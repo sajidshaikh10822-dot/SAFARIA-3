@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SAFARIA - Checkout</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #eaeded;
+      color: #111;
+    }
+
+    header {
+      background: #131921;
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      color: #ff9900;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .back {
+      color: white;
+      text-decoration: none;
+      background: #37475a;
+      padding: 9px 14px;
+      border-radius: 5px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 12px 0 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .item img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      background: #f7f7f7;
+      border-radius: 5px;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .price {
+      color: #b12704;
+      font-weight: bold;
+    }
+
+    .quantity {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 18px;
+      padding-top: 15px;
+      border-top: 1px solid #ddd;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .payment-option {
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .payment-option:hover {
+      border-color: #ff9900;
+    }
+
+    .payment-option input {
+      width: auto;
+      margin-right: 8px;
+    }
+
+    .upi-box {
+      display: none;
+      background: #f7f7f7;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .upi-id {
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      word-break: break-all;
+      margin: 10px 0;
+    }
+
+    .pay-button {
+      width: 100%;
+      background: #ff9900;
+      color: #111;
+      border: none;
+      padding: 14px;
+      border-radius: 7px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .pay-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .success {
+      background: #d1e7dd;
+      color: #0f5132;
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .success h2 {
+      color: #0f5132;
+    }
+
+    .order-id {
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+
+    .home-button {
+      display: inline-block;
+      background: #ff9900;
+      color: #111;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .orders-button {
+      display: inline-block;
+      background: #37475a;
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-left: 8px;
+    }
+
+    .empty {
+      background: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    footer {
+      background: #131921;
+      color: white;
+      text-align: center;
+      padding: 25px;
+      margin-top: 35px;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        gap: 10px;
+      }
+
+      .logo {
+        font-size: 23px;
+      }
+
+      .total {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">SAFARIA</div>
+
+  <a href="index.html" class="back">
+    ← Continue Shopping
+  </a>
+</header>
+
+
+<div class="container">
+
+  <div id="checkoutPage">
+
+    <h1>🛒 Checkout</h1>
+
+
+    <div class="box">
+
+      <h2>📦 Your Cart</h2>
+
+      <div id="cartItems"></div>
+
+      <div class="total">
+        <span>Total</span>
+
+        <span>
+          ₹<span id="totalAmount">0</span>
+        </span>
+      </div>
+
+    </div>
+
+
+    <div class="box">
+
+      <h2>📍 Delivery Details</h2>
+
+      <label>Full Name</label>
+
+      <input
+        id="customerName"
+        type="text"
+        placeholder="Enter your full name"
+      >
+
+
+      <label>Phone Number</label>
+
+      <input
+        id="customerPhone"
+        type="tel"
+        placeholder="Enter your phone number"
+      >
+
+
+      <label>Email</label>
+
+      <input
+        id="customerEmail"
+        type="email"
+        placeholder="Enter your email"
+      >
+
+
+      <label>Delivery Address</label>
+
+      <textarea
+        id="shippingAddress"
+        placeholder="House/Flat, Street, Area, City, State, PIN"
+      ></textarea>
+
+    </div>
+
+
+    <div class="box">
+
+      <h2>💳 Payment Method</h2>
+
+
+      <label class="payment-option">
+
+        <input
+          type="radio"
+          name="payment"
+          value="COD"
+          checked
+          onchange="changePayment()"
+        >
+
+        💵 Cash on Delivery
+
+      </label>
+
+
+      <label class="payment-option">
+
+        <input
+          type="radio"
+          name="payment"
+          value="UPI"
+          onchange="changePayment()"
+        >
+
+        📱 UPI Payment
+
+      </label>
+
+
+      <div id="upiBox" class="upi-box">
+
+        <strong>📱 Pay using UPI</strong>
+
+        <p style="margin-top:8px;color:#555;">
+          Your order amount will automatically be filled
+          in your UPI app.
+        </p>
+
+        <div class="upi-id">
+          UPI ID: 7484014866-2@ybl
+        </div>
+
+        <button
+          type="button"
+          class="pay-button"
+          onclick="payWithUPI()"
+        >
+          📲 Pay with UPI
+        </button>
+
+      </div>
+
+
+      <button
+        id="placeOrderButton"
+        class="pay-button"
+        onclick="placeOrder()"
+      >
+        🛍️ Place Order
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="successPage"
+    style="display:none;"
+  >
+
+    <div class="success">
+
+      <h2>🎉 Order Placed Successfully!</h2>
+
+      <p style="margin-top:10px;">
+        Thank you for shopping with SAFARIA.
+      </p>
+
+      <div class="order-id">
+        Order ID:
+        <span id="successOrderId"></span>
+      </div>
+
+      <a
+        href="index.html"
+        class="home-button"
+      >
+        🏠 Back to Store
+      </a>
+
+      <a
+        href="my-orders.html"
+        class="orders-button"
+      >
+        📦 My Orders
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<footer>
+  <h2>SAFARIA</h2>
+  <p>India's Shopping Store</p>
+</footer>
+
+
+<script>
+
+const SUPABASE_URL =
+  "https://dcwdzbejpwvskajukxrh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+const SAFARIA_UPI =
+  "7484014866-2@ybl";
+
+
+let cart =
+  JSON.parse(
+    localStorage.getItem("safaria_cart") || "[]"
+  );
+
+
+let totalAmount = 0;
+
+
+function loadCart() {
+
+  const container =
+    document.getElementById("cartItems");
+
+
+  if (!cart.length) {
+
+    container.innerHTML = `
+      <div class="empty">
+        🛒 Your cart is empty.
+        <br><br>
+        <a href="index.html" class="home-button">
+          Start Shopping
+        </a>
+      </div>
+    `;
+
+    document.getElementById("placeOrderButton")
+      .disabled = true;
+
+    return;
+  }
+
+
+  container.innerHTML = "";
+
+  totalAmount = 0;
+
+
+  cart.forEach(item => {
+
+    const quantity =
+      Number(item.quantity || 1);
+
+    const price =
+      Number(item.price || 0);
+
+    const itemTotal =
+      price * quantity;
+
+    totalAmount += itemTotal;
+
+
+    const div =
+      document.createElement("div");
+
+    div.className = "item";
+
+
+    const image =
+      item.image ||
+      "https://via.placeholder.com/100?text=SAFARIA";
+
+
+    div.innerHTML = `
+
+      <img
+        src="${escapeHTML(image)}"
+        alt="${escapeHTML(item.name || "Product")}"
+        onerror="this.src='https://via.placeholder.com/100?text=SAFARIA'"
+      >
+
+      <div class="item-info">
+
+        <div class="item-name">
+          ${escapeHTML(item.name || "Product")}
+        </div>
+
+        <div class="quantity">
+          Quantity: ${quantity}
+        </div>
+
+        <div class="price">
+          ₹${itemTotal.toLocaleString("en-IN")}
+        </div>
+
+      </div>
+
+    `;
+
+
+    container.appendChild(div);
+
+  });
+
+
+  document.getElementById("totalAmount")
+    .textContent =
+    totalAmount.toLocaleString("en-IN");
+
+}
+
+
+function changePayment() {
+
+  const payment =
+    document.querySelector(
+      'input[name="payment"]:checked'
+    )?.value;
+
+
+  const upiBox =
+    document.getElementById("upiBox");
+
+
+  const placeButton =
+    document.getElementById(
+      "placeOrderButton"
+    );
+
+
+  if (payment === "UPI") {
+
+    upiBox.style.display = "block";
+
+    placeButton.textContent =
+      "✅ I Have Paid - Place Order";
+
+  } else {
+
+    upiBox.style.display = "none";
+
+    placeButton.textContent =
+      "🛍️ Place Order";
+
+  }
+
+}
+
+
+function payWithUPI() {
+
+  if (totalAmount <= 0) {
+
+    alert("Invalid order amount.");
+
+    return;
+
+  }
+
+
+  const name =
+    "SAFARIA Order";
+
+
+  const transactionNote =
+    "SAFARIA Shopping Order";
+
+
+  const upiURL =
+    "upi://pay" +
+    "?pa=" + encodeURIComponent(SAFARIA_UPI) +
+    "&pn=" + encodeURIComponent(name) +
+    "&am=" + encodeURIComponent(
+      totalAmount.toFixed(2)
+    ) +
+    "&cu=INR" +
+    "&tn=" + encodeURIComponent(transactionNote);
+
+
+  window.location.href = upiURL;
+
+}
+
+
+async function placeOrder() {
+
+  if (!cart.length) {
+
+    alert("Your cart is empty.");
+
+    return;
+
+  }
+
+
+  const name =
+    document.getElementById("customerName")
+      .value.trim();
+
+
+  const phone =
+    document.getElementById("customerPhone")
+      .value.trim();
+
+
+  const email =
+    document.getElementById("customerEmail")
+      .value.trim();
+
+
+  const address =
+    document.getElementById("shippingAddress")
+      .value.trim();
+
+
+  const payment =
+    document.querySelector(
+      'input[name="payment"]:checked'
+    )?.value || "COD";
+
+
+  if (!name) {
+
+    alert("Please enter your name.");
+
+    return;
+
+  }
+
+
+  if (!phone) {
+
+    alert("Please enter your phone number.");
+
+    return;
+
+  }
+
+
+  if (!email) {
+
+    alert("Please enter your email.");
+
+    return;
+
+  }
+
+
+  if (!address) {
+
+    alert("Please enter your delivery address.");
+
+    return;
+
+  }
+
+
+  if (payment === "UPI") {
+
+    const paid =
+      confirm(
+        "UPI payment karne ke baad OK dabakar order place karein."
+      );
+
+    if (!paid) {
+
+      return;
+
+    }
+
+  }
+
+
+  const button =
+    document.getElementById(
+      "placeOrderButton"
+    );
+
+
+  button.disabled = true;
+
+  button.textContent =
+    "Placing Order...";
+
+
+  const {
+    data: { session }
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  const orderId =
+    "SAF-" + Date.now();
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("orders")
+      .insert({
+
+        order_id: orderId,
+
+        user_id:
+          session?.user?.id || null,
+
+        customer_name: name,
+
+        customer_email: email,
+
+        customer_phone: phone,
+
+        shipping_address: address,
+
+        items: cart,
+
+        total: totalAmount,
+
+        status: "pending",
+
+        payment_method: payment
+
+      })
+      .select();
+
+
+  if (error) {
+
+    console.error(error);
+
+    alert(
+      "❌ Order place nahi hua:\n" +
+      error.message
+    );
+
+    button.disabled = false;
+
+    button.textContent =
+      payment === "UPI"
+        ? "✅ I Have Paid - Place Order"
+        : "🛍️ Place Order";
+
+    return;
+
+  }
+
+
+  localStorage.removeItem(
+    "safaria_cart"
+  );
+
+  cart = [];
+
+
+  document.getElementById(
+    "successOrderId"
+  ).textContent =
+    orderId;
+
+
+  document.getElementById(
+    "checkoutPage"
+  ).style.display =
+    "none";
+
+
+  document.getElementById(
+    "successPage"
+  ).style.display =
+    "block";
+
+}
+
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  loadCart
+);
+
+</script>
+
+</body>
+</html>

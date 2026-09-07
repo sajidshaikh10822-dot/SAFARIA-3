@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFARIA - My Orders</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #eaeded;
+      color: #111;
+    }
+
+    header {
+      background: #131921;
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: #ff9900;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .back {
+      color: white;
+      text-decoration: none;
+      background: #37475a;
+      padding: 9px 14px;
+      border-radius: 5px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .title {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+    }
+
+    .title h1 {
+      margin-bottom: 7px;
+    }
+
+    .title p {
+      color: #666;
+    }
+
+    .loading,
+    .empty,
+    .login-box {
+      background: white;
+      padding: 30px;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    .order {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.08);
+    }
+
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .order-id {
+      font-weight: bold;
+    }
+
+    .date {
+      color: #666;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+
+    .status {
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      text-transform: capitalize;
+      background: #eee;
+    }
+
+    .pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .confirmed {
+      background: #cfe2ff;
+      color: #084298;
+    }
+
+    .shipped {
+      background: #cff4fc;
+      color: #055160;
+    }
+
+    .delivered {
+      background: #d1e7dd;
+      color: #0f5132;
+    }
+
+    .cancelled {
+      background: #f8d7da;
+      color: #842029;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .item img {
+      width: 65px;
+      height: 65px;
+      object-fit: contain;
+      background: #f7f7f7;
+    }
+
+    .item-info {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .item-price {
+      color: #b12704;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid #ddd;
+      margin-top: 12px;
+      padding-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .login-btn {
+      display: inline-block;
+      margin-top: 15px;
+      background: #ff9900;
+      color: #111;
+      text-decoration: none;
+      padding: 11px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    footer {
+      background: #131921;
+      color: white;
+      text-align: center;
+      padding: 25px;
+      margin-top: 35px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">SAFARIA</div>
+
+  <a href="index.html" class="back">
+    ← Back to Store
+  </a>
+</header>
+
+
+<div class="container">
+
+  <div class="title">
+    <h1>📦 My Orders</h1>
+    <p>Track your SAFARIA orders</p>
+  </div>
+
+  <div id="orders">
+    <div class="loading">
+      Loading your orders...
+    </div>
+  </div>
+
+</div>
+
+
+<footer>
+  <h2>SAFARIA</h2>
+  <p>India's Shopping Store</p>
+</footer>
+
+
+<script>
+
+const SUPABASE_URL =
+  "https://dcwdzbejpwvskajukxrh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+async function loadOrders() {
+
+  const container =
+    document.getElementById("orders");
+
+  const {
+    data: { session }
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (!session) {
+
+    container.innerHTML = `
+      <div class="login-box">
+
+        <h2>🔐 Login Required</h2>
+
+        <p style="margin-top:10px;color:#666;">
+          Login karke apne orders dekho.
+        </p>
+
+        <a href="auth.html" class="login-btn">
+          Login
+        </a>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("created_at", {
+        ascending: false
+      });
+
+
+  if (error) {
+
+    container.innerHTML = `
+      <div class="empty">
+        ❌ Orders load nahi ho rahe.
+        <br><br>
+        ${error.message}
+      </div>
+    `;
+
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    container.innerHTML = `
+      <div class="empty">
+
+        📦 Abhi koi order nahi hai.
+
+        <br><br>
+
+        <a href="index.html" class="login-btn">
+          Start Shopping
+        </a>
+
+      </div>
+    `;
+
+    return;
+  }
+
+
+  container.innerHTML = "";
+
+
+  data.forEach(order => {
+
+    let items = [];
+
+    try {
+
+      items =
+        Array.isArray(order.items)
+          ? order.items
+          : JSON.parse(order.items || "[]");
+
+    } catch (e) {
+
+      items = [];
+
+    }
+
+
+    let itemsHTML = "";
+
+
+    items.forEach(item => {
+
+      const image =
+        item.image ||
+        "https://via.placeholder.com/100?text=SAFARIA";
+
+      const quantity =
+        Number(item.quantity || 1);
+
+      const price =
+        Number(item.price || 0);
+
+
+      itemsHTML += `
+
+        <div class="item">
+
+          <img
+            src="${image}"
+            alt="${item.name || "Product"}"
+          >
+
+          <div class="item-info">
+
+            <div class="item-name">
+              ${item.name || "Product"}
+            </div>
+
+            <div>
+              Qty: ${quantity}
+            </div>
+
+            <div class="item-price">
+              ₹${(price * quantity)
+                .toLocaleString("en-IN")}
+            </div>
+
+          </div>
+
+        </div>
+
+      `;
+
+    });
+
+
+    const status =
+      String(order.status || "pending")
+        .toLowerCase();
+
+
+    const date =
+      order.created_at
+        ? new Date(order.created_at)
+            .toLocaleString("en-IN")
+        : "";
+
+
+    const card =
+      document.createElement("div");
+
+    card.className = "order";
+
+
+    card.innerHTML = `
+
+      <div class="order-top">
+
+        <div>
+
+          <div class="order-id">
+            Order #${order.order_id || order.id}
+          </div>
+
+          <div class="date">
+            ${date}
+          </div>
+
+        </div>
+
+        <div class="status ${status}">
+          ${status}
+        </div>
+
+      </div>
+
+
+      ${itemsHTML}
+
+
+      <div class="total">
+
+        <span>Total</span>
+
+        <span>
+          ₹${Number(order.total || 0)
+            .toLocaleString("en-IN")}
+        </span>
+
+      </div>
+
+    `;
+
+
+    container.appendChild(card);
+
+  });
+
+}
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  loadOrders
+);
+
+</script>
+
+</body>
+</html>

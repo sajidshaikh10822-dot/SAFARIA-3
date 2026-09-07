@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>SAFARIA Admin Panel</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    header {
+      background: #131921;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    header h1 {
+      color: #ff9900;
+      font-size: 24px;
+    }
+
+    header a {
+      color: white;
+      text-decoration: none;
+      background: #ff9900;
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .stat h3 {
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .stat p {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-bottom: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    button {
+      border: none;
+      border-radius: 6px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .add-btn {
+      background: #ff9900;
+      color: #111;
+    }
+
+    .cancel-btn {
+      background: #6b7280;
+      color: white;
+      margin-left: 8px;
+      display: none;
+    }
+
+    .message {
+      margin-top: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .product {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .product img {
+      width: 100%;
+      height: 160px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: #f9fafb;
+      margin-bottom: 10px;
+    }
+
+    .product h3 {
+      font-size: 17px;
+      margin-bottom: 6px;
+    }
+
+    .price {
+      font-size: 18px;
+      font-weight: bold;
+      color: #b12704;
+      margin: 5px 0;
+    }
+
+    .product-info {
+      color: #555;
+      font-size: 14px;
+      margin: 4px 0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .edit {
+      background: #2563eb;
+      color: white;
+      flex: 1;
+    }
+
+    .delete {
+      background: #dc2626;
+      color: white;
+      flex: 1;
+    }
+
+    .order {
+      border: 1px solid #e5e7eb;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .order-id {
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    .order-details {
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .status-select {
+      width: auto;
+      min-width: 140px;
+      padding: 8px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 25px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 800px) {
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .products {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      .products {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .stat p {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>SAFARIA Admin</h1>
+  <a href="index.html">🏠 Store</a>
+</header>
+
+<div class="container">
+
+  <!-- DASHBOARD -->
+  <div class="stats">
+    <div class="stat">
+      <h3>Total Orders</h3>
+      <p id="totalOrders">0</p>
+    </div>
+
+    <div class="stat">
+      <h3>Pending</h3>
+      <p id="pendingOrders">0</p>
+    </div>
+
+    <div class="stat">
+      <h3>Delivered</h3>
+      <p id="deliveredOrders">0</p>
+    </div>
+
+    <div class="stat">
+      <h3>Revenue</h3>
+      <p id="revenue">₹0</p>
+    </div>
+  </div>
+
+
+  <!-- PRODUCT MANAGEMENT -->
+  <div class="card">
+
+    <h2>🛍️ Product Management</h2>
+
+    <div class="form-grid">
+
+      <input
+        id="productName"
+        type="text"
+        placeholder="Product Name"
+      >
+
+      <input
+        id="productPrice"
+        type="number"
+        placeholder="Price"
+        min="0"
+      >
+
+      <input
+        id="productImage"
+        type="text"
+        placeholder="Product Image URL"
+      >
+
+      <input
+        id="productCategory"
+        type="text"
+        placeholder="Category (e.g. Electronics)"
+      >
+
+      <input
+        id="productStock"
+        type="number"
+        placeholder="Stock"
+        min="0"
+      >
+
+      <textarea
+        id="productDescription"
+        class="full"
+        placeholder="Product Description"
+      ></textarea>
+
+      <div class="full">
+
+        <button
+          type="button"
+          class="add-btn"
+          id="saveProductBtn"
+          onclick="saveProduct()"
+        >
+          ➕ Add Product
+        </button>
+
+        <button
+          type="button"
+          class="cancel-btn"
+          id="cancelEditBtn"
+          onclick="cancelEdit()"
+        >
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
+    <div id="productMessage" class="message"></div>
+
+  </div>
+
+
+  <!-- PRODUCTS -->
+  <div class="card">
+
+    <h2>📦 Products</h2>
+
+    <div id="productsList" class="products">
+      <div class="empty">Loading products...</div>
+    </div>
+
+  </div>
+
+
+  <!-- ORDERS -->
+  <div class="card">
+
+    <h2>📋 Orders</h2>
+
+    <div id="ordersList">
+      <div class="empty">Loading orders...</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =========================
+     SUPABASE
+  ========================= */
+
+  const SUPABASE_URL =
+    "https://dcwdzbejpwvskajukxrh.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+
+  /* =========================
+     VARIABLES
+  ========================= */
+
+  let editingProductId = null;
+
+
+  /* =========================
+     MESSAGE
+  ========================= */
+
+  function showMessage(text, type) {
+
+    const box =
+      document.getElementById("productMessage");
+
+    box.textContent = text;
+
+    box.className =
+      "message " + type;
+
+    box.style.display = "block";
+
+    setTimeout(() => {
+      box.style.display = "none";
+    }, 4000);
+  }
+
+
+  /* =========================
+     SAVE PRODUCT
+  ========================= */
+
+  async function saveProduct() {
+
+    const name =
+      document.getElementById("productName").value.trim();
+
+    const description =
+      document.getElementById("productDescription").value.trim();
+
+    const price =
+      Number(document.getElementById("productPrice").value);
+
+    const image =
+      document.getElementById("productImage").value.trim();
+
+    const category =
+      document.getElementById("productCategory").value.trim();
+
+    const stock =
+      Number(document.getElementById("productStock").value);
+
+
+    if (!name) {
+      showMessage("Product name required.", "error");
+      return;
+    }
+
+    if (!price || price < 0) {
+      showMessage("Please enter a valid price.", "error");
+      return;
+    }
+
+    if (!image) {
+      showMessage("Product image URL required.", "error");
+      return;
+    }
+
+    if (!category) {
+      showMessage("Category required.", "error");
+      return;
+    }
+
+    if (stock < 0 || isNaN(stock)) {
+      showMessage("Please enter valid stock.", "error");
+      return;
+    }
+
+
+    const productData = {
+      name: name,
+      description: description,
+      price: price,
+      image: image,
+      category: category,
+      stock: stock
+    };
+
+
+    const button =
+      document.getElementById("saveProductBtn");
+
+    button.disabled = true;
+
+    button.textContent = "Saving...";
+
+
+    try {
+
+      let result;
+
+      if (editingProductId) {
+
+        result =
+          await supabaseClient
+            .from("products")
+            .update(productData)
+            .eq("id", editingProductId);
+
+      } else {
+
+        result =
+          await supabaseClient
+            .from("products")
+            .insert([productData]);
+
+      }
+
+
+      if (result.error) {
+        throw result.error;
+      }
+
+
+      if (editingProductId) {
+
+        showMessage(
+          "✅ Product updated successfully!",
+          "success"
+        );
+
+      } else {
+
+        showMessage(
+          "✅ Product added successfully!",
+          "success"
+        );
+
+      }
+
+
+      clearForm();
+
+      await loadProducts();
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "❌ " + (error.message || "Product save failed"),
+        "error"
+      );
+
+    }
+
+
+    button.disabled = false;
+
+    button.textContent =
+      editingProductId
+        ? "💾 Update Product"
+        : "➕ Add Product";
+  }
+
+
+  /* =========================
+     LOAD PRODUCTS
+  ========================= */
+
+  async function loadProducts() {
+
+    const list =
+      document.getElementById("productsList");
+
+    list.innerHTML =
+      '<div class="empty">Loading products...</div>';
+
+
+    const { data, error } =
+      await supabaseClient
+        .from("products")
+        .select("*")
+        .order("id", { ascending: false });
+
+
+    if (error) {
+
+      console.error(error);
+
+      list.innerHTML =
+        '<div class="empty">❌ Failed to load products.</div>';
+
+      return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+      list.innerHTML =
+        '<div class="empty">No products added yet.</div>';
+
+      return;
+    }
+
+
+    list.innerHTML = "";
+
+
+    data.forEach(product => {
+
+      const card =
+        document.createElement("div");
+
+      card.className = "product";
+
+
+      card.innerHTML = `
+
+        <img
+          src="${escapeHTML(product.image || '')}"
+          alt="${escapeHTML(product.name || '')}"
+          onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
+        >
+
+        <h3>${escapeHTML(product.name || '')}</h3>
+
+        <div class="price">
+          ₹${Number(product.price || 0).toLocaleString("en-IN")}
+        </div>
+
+        <div class="product-info">
+          📂 ${escapeHTML(product.category || "General")}
+        </div>
+
+        <div class="product-info">
+          📦 Stock: ${product.stock ?? 0}
+        </div>
+
+        <div class="product-info">
+          ${escapeHTML(product.description || "")}
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="edit"
+            onclick='editProduct(${JSON.stringify(product)})'
+          >
+            ✏️ Edit
+          </button>
+
+          <button
+            class="delete"
+            onclick="deleteProduct(${product.id})"
+          >
+            🗑️ Delete
+          </button>
+
+        </div>
+      `;
+
+
+      list.appendChild(card);
+
+    });
+
+  }
+
+
+  /* =========================
+     EDIT PRODUCT
+  ========================= */
+
+  function editProduct(product) {
+
+    editingProductId = product.id;
+
+
+    document.getElementById("productName").value =
+      product.name || "";
+
+    document.getElementById("productDescription").value =
+      product.description || "";
+
+    document.getElementById("productPrice").value =
+      product.price || "";
+
+    document.getElementById("productImage").value =
+      product.image || "";
+
+    document.getElementById("productCategory").value =
+      product.category || "";
+
+    document.getElementById("productStock").value =
+      product.stock || 0;
+
+
+    document.getElementById("saveProductBtn").textContent =
+      "💾 Update Product";
+
+    document.getElementById("cancelEditBtn").style.display =
+      "inline-block";
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+
+
+  /* =========================
+     DELETE PRODUCT
+  ========================= */
+
+  async function deleteProduct(id) {
+
+    const ok =
+      confirm("Delete this product?");
+
+    if (!ok) return;
+
+
+    const { error } =
+      await supabaseClient
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+
+    if (error) {
+
+      alert(
+        "❌ Delete failed: " +
+        error.message
+      );
+
+      return;
+    }
+
+
+    showMessage(
+      "✅ Product deleted.",
+      "success"
+    );
+
+
+    loadProducts();
+
+  }
+
+
+  /* =========================
+     CANCEL EDIT
+  ========================= */
+
+  function cancelEdit() {
+
+    editingProductId = null;
+
+    clearForm();
+
+  }
+
+
+  /* =========================
+     CLEAR FORM
+  ========================= */
+
+  function clearForm() {
+
+    document.getElementById("productName").value = "";
+
+    document.getElementById("productDescription").value = "";
+
+    document.getElementById("productPrice").value = "";
+
+    document.getElementById("productImage").value = "";
+
+    document.getElementById("productCategory").value = "";
+
+    document.getElementById("productStock").value = "";
+
+
+    editingProductId = null;
+
+
+    document.getElementById("saveProductBtn").textContent =
+      "➕ Add Product";
+
+    document.getElementById("cancelEditBtn").style.display =
+      "none";
+
+  }
+
+
+  /* =========================
+     LOAD ORDERS
+  ========================= */
+
+  async function loadOrders() {
+
+    const list =
+      document.getElementById("ordersList");
+
+
+    const { data, error } =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .order("created_at", {
+          ascending: false
+        });
+
+
+    if (error) {
+
+      console.error(error);
+
+      list.innerHTML =
+        '<div class="empty">❌ Failed to load orders.</div>';
+
+      return;
+    }
+
+
+    const orders = data || [];
+
+
+    document.getElementById("totalOrders").textContent =
+      orders.length;
+
+
+    document.getElementById("pendingOrders").textContent =
+      orders.filter(
+        o =>
+          String(o.status).toLowerCase() ===
+          "pending"
+      ).length;
+
+
+    document.getElementById("deliveredOrders").textContent =
+      orders.filter(
+        o =>
+          String(o.status).toLowerCase() ===
+          "delivered"
+      ).length;
+
+
+    const revenue =
+      orders.reduce(
+        (sum, order) =>
+          sum + Number(order.total || 0),
+        0
+      );
+
+
+    document.getElementById("revenue").textContent =
+      "₹" + revenue.toLocaleString("en-IN");
+
+
+    if (orders.length === 0) {
+
+      list.innerHTML =
+        '<div class="empty">No orders yet.</div>';
+
+      return;
+    }
+
+
+    list.innerHTML = "";
+
+
+    orders.forEach(order => {
+
+      const div =
+        document.createElement("div");
+
+      div.className = "order";
+
+
+      let itemsText = "";
+
+
+      try {
+
+        const items =
+          typeof order.items === "string"
+            ? JSON.parse(order.items)
+            : order.items;
+
+
+        if (Array.isArray(items)) {
+
+          itemsText =
+            items
+              .map(item =>
+                `${item.name || "Product"} × ${item.quantity || 1}`
+              )
+              .join(", ");
+
+        }
+
+      } catch (e) {
+
+        itemsText = "";
+
+      }
+
+
+      div.innerHTML = `
+
+        <div class="order-top">
+
+          <div>
+            <div class="order-id">
+              ${escapeHTML(order.order_id || "")}
+            </div>
+
+            <strong>
+              ₹${Number(order.total || 0).toLocaleString("en-IN")}
+            </strong>
+          </div>
+
+          <select
+            class="status-select"
+            onchange="updateOrderStatus('${escapeAttribute(order.order_id)}', this.value)"
+          >
+
+            ${statusOption("pending", order.status)}
+            ${statusOption("confirmed", order.status)}
+            ${statusOption("shipped", order.status)}
+            ${statusOption("delivered", order.status)}
+            ${statusOption("cancelled", order.status)}
+
+          </select>
+
+        </div>
+
+
+        <div class="order-details">
+
+          👤 <b>Name:</b>
+          ${escapeHTML(order.customer_name || "-")}
+          <br>
+
+          📞 <b>Phone:</b>
+          ${escapeHTML(order.customer_phone || "-")}
+          <br>
+
+          📧 <b>Email:</b>
+          ${escapeHTML(order.customer_email || "-")}
+          <br>
+
+          📍 <b>Address:</b>
+          ${escapeHTML(order.shipping_address || "-")}
+          <br>
+
+          💳 <b>Payment:</b>
+          ${escapeHTML(order.payment_method || "-")}
+          <br>
+
+          🛒 <b>Items:</b>
+          ${escapeHTML(itemsText || "-")}
+          <br>
+
+          📅 <b>Date:</b>
+          ${order.created_at
+            ? new Date(order.created_at).toLocaleString("en-IN")
+            : "-"}
+
+        </div>
+
+      `;
+
+
+      list.appendChild(div);
+
+    });
+
+  }
+
+
+  /* =========================
+     ORDER STATUS
+  ========================= */
+
+  async function updateOrderStatus(orderId, status) {
+
+    const { error } =
+      await supabaseClient
+        .from("orders")
+        .update({
+          status: status
+        })
+        .eq("order_id", orderId);
+
+
+    if (error) {
+
+      alert(
+        "❌ Status update failed: " +
+        error.message
+      );
+
+      return;
+    }
+
+
+    loadOrders();
+
+  }
+
+
+  /* =========================
+     HELPERS
+  ========================= */
+
+  function statusOption(value, current) {
+
+    const selected =
+      String(value).toLowerCase() ===
+      String(current || "pending").toLowerCase()
+        ? "selected"
+        : "";
+
+    return `
+      <option value="${value}" ${selected}>
+        ${value.charAt(0).toUpperCase() + value.slice(1)}
+      </option>
+    `;
+
+  }
+
+
+  function escapeHTML(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  function escapeAttribute(value) {
+
+    return String(value ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/'/g, "\\'");
+
+  }
+
+
+  /* =========================
+     START
+  ========================= */
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+      loadProducts();
+
+      loadOrders();
+
+    }
+  );
+
+</script>
+
+</body>
+</html>

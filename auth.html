@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAFARIA - Login</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #eaeded;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .box {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.15);
+    }
+
+    .logo {
+      text-align: center;
+      color: #ff9900;
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    h2 {
+      margin-bottom: 18px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 6px;
+      background: #ff9900;
+      color: #111;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .switch {
+      text-align: center;
+      margin-top: 18px;
+      color: #555;
+    }
+
+    .switch span {
+      color: #0066c0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .message {
+      display: none;
+      padding: 11px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #0066c0;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <div class="logo">SAFARIA</div>
+
+  <div class="subtitle">
+    Your shopping account
+  </div>
+
+  <div id="message" class="message"></div>
+
+  <div id="loginBox">
+
+    <h2>🔐 Login</h2>
+
+    <input
+      id="loginEmail"
+      type="email"
+      placeholder="Email address"
+    >
+
+    <input
+      id="loginPassword"
+      type="password"
+      placeholder="Password"
+    >
+
+    <button id="loginBtn" onclick="login()">
+      Login
+    </button>
+
+    <div class="switch">
+      New to SAFARIA?
+      <span onclick="showSignup()">Create account</span>
+    </div>
+
+  </div>
+
+  <div id="signupBox" style="display:none;">
+
+    <h2>👤 Create Account</h2>
+
+    <input
+      id="signupName"
+      type="text"
+      placeholder="Full name"
+    >
+
+    <input
+      id="signupEmail"
+      type="email"
+      placeholder="Email address"
+    >
+
+    <input
+      id="signupPassword"
+      type="password"
+      placeholder="Password (minimum 6 characters)"
+    >
+
+    <button id="signupBtn" onclick="signup()">
+      Create Account
+    </button>
+
+    <div class="switch">
+      Already have an account?
+      <span onclick="showLogin()">Login</span>
+    </div>
+
+  </div>
+
+  <a class="back" href="index.html">
+    ← Back to SAFARIA
+  </a>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+  "https://dcwdzbejpwvskajukxrh.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+function showMessage(text, type) {
+
+  const box =
+    document.getElementById("message");
+
+  box.textContent = text;
+
+  box.className =
+    "message " + type;
+
+  box.style.display = "block";
+}
+
+
+function showSignup() {
+
+  document.getElementById("loginBox")
+    .style.display = "none";
+
+  document.getElementById("signupBox")
+    .style.display = "block";
+
+  document.getElementById("message")
+    .style.display = "none";
+}
+
+
+function showLogin() {
+
+  document.getElementById("signupBox")
+    .style.display = "none";
+
+  document.getElementById("loginBox")
+    .style.display = "block";
+
+  document.getElementById("message")
+    .style.display = "none";
+}
+
+
+async function signup() {
+
+  const name =
+    document.getElementById("signupName")
+      .value.trim();
+
+  const email =
+    document.getElementById("signupEmail")
+      .value.trim();
+
+  const password =
+    document.getElementById("signupPassword")
+      .value;
+
+
+  if (!name) {
+    showMessage(
+      "Please enter your name.",
+      "error"
+    );
+    return;
+  }
+
+
+  if (!email) {
+    showMessage(
+      "Please enter your email.",
+      "error"
+    );
+    return;
+  }
+
+
+  if (password.length < 6) {
+    showMessage(
+      "Password must be at least 6 characters.",
+      "error"
+    );
+    return;
+  }
+
+
+  const btn =
+    document.getElementById("signupBtn");
+
+  btn.disabled = true;
+  btn.textContent = "Creating account...";
+
+
+  const { data, error } =
+    await supabaseClient.auth.signUp({
+
+      email: email,
+
+      password: password,
+
+      options: {
+        data: {
+          full_name: name
+        }
+      }
+
+    });
+
+
+  btn.disabled = false;
+  btn.textContent = "Create Account";
+
+
+  if (error) {
+
+    showMessage(
+      "❌ " + error.message,
+      "error"
+    );
+
+    return;
+  }
+
+
+  if (data.session) {
+
+    showMessage(
+      "✅ Account created successfully!",
+      "success"
+    );
+
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1000);
+
+  } else {
+
+    showMessage(
+      "✅ Account created! Check your email to verify your account.",
+      "success"
+    );
+
+  }
+
+}
+
+
+async function login() {
+
+  const email =
+    document.getElementById("loginEmail")
+      .value.trim();
+
+  const password =
+    document.getElementById("loginPassword")
+      .value;
+
+
+  if (!email || !password) {
+
+    showMessage(
+      "Please enter email and password.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const btn =
+    document.getElementById("loginBtn");
+
+  btn.disabled = true;
+  btn.textContent = "Logging in...";
+
+
+  const { data, error } =
+    await supabaseClient.auth
+      .signInWithPassword({
+
+        email: email,
+
+        password: password
+
+      });
+
+
+  btn.disabled = false;
+  btn.textContent = "Login";
+
+
+  if (error) {
+
+    showMessage(
+      "❌ " + error.message,
+      "error"
+    );
+
+    return;
+  }
+
+
+  showMessage(
+    "✅ Login successful!",
+    "success"
+  );
+
+
+  setTimeout(() => {
+
+    window.location.href =
+      "index.html";
+
+  }, 800);
+
+}
+
+</script>
+
+</body>
+</html>
