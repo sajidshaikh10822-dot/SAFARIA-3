@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -73,8 +73,9 @@
       border-radius: 5px;
     }
 
+    /* ADMIN IS HIDDEN BY DEFAULT */
     #adminBtn {
-      display: none;
+      display: none !important;
     }
 
     nav {
@@ -222,7 +223,7 @@
     }
 
     .account-info {
-      line-height: 1.8;
+      line-height: 1.9;
       color: #333;
     }
 
@@ -346,7 +347,6 @@
       placeholder="Search products..."
       oninput="searchProducts()"
     >
-
     <button onclick="searchProducts()">🔍</button>
   </div>
 
@@ -362,17 +362,17 @@
     🛒 Cart (<span id="cartCount">0</span>)
   </a>
 
-  <!-- ADMIN BUTTON -->
+  <!-- ADMIN BUTTON: COMPLETELY HIDDEN BY DEFAULT -->
   <a
     href="admin.html"
     class="header-btn"
     id="adminBtn"
+    hidden
   >
     🔐 Admin
   </a>
 
 </header>
-
 
 <nav>
   <span onclick="showAllProducts()">All</span>
@@ -384,12 +384,10 @@
   <span onclick="filterCategory('Grocery')">Grocery</span>
 </nav>
 
-
 <section class="hero">
   <h1>Welcome to SAFARIA</h1>
   <p>Everything you need, all in one place.</p>
 </section>
-
 
 <!-- CUSTOMER ACCOUNT -->
 
@@ -409,6 +407,16 @@
     <div>
       <b>Email:</b>
       <span id="customerEmail">-</span>
+    </div>
+
+    <div>
+      <b>Phone:</b>
+      <span id="customerPhone">-</span>
+    </div>
+
+    <div>
+      <b>Address:</b>
+      <span id="customerAddress">-</span>
     </div>
 
   </div>
@@ -433,7 +441,6 @@
 
 </div>
 
-
 <!-- CUSTOMER ORDERS -->
 
 <div id="myOrders" class="my-orders">
@@ -445,7 +452,6 @@
   </div>
 
 </div>
-
 
 <div class="categories">
 
@@ -475,7 +481,6 @@
 
 </div>
 
-
 <section class="section">
 
   <h2 id="productTitle">
@@ -490,7 +495,6 @@
 
 </section>
 
-
 <footer>
   <h2>SAFARIA</h2>
   <p>India's Shopping Store</p>
@@ -498,357 +502,252 @@
   <p>© 2026 SAFARIA. All rights reserved.</p>
 </footer>
 
-
 <script>
 
-  /* =========================
-     SUPABASE
-  ========================= */
+const SUPABASE_URL =
+  "https://dcwdzbejpwvskajukxrh.supabase.co";
 
-  const SUPABASE_URL =
-    "https://dcwdzbejpwvskajukxrh.supabase.co";
+const SUPABASE_KEY =
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
 
-  const SUPABASE_KEY =
-    "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-  const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+const ADMIN_EMAIL =
+  "sajidshaikh10822@gmail.com";
 
+let allProducts = [];
 
-  /* =========================
-     ADMIN EMAIL
-  ========================= */
-
-  const ADMIN_EMAIL =
-    "sajidshaikh10822@gmail.com";
+let cart =
+  JSON.parse(
+    localStorage.getItem("safaria_cart") || "[]"
+  );
 
 
-  let allProducts = [];
+/* =========================
+   LOAD PRODUCTS
+========================= */
 
-  let cart =
-    JSON.parse(
-      localStorage.getItem("safaria_cart") || "[]"
-    );
+async function loadProducts() {
 
+  const container =
+    document.getElementById("products");
 
-  /* =========================
-     LOAD PRODUCTS
-  ========================= */
+  container.innerHTML =
+    '<div class="loading">Loading products...</div>';
 
-  async function loadProducts() {
+  const { data, error } =
+    await supabaseClient
+      .from("products")
+      .select("*")
+      .order("id", { ascending: false });
 
-    const container =
-      document.getElementById("products");
+  if (error) {
+
+    console.error(error);
 
     container.innerHTML =
-      '<div class="loading">Loading products...</div>';
+      '<div class="empty">❌ Products load nahi ho rahe.</div>';
 
-
-    const { data, error } =
-      await supabaseClient
-        .from("products")
-        .select("*")
-        .order("id", { ascending: false });
-
-
-    if (error) {
-
-      console.error(error);
-
-      container.innerHTML =
-        '<div class="empty">❌ Products load nahi ho rahe.</div>';
-
-      return;
-    }
-
-
-    allProducts = data || [];
-
-    displayProducts(allProducts);
-
-    updateCartCount();
-
+    return;
   }
 
+  allProducts = data || [];
 
-  /* =========================
-     DISPLAY PRODUCTS
-  ========================= */
+  displayProducts(allProducts);
 
-  function displayProducts(products) {
-
-    const container =
-      document.getElementById("products");
+  updateCartCount();
+}
 
 
-    if (!products.length) {
+/* =========================
+   DISPLAY PRODUCTS
+========================= */
 
-      container.innerHTML =
-        '<div class="empty">😔 No products found.</div>';
+function displayProducts(products) {
 
+  const container =
+    document.getElementById("products");
+
+  if (!products.length) {
+
+    container.innerHTML =
+      '<div class="empty">😔 No products found.</div>';
+
+    return;
+  }
+
+  container.innerHTML = "";
+
+  products.forEach(product => {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "product";
+
+    const image =
+      product.image ||
+      "https://via.placeholder.com/300x200?text=SAFARIA";
+
+    card.innerHTML = `
+
+      <img
+        src="${escapeHTML(image)}"
+        alt="${escapeHTML(product.name)}"
+        onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
+      >
+
+      <h3>
+        ${escapeHTML(product.name || "Product")}
+      </h3>
+
+      <div class="description">
+        ${escapeHTML(product.description || "")}
+      </div>
+
+      <div class="price">
+        ₹${Number(product.price || 0).toLocaleString("en-IN")}
+      </div>
+
+      <div class="stock">
+        ${
+          Number(product.stock || 0) > 0
+            ? "✓ In Stock"
+            : "❌ Out of Stock"
+        }
+      </div>
+
+      <button
+        class="buy"
+        ${Number(product.stock || 0) <= 0 ? "disabled" : ""}
+        onclick="addToCart(${Number(product.id)})"
+      >
+        🛒 Add to Cart
+      </button>
+
+    `;
+
+    container.appendChild(card);
+
+  });
+}
+
+
+/* =========================
+   CART
+========================= */
+
+function addToCart(id) {
+
+  const product =
+    allProducts.find(
+      p => Number(p.id) === Number(id)
+    );
+
+  if (!product) {
+    alert("Product not found.");
+    return;
+  }
+
+  if (Number(product.stock || 0) <= 0) {
+    alert("This product is out of stock.");
+    return;
+  }
+
+  const existing =
+    cart.find(
+      item => Number(item.id) === Number(id)
+    );
+
+  if (existing) {
+
+    if (
+      Number(existing.quantity || 1) <
+      Number(product.stock)
+    ) {
+
+      existing.quantity =
+        Number(existing.quantity || 1) + 1;
+
+    } else {
+
+      alert("Maximum stock reached.");
       return;
     }
 
+  } else {
 
-    container.innerHTML = "";
-
-
-    products.forEach(product => {
-
-      const card =
-        document.createElement("div");
-
-      card.className = "product";
-
-
-      const image =
-        product.image ||
-        "https://via.placeholder.com/300x200?text=SAFARIA";
-
-
-      card.innerHTML = `
-
-        <img
-          src="${escapeHTML(image)}"
-          alt="${escapeHTML(product.name)}"
-          onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
-        >
-
-        <h3>
-          ${escapeHTML(product.name || "Product")}
-        </h3>
-
-        <div class="description">
-          ${escapeHTML(product.description || "")}
-        </div>
-
-        <div class="price">
-          ₹${Number(product.price || 0).toLocaleString("en-IN")}
-        </div>
-
-        <div class="stock">
-          ${
-            Number(product.stock || 0) > 0
-              ? "✓ In Stock"
-              : "❌ Out of Stock"
-          }
-        </div>
-
-        <button
-          class="buy"
-          ${Number(product.stock || 0) <= 0 ? "disabled" : ""}
-          onclick="addToCart(${Number(product.id)})"
-        >
-          🛒 Add to Cart
-        </button>
-
-      `;
-
-      container.appendChild(card);
-
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price || 0),
+      image: product.image,
+      quantity: 1
     });
 
   }
 
+  saveCart();
 
-  /* =========================
-     CART
-  ========================= */
-
-  function addToCart(id) {
-
-    const product =
-      allProducts.find(
-        p => Number(p.id) === Number(id)
-      );
+  alert("✅ Product added to cart!");
+}
 
 
-    if (!product) {
-      alert("Product not found.");
-      return;
-    }
+function saveCart() {
+
+  localStorage.setItem(
+    "safaria_cart",
+    JSON.stringify(cart)
+  );
+
+  updateCartCount();
+}
 
 
-    if (Number(product.stock || 0) <= 0) {
-      alert("This product is out of stock.");
-      return;
-    }
+function updateCartCount() {
 
-
-    const existing =
-      cart.find(
-        item => Number(item.id) === Number(id)
-      );
-
-
-    if (existing) {
-
-      if (
-        Number(existing.quantity || 1) <
-        Number(product.stock)
-      ) {
-
-        existing.quantity =
-          Number(existing.quantity || 1) + 1;
-
-      } else {
-
-        alert("Maximum stock reached.");
-        return;
-
-      }
-
-    } else {
-
-      cart.push({
-        id: product.id,
-        name: product.name,
-        price: Number(product.price || 0),
-        image: product.image,
-        quantity: 1
-      });
-
-    }
-
-
-    saveCart();
-
-    alert("✅ Product added to cart!");
-
-  }
-
-
-  function saveCart() {
-
-    localStorage.setItem(
-      "safaria_cart",
-      JSON.stringify(cart)
+  const count =
+    cart.reduce(
+      (total, item) =>
+        total + Number(item.quantity || 1),
+      0
     );
 
-    updateCartCount();
+  document.getElementById("cartCount")
+    .textContent = count;
+}
 
+
+function openCart() {
+
+  if (!cart.length) {
+
+    alert("🛒 Your cart is empty.");
+    return;
   }
 
-
-  function updateCartCount() {
-
-    const count =
-      cart.reduce(
-        (total, item) =>
-          total + Number(item.quantity || 1),
-        0
-      );
+  window.location.href =
+    "checkout.html";
+}
 
 
-    document.getElementById("cartCount")
-      .textContent = count;
+/* =========================
+   SEARCH
+========================= */
 
-  }
+function searchProducts() {
 
-
-  function openCart() {
-
-    if (!cart.length) {
-
-      alert("🛒 Your cart is empty.");
-      return;
-
-    }
-
-    window.location.href =
-      "checkout.html";
-
-  }
-
-
-  /* =========================
-     SEARCH
-  ========================= */
-
-  function searchProducts() {
-
-    const value =
-      document.getElementById("searchInput")
-        .value
-        .trim()
-        .toLowerCase();
-
-
-    if (!value) {
-
-      document.getElementById("productTitle")
-        .textContent =
-        "🛍️ Latest Products";
-
-      displayProducts(allProducts);
-
-      return;
-    }
-
-
-    const filtered =
-      allProducts.filter(product =>
-
-        String(product.name || "")
-          .toLowerCase()
-          .includes(value)
-
-        ||
-
-        String(product.category || "")
-          .toLowerCase()
-          .includes(value)
-
-        ||
-
-        String(product.description || "")
-          .toLowerCase()
-          .includes(value)
-
-      );
-
-
-    document.getElementById("productTitle")
-      .textContent =
-      `🔍 Search Results (${filtered.length})`;
-
-
-    displayProducts(filtered);
-
-  }
-
-
-  /* =========================
-     CATEGORY
-  ========================= */
-
-  function filterCategory(category) {
-
-    const filtered =
-      allProducts.filter(product =>
-        String(product.category || "")
-          .toLowerCase() ===
-        String(category).toLowerCase()
-      );
-
-
-    document.getElementById("productTitle")
-      .textContent =
-      `🛍️ ${category}`;
-
-
-    displayProducts(filtered);
-
-  }
-
-
-  function showAllProducts() {
-
+  const value =
     document.getElementById("searchInput")
-      .value = "";
+      .value
+      .trim()
+      .toLowerCase();
+
+  if (!value) {
 
     document.getElementById("productTitle")
       .textContent =
@@ -856,325 +755,466 @@
 
     displayProducts(allProducts);
 
+    return;
+  }
+
+  const filtered =
+    allProducts.filter(product =>
+
+      String(product.name || "")
+        .toLowerCase()
+        .includes(value)
+
+      ||
+
+      String(product.category || "")
+        .toLowerCase()
+        .includes(value)
+
+      ||
+
+      String(product.description || "")
+        .toLowerCase()
+        .includes(value)
+
+    );
+
+  document.getElementById("productTitle")
+    .textContent =
+    `🔍 Search Results (${filtered.length})`;
+
+  displayProducts(filtered);
+}
+
+
+/* =========================
+   CATEGORY
+========================= */
+
+function filterCategory(category) {
+
+  const filtered =
+    allProducts.filter(product =>
+      String(product.category || "")
+        .toLowerCase() ===
+      String(category).toLowerCase()
+    );
+
+  document.getElementById("productTitle")
+    .textContent =
+    `🛍️ ${category}`;
+
+  displayProducts(filtered);
+}
+
+
+function showAllProducts() {
+
+  document.getElementById("searchInput")
+    .value = "";
+
+  document.getElementById("productTitle")
+    .textContent =
+    "🛍️ Latest Products";
+
+  displayProducts(allProducts);
+}
+
+
+/* =========================
+   LOGIN / ACCOUNT
+========================= */
+
+async function checkLogin() {
+
+  const {
+    data: { session }
+  } =
+    await supabaseClient.auth.getSession();
+
+  const accountBtn =
+    document.getElementById("accountBtn");
+
+  const accountBox =
+    document.getElementById("accountBox");
+
+  const adminBtn =
+    document.getElementById("adminBtn");
+
+  const customerName =
+    document.getElementById("customerName");
+
+  const customerEmail =
+    document.getElementById("customerEmail");
+
+  const customerPhone =
+    document.getElementById("customerPhone");
+
+  const customerAddress =
+    document.getElementById("customerAddress");
+
+
+  /* ALWAYS HIDE ADMIN FIRST */
+
+  adminBtn.hidden = true;
+  adminBtn.style.display = "none";
+
+
+  if (!session || !session.user) {
+
+    accountBtn.textContent =
+      "👤 Login";
+
+    accountBtn.href =
+      "auth.html";
+
+    accountBtn.onclick = null;
+
+    accountBox.style.display =
+      "none";
+
+    return;
   }
 
 
-  /* =========================
-     LOGIN / ACCOUNT
-  ========================= */
-
-  async function checkLogin() {
-
-    const {
-      data: { session }
-    } =
-      await supabaseClient.auth.getSession();
+  const email =
+    String(session.user.email || "")
+      .trim()
+      .toLowerCase();
 
 
-    const accountBtn =
-      document.getElementById("accountBtn");
+  accountBtn.textContent =
+    "👤 My Account";
 
-    const accountBox =
-      document.getElementById("accountBox");
+  accountBtn.href =
+    "javascript:void(0)";
+
+  accountBtn.onclick = function() {
+
+    accountBox.style.display =
+      "flex";
+
+  };
+
+
+  const name =
+    session.user.user_metadata?.full_name ||
+    session.user.user_metadata?.name ||
+    session.user.email ||
+    "Customer";
+
+
+  customerName.textContent =
+    name;
+
+  customerEmail.textContent =
+    session.user.email || "-";
+
+
+  customerPhone.textContent =
+    "Loading...";
+
+  customerAddress.textContent =
+    "Loading...";
+
+
+  /*
+    ADMIN ONLY
+  */
+
+  if (
+    email ===
+    ADMIN_EMAIL.toLowerCase()
+  ) {
+
+    adminBtn.hidden = false;
+
+    adminBtn.style.setProperty(
+      "display",
+      "inline-block",
+      "important"
+    );
+
+  }
+
+
+  /*
+    LOAD CUSTOMER DETAILS
+    FROM THEIR LATEST ORDER
+  */
+
+  const { data: orders, error } =
+    await supabaseClient
+      .from("orders")
+      .select(
+        "customer_phone, shipping_address, customer_name"
+      )
+      .eq(
+        "customer_email",
+        session.user.email
+      )
+      .order(
+        "created_at",
+        { ascending: false }
+      )
+      .limit(1);
+
+
+  if (
+    !error &&
+    orders &&
+    orders.length > 0
+  ) {
+
+    const latestOrder =
+      orders[0];
+
+    if (
+      latestOrder.customer_name
+    ) {
+
+      customerName.textContent =
+        latestOrder.customer_name;
+
+    }
+
+    customerPhone.textContent =
+      latestOrder.customer_phone ||
+      "-";
+
+    customerAddress.textContent =
+      latestOrder.shipping_address ||
+      "-";
+
+  } else {
+
+    customerPhone.textContent =
+      "-";
+
+    customerAddress.textContent =
+      "-";
+
+  }
+
+}
+
+
+/* =========================
+   MY ORDERS
+========================= */
+
+async function showMyOrders() {
+
+  const {
+    data: { session }
+  } =
+    await supabaseClient.auth.getSession();
+
+  if (!session || !session.user) {
+
+    alert("Please login first.");
+    return;
+  }
+
+  const ordersBox =
+    document.getElementById("myOrders");
+
+  const list =
+    document.getElementById("myOrdersList");
+
+  ordersBox.style.display =
+    "block";
+
+  list.innerHTML =
+    "Loading your orders...";
+
+
+  const { data, error } =
+    await supabaseClient
+      .from("orders")
+      .select("*")
+      .eq(
+        "customer_email",
+        session.user.email
+      )
+      .order(
+        "created_at",
+        { ascending: false }
+      );
+
+
+  if (error) {
+
+    console.error(error);
+
+    list.innerHTML =
+      "❌ Orders load nahi ho rahe.";
+
+    return;
+  }
+
+
+  if (!data || data.length === 0) {
+
+    list.innerHTML =
+      "📦 Aapka abhi koi order nahi hai.";
+
+    return;
+  }
+
+
+  list.innerHTML = "";
+
+
+  data.forEach(order => {
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "my-order";
+
+
+    let itemsText = "-";
+
+
+    try {
+
+      const items =
+        typeof order.items === "string"
+          ? JSON.parse(order.items)
+          : order.items;
+
+
+      if (Array.isArray(items)) {
+
+        itemsText =
+          items
+            .map(item =>
+              `${item.name || "Product"} × ${item.quantity || 1}`
+            )
+            .join(", ");
+
+      }
+
+    } catch (e) {}
+
+
+    div.innerHTML = `
+
+      <b>Order ID:</b>
+      ${escapeHTML(order.order_id || "-")}
+      <br>
+
+      <b>Total:</b>
+      ₹${Number(order.total || 0).toLocaleString("en-IN")}
+      <br>
+
+      <b>Items:</b>
+      ${escapeHTML(itemsText)}
+      <br>
+
+      <b>Status:</b>
+      <span class="order-status">
+        ${escapeHTML(order.status || "Pending")}
+      </span>
+      <br>
+
+      <b>Date:</b>
+      ${
+        order.created_at
+          ? new Date(order.created_at)
+              .toLocaleString("en-IN")
+          : "-"
+      }
+
+    `;
+
+    list.appendChild(div);
+
+  });
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  localStorage.removeItem(
+    "safaria_cart"
+  );
+
+  cart = [];
+
+  updateCartCount();
+
+  window.location.reload();
+}
+
+
+/* =========================
+   SECURITY
+========================= */
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+
+    /*
+      Hide admin immediately
+      before checking login.
+    */
 
     const adminBtn =
       document.getElementById("adminBtn");
 
-    const customerName =
-      document.getElementById("customerName");
+    adminBtn.hidden = true;
+    adminBtn.style.display = "none";
 
-    const customerEmail =
-      document.getElementById("customerEmail");
 
-
-    if (session && session.user) {
-
-      const email =
-        String(session.user.email || "")
-          .trim()
-          .toLowerCase();
-
-
-      accountBtn.textContent =
-        "👤 My Account";
-
-      accountBtn.href =
-        "javascript:void(0)";
-
-
-      accountBtn.onclick = function() {
-
-        accountBox.style.display = "flex";
-
-      };
-
-
-      const name =
-        session.user.user_metadata?.full_name ||
-        session.user.user_metadata?.name ||
-        session.user.email ||
-        "Customer";
-
-
-      customerName.textContent =
-        name;
-
-      customerEmail.textContent =
-        session.user.email || "-";
-
-
-      /*
-        ONLY ADMIN EMAIL CAN SEE ADMIN BUTTON
-      */
-
-      if (email === ADMIN_EMAIL.toLowerCase()) {
-
-        adminBtn.style.display =
-          "inline-block";
-
-      } else {
-
-        adminBtn.style.display =
-          "none";
-
-      }
-
-    } else {
-
-      accountBtn.textContent =
-        "👤 Login";
-
-      accountBtn.href =
-        "auth.html";
-
-      accountBtn.onclick = null;
-
-      accountBox.style.display =
-        "none";
-
-      adminBtn.style.display =
-        "none";
-
-    }
-
-  }
-
-
-  /* =========================
-     MY ORDERS
-  ========================= */
-
-  async function showMyOrders() {
-
-    const {
-      data: { session }
-    } =
-      await supabaseClient.auth.getSession();
-
-
-    if (!session || !session.user) {
-
-      alert("Please login first.");
-
-      return;
-
-    }
-
-
-    const ordersBox =
-      document.getElementById("myOrders");
-
-    const list =
-      document.getElementById("myOrdersList");
-
-
-    ordersBox.style.display =
-      "block";
-
-    list.innerHTML =
-      "Loading your orders...";
-
-
-    /*
-      We currently match orders by customer email.
-      Supabase RLS will be added in the next security step.
-    */
-
-    const { data, error } =
-      await supabaseClient
-        .from("orders")
-        .select("*")
-        .eq(
-          "customer_email",
-          session.user.email
-        )
-        .order(
-          "created_at",
-          { ascending: false }
-        );
-
-
-    if (error) {
-
-      console.error(error);
-
-      list.innerHTML =
-        "❌ Orders load nahi ho rahe.";
-
-      return;
-
-    }
-
-
-    if (!data || data.length === 0) {
-
-      list.innerHTML =
-        "📦 Aapka abhi koi order nahi hai.";
-
-      return;
-
-    }
-
-
-    list.innerHTML = "";
-
-
-    data.forEach(order => {
-
-      const div =
-        document.createElement("div");
-
-      div.className =
-        "my-order";
-
-
-      let itemsText = "-";
-
-
-      try {
-
-        const items =
-          typeof order.items === "string"
-            ? JSON.parse(order.items)
-            : order.items;
-
-
-        if (Array.isArray(items)) {
-
-          itemsText =
-            items
-              .map(item =>
-                `${item.name || "Product"} × ${item.quantity || 1}`
-              )
-              .join(", ");
-
-        }
-
-      } catch (e) {}
-
-
-
-      div.innerHTML = `
-
-        <b>Order ID:</b>
-        ${escapeHTML(order.order_id || "-")}
-        <br>
-
-        <b>Total:</b>
-        ₹${Number(order.total || 0).toLocaleString("en-IN")}
-        <br>
-
-        <b>Items:</b>
-        ${escapeHTML(itemsText)}
-        <br>
-
-        <b>Status:</b>
-        <span class="order-status">
-          ${escapeHTML(order.status || "Pending")}
-        </span>
-        <br>
-
-        <b>Date:</b>
-        ${
-          order.created_at
-            ? new Date(order.created_at)
-                .toLocaleString("en-IN")
-            : "-"
-        }
-
-      `;
-
-
-      list.appendChild(div);
-
-    });
-
-  }
-
-
-  /* =========================
-     LOGOUT
-  ========================= */
-
-  async function logout() {
-
-    await supabaseClient.auth.signOut();
-
-    localStorage.removeItem("safaria_cart");
-
-    cart = [];
+    loadProducts();
 
     updateCartCount();
 
-    window.location.reload();
+    await checkLogin();
 
   }
+);
 
 
-  /* =========================
-     SECURITY HELPERS
-  ========================= */
+/* =========================
+   AUTH STATE
+========================= */
 
-  function escapeHTML(value) {
+supabaseClient.auth.onAuthStateChange(
+  () => {
 
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    setTimeout(() => {
+      checkLogin();
+    }, 0);
 
   }
-
-
-  /* =========================
-     START
-  ========================= */
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-      loadProducts();
-
-      updateCartCount();
-
-      checkLogin();
-
-    }
-  );
-
-
-  /*
-    IMPORTANT:
-    Keep checking session when auth state changes.
-  */
-
-  supabaseClient.auth.onAuthStateChange(
-    () => {
-      checkLogin();
-    }
-  );
+);
 
 </script>
 
