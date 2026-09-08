@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>SAFARIA - Login</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -129,6 +130,9 @@
 
   <div id="message" class="message"></div>
 
+
+  <!-- LOGIN -->
+
   <div id="loginBox">
 
     <h2>🔐 Login</h2>
@@ -137,26 +141,39 @@
       id="loginEmail"
       type="email"
       placeholder="Email address"
+      autocomplete="email"
     >
 
     <input
       id="loginPassword"
       type="password"
       placeholder="Password"
+      autocomplete="current-password"
     >
 
-    <button id="loginBtn" onclick="login()">
+    <button
+      id="loginBtn"
+      onclick="login()"
+    >
       Login
     </button>
 
     <div class="switch">
       New to SAFARIA?
-      <span onclick="showSignup()">Create account</span>
+      <span onclick="showSignup()">
+        Create account
+      </span>
     </div>
 
   </div>
 
-  <div id="signupBox" style="display:none;">
+
+  <!-- SIGNUP -->
+
+  <div
+    id="signupBox"
+    style="display:none;"
+  >
 
     <h2>👤 Create Account</h2>
 
@@ -164,264 +181,528 @@
       id="signupName"
       type="text"
       placeholder="Full name"
+      autocomplete="name"
     >
 
     <input
       id="signupEmail"
       type="email"
       placeholder="Email address"
+      autocomplete="email"
     >
 
     <input
       id="signupPassword"
       type="password"
       placeholder="Password (minimum 6 characters)"
+      autocomplete="new-password"
     >
 
-    <button id="signupBtn" onclick="signup()">
+    <button
+      id="signupBtn"
+      onclick="signup()"
+    >
       Create Account
     </button>
 
     <div class="switch">
       Already have an account?
-      <span onclick="showLogin()">Login</span>
+      <span onclick="showLogin()">
+        Login
+      </span>
     </div>
 
   </div>
 
-  <a class="back" href="index.html">
+
+  <a
+    class="back"
+    href="index.html"
+  >
     ← Back to SAFARIA
   </a>
 
 </div>
 
+
 <script>
 
-const SUPABASE_URL =
-  "https://dcwdzbejpwvskajukxrh.supabase.co";
+  /* =========================================
+     SUPABASE
+  ========================================= */
 
-const SUPABASE_KEY =
-  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+  const SUPABASE_URL =
+    "https://dcwdzbejpwvskajukxrh.supabase.co";
 
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const SUPABASE_KEY =
+    "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
 
 
-function showMessage(text, type) {
-
-  const box =
-    document.getElementById("message");
-
-  box.textContent = text;
-
-  box.className =
-    "message " + type;
-
-  box.style.display = "block";
-}
-
-
-function showSignup() {
-
-  document.getElementById("loginBox")
-    .style.display = "none";
-
-  document.getElementById("signupBox")
-    .style.display = "block";
-
-  document.getElementById("message")
-    .style.display = "none";
-}
-
-
-function showLogin() {
-
-  document.getElementById("signupBox")
-    .style.display = "none";
-
-  document.getElementById("loginBox")
-    .style.display = "block";
-
-  document.getElementById("message")
-    .style.display = "none";
-}
-
-
-async function signup() {
-
-  const name =
-    document.getElementById("signupName")
-      .value.trim();
-
-  const email =
-    document.getElementById("signupEmail")
-      .value.trim();
-
-  const password =
-    document.getElementById("signupPassword")
-      .value;
-
-
-  if (!name) {
-    showMessage(
-      "Please enter your name.",
-      "error"
+  const supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
     );
-    return;
+
+
+  /* =========================================
+     ADMIN
+  ========================================= */
+
+  const ADMIN_EMAIL =
+    "sajidshaikh10822@gmail.com";
+
+
+  /* =========================================
+     MESSAGE
+  ========================================= */
+
+  function showMessage(
+    text,
+    type
+  ) {
+
+    const box =
+      document.getElementById(
+        "message"
+      );
+
+
+    box.textContent =
+      text;
+
+
+    box.className =
+      "message " + type;
+
+
+    box.style.display =
+      "block";
+
   }
 
 
-  if (!email) {
-    showMessage(
-      "Please enter your email.",
-      "error"
-    );
-    return;
+  /* =========================================
+     SHOW SIGNUP
+  ========================================= */
+
+  function showSignup() {
+
+    document.getElementById(
+      "loginBox"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "signupBox"
+    ).style.display =
+      "block";
+
+
+    document.getElementById(
+      "message"
+    ).style.display =
+      "none";
+
   }
 
 
-  if (password.length < 6) {
-    showMessage(
-      "Password must be at least 6 characters.",
-      "error"
-    );
-    return;
+  /* =========================================
+     SHOW LOGIN
+  ========================================= */
+
+  function showLogin() {
+
+    document.getElementById(
+      "signupBox"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "loginBox"
+    ).style.display =
+      "block";
+
+
+    document.getElementById(
+      "message"
+    ).style.display =
+      "none";
+
   }
 
 
-  const btn =
-    document.getElementById("signupBtn");
+  /* =========================================
+     SIGNUP
+  ========================================= */
 
-  btn.disabled = true;
-  btn.textContent = "Creating account...";
+  async function signup() {
+
+    const name =
+      document.getElementById(
+        "signupName"
+      ).value.trim();
 
 
-  const { data, error } =
-    await supabaseClient.auth.signUp({
+    const email =
+      document.getElementById(
+        "signupEmail"
+      ).value.trim();
 
-      email: email,
 
-      password: password,
+    const password =
+      document.getElementById(
+        "signupPassword"
+      ).value;
 
-      options: {
-        data: {
-          full_name: name
-        }
+
+    if (!name) {
+
+      showMessage(
+        "Please enter your name.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (!email) {
+
+      showMessage(
+        "Please enter your email.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    if (password.length < 6) {
+
+      showMessage(
+        "Password must be at least 6 characters.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const btn =
+      document.getElementById(
+        "signupBtn"
+      );
+
+
+    btn.disabled = true;
+
+    btn.textContent =
+      "Creating account...";
+
+
+    try {
+
+      const result =
+        await supabaseClient.auth.signUp({
+
+          email: email,
+
+          password: password,
+
+          options: {
+
+            data: {
+              full_name: name
+            }
+
+          }
+
+        });
+
+
+      const data =
+        result.data;
+
+      const error =
+        result.error;
+
+
+      if (error) {
+
+        showMessage(
+          "❌ " + error.message,
+          "error"
+        );
+
+        return;
       }
 
-    });
+
+      if (data.session) {
+
+        showMessage(
+          "✅ Account created successfully!",
+          "success"
+        );
 
 
-  btn.disabled = false;
-  btn.textContent = "Create Account";
+        setTimeout(
+          function() {
+
+            window.location.href =
+              "index.html";
+
+          },
+          800
+        );
+
+      } else {
+
+        showMessage(
+          "✅ Account created! Check your email to verify your account.",
+          "success"
+        );
+
+      }
 
 
-  if (error) {
+    } catch (error) {
 
-    showMessage(
-      "❌ " + error.message,
-      "error"
-    );
+      console.error(error);
 
-    return;
+      showMessage(
+        "❌ " +
+        (
+          error.message ||
+          "Signup failed."
+        ),
+        "error"
+      );
+
+    } finally {
+
+      btn.disabled = false;
+
+      btn.textContent =
+        "Create Account";
+
+    }
+
   }
 
 
-  if (data.session) {
+  /* =========================================
+     LOGIN
+  ========================================= */
 
-    showMessage(
-      "✅ Account created successfully!",
-      "success"
-    );
+  async function login() {
 
-    setTimeout(() => {
-      window.location.href = "index.html";
-    }, 1000);
+    const email =
+      document.getElementById(
+        "loginEmail"
+      ).value.trim();
 
-  } else {
 
-    showMessage(
-      "✅ Account created! Check your email to verify your account.",
-      "success"
-    );
+    const password =
+      document.getElementById(
+        "loginPassword"
+      ).value;
+
+
+    if (!email || !password) {
+
+      showMessage(
+        "Please enter email and password.",
+        "error"
+      );
+
+      return;
+    }
+
+
+    const btn =
+      document.getElementById(
+        "loginBtn"
+      );
+
+
+    btn.disabled = true;
+
+    btn.textContent =
+      "Logging in...";
+
+
+    try {
+
+      const result =
+        await supabaseClient.auth
+          .signInWithPassword({
+
+            email: email,
+
+            password: password
+
+          });
+
+
+      const data =
+        result.data;
+
+      const error =
+        result.error;
+
+
+      if (error) {
+
+        showMessage(
+          "❌ " + error.message,
+          "error"
+        );
+
+        return;
+      }
+
+
+      if (
+        !data ||
+        !data.session ||
+        !data.user
+      ) {
+
+        showMessage(
+          "❌ Login failed. No session created.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      const loggedInEmail =
+        String(
+          data.user.email || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+      /* =====================================
+         ADMIN LOGIN
+      ===================================== */
+
+      if (
+        loggedInEmail ===
+        ADMIN_EMAIL.toLowerCase()
+      ) {
+
+        showMessage(
+          "✅ Admin login successful! Opening Admin Panel...",
+          "success"
+        );
+
+
+        setTimeout(
+          function() {
+
+            window.location.href =
+              "admin.html";
+
+          },
+          500
+        );
+
+
+        return;
+      }
+
+
+      /* =====================================
+         CUSTOMER LOGIN
+      ===================================== */
+
+      showMessage(
+        "✅ Login successful!",
+        "success"
+      );
+
+
+      setTimeout(
+        function() {
+
+          window.location.href =
+            "index.html";
+
+        },
+        800
+      );
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "❌ " +
+        (
+          error.message ||
+          "Login failed."
+        ),
+        "error"
+      );
+
+    } finally {
+
+      btn.disabled = false;
+
+      btn.textContent =
+        "Login";
+
+    }
 
   }
 
-}
 
+  /* =========================================
+     ENTER KEY SUPPORT
+  ========================================= */
 
-async function login() {
+  document
+    .getElementById("loginPassword")
+    .addEventListener(
+      "keydown",
+      function(event) {
 
-  const email =
-    document.getElementById("loginEmail")
-      .value.trim();
+        if (
+          event.key === "Enter"
+        ) {
 
-  const password =
-    document.getElementById("loginPassword")
-      .value;
+          login();
 
+        }
 
-  if (!email || !password) {
-
-    showMessage(
-      "Please enter email and password.",
-      "error"
+      }
     );
 
-    return;
-  }
 
+  document
+    .getElementById("signupPassword")
+    .addEventListener(
+      "keydown",
+      function(event) {
 
-  const btn =
-    document.getElementById("loginBtn");
+        if (
+          event.key === "Enter"
+        ) {
 
-  btn.disabled = true;
-  btn.textContent = "Logging in...";
+          signup();
 
+        }
 
-  const { data, error } =
-    await supabaseClient.auth
-      .signInWithPassword({
-
-        email: email,
-
-        password: password
-
-      });
-
-
-  btn.disabled = false;
-  btn.textContent = "Login";
-
-
-  if (error) {
-
-    showMessage(
-      "❌ " + error.message,
-      "error"
+      }
     );
-
-    return;
-  }
-
-
-  showMessage(
-    "✅ Login successful!",
-    "success"
-  );
-
-
-  setTimeout(() => {
-
-    window.location.href =
-      "index.html";
-
-  }, 800);
-
-}
 
 </script>
 
