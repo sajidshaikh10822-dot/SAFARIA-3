@@ -261,7 +261,6 @@
     }
 
     @media (max-width: 600px) {
-
       header {
         gap: 10px;
       }
@@ -289,7 +288,6 @@
 <body>
 
 <header>
-
   <div class="logo">
     SAFARIA
   </div>
@@ -297,9 +295,7 @@
   <a href="index.html" class="back">
     ← Continue Shopping
   </a>
-
 </header>
-
 
 <div class="container">
 
@@ -308,7 +304,6 @@
   <div id="checkoutPage">
 
     <h1>🛒 Checkout</h1>
-
 
     <!-- CART -->
 
@@ -319,17 +314,14 @@
       <div id="cartItems"></div>
 
       <div class="total">
-
         <span>Total</span>
 
         <span>
           ₹<span id="totalAmount">0</span>
         </span>
-
       </div>
 
     </div>
-
 
     <!-- DELIVERY DETAILS -->
 
@@ -340,7 +332,6 @@
       <div id="loginInfo" class="info">
         You can place an order without creating an account.
       </div>
-
 
       <label for="customerName">
         Full Name
@@ -354,7 +345,6 @@
         autocomplete="name"
       >
 
-
       <label for="customerEmail">
         Email Address
       </label>
@@ -366,7 +356,6 @@
         placeholder="Enter your email"
         autocomplete="email"
       >
-
 
       <label for="customerPhone">
         Phone Number
@@ -381,7 +370,6 @@
         autocomplete="tel"
       >
 
-
       <label for="shippingAddress">
         Delivery Address
       </label>
@@ -392,7 +380,6 @@
         placeholder="House/Flat, Street, Area"
         autocomplete="street-address"
       ></textarea>
-
 
       <div class="row">
 
@@ -411,7 +398,6 @@
           >
 
         </div>
-
 
         <div>
 
@@ -434,13 +420,11 @@
 
     </div>
 
-
     <!-- PAYMENT -->
 
     <div class="box">
 
       <h2>💳 Payment Method</h2>
-
 
       <label class="payment-option">
 
@@ -456,7 +440,6 @@
 
       </label>
 
-
       <label class="payment-option">
 
         <input
@@ -469,7 +452,6 @@
         📱 UPI Payment
 
       </label>
-
 
       <div id="upiBox" class="upi-box">
 
@@ -496,7 +478,6 @@
 
       </div>
 
-
       <button
         id="placeOrderButton"
         class="pay-button"
@@ -504,7 +485,6 @@
       >
         🛍️ Place Order
       </button>
-
 
       <div
         id="errorMessage"
@@ -514,7 +494,6 @@
     </div>
 
   </div>
-
 
   <!-- SUCCESS -->
 
@@ -540,14 +519,12 @@
 
       </div>
 
-
       <a
         href="index.html"
         class="home-button"
       >
         🏠 Back to Store
       </a>
-
 
       <a
         href="my-orders.html"
@@ -562,7 +539,6 @@
 
 </div>
 
-
 <footer>
 
   <h2>SAFARIA</h2>
@@ -570,7 +546,6 @@
   <p>India's Shopping Store</p>
 
 </footer>
-
 
 <script>
 
@@ -605,11 +580,8 @@ const SAFARIA_UPI =
 
 let cart =
   JSON.parse(
-    localStorage.getItem(
-      "safaria_cart"
-    ) || "[]"
+    localStorage.getItem("safaria_cart") || "[]"
   );
-
 
 let totalAmount = 0;
 
@@ -635,7 +607,6 @@ async function checkLogin() {
     } =
       await supabaseClient.auth.getSession();
 
-
     if (error) {
 
       console.error(
@@ -646,10 +617,8 @@ async function checkLogin() {
       return null;
     }
 
-
     currentSession =
       data.session || null;
-
 
     if (
       currentSession &&
@@ -659,17 +628,14 @@ async function checkLogin() {
       const email =
         currentSession.user.email || "";
 
-
       document.getElementById(
         "customerEmail"
       ).value = email;
-
 
       const name =
         currentSession.user.user_metadata?.full_name ||
         currentSession.user.user_metadata?.name ||
         "";
-
 
       if (name) {
 
@@ -678,7 +644,6 @@ async function checkLogin() {
         ).value = name;
 
       }
-
 
       document.getElementById(
         "loginInfo"
@@ -693,7 +658,6 @@ async function checkLogin() {
         "🛍️ Guest checkout is available. Login is not required.";
 
     }
-
 
     return currentSession;
 
@@ -715,9 +679,36 @@ async function checkLogin() {
 function loadCart() {
 
   const container =
-    document.getElementById(
-      "cartItems"
+    document.getElementById("cartItems");
+
+  /*
+    IMPORTANT:
+    Reload cart directly from localStorage.
+  */
+
+  try {
+
+    const savedCart =
+      localStorage.getItem("safaria_cart");
+
+    cart =
+      JSON.parse(savedCart || "[]");
+
+  } catch (error) {
+
+    console.error(
+      "Cart read error:",
+      error
     );
+
+    cart = [];
+
+  }
+
+
+  if (!Array.isArray(cart)) {
+    cart = [];
+  }
 
 
   if (!cart.length) {
@@ -736,11 +727,15 @@ function loadCart() {
       </div>
     `;
 
+    document.getElementById(
+      "totalAmount"
+    ).textContent = "0";
 
     document.getElementById(
       "placeOrderButton"
     ).disabled = true;
 
+    totalAmount = 0;
 
     return;
 
@@ -757,18 +752,14 @@ function loadCart() {
     const quantity =
       Math.max(
         1,
-        Number(
-          item.quantity || 1
-        )
+        Number(item.quantity || 1)
       );
 
 
     const price =
       Math.max(
         0,
-        Number(
-          item.price || 0
-        )
+        Number(item.price || 0)
       );
 
 
@@ -781,10 +772,7 @@ function loadCart() {
 
 
     const div =
-      document.createElement(
-        "div"
-      );
-
+      document.createElement("div");
 
     div.className =
       "item";
@@ -823,10 +811,7 @@ function loadCart() {
 
     `;
 
-
-    container.appendChild(
-      div
-    );
+    container.appendChild(div);
 
   });
 
@@ -834,9 +819,12 @@ function loadCart() {
   document.getElementById(
     "totalAmount"
   ).textContent =
-    totalAmount.toLocaleString(
-      "en-IN"
-    );
+    totalAmount.toLocaleString("en-IN");
+
+
+  document.getElementById(
+    "placeOrderButton"
+  ).disabled = false;
 
 }
 
@@ -854,9 +842,7 @@ function changePayment() {
 
 
   const upiBox =
-    document.getElementById(
-      "upiBox"
-    );
+    document.getElementById("upiBox");
 
 
   const placeButton =
@@ -865,13 +851,10 @@ function changePayment() {
     );
 
 
-  if (
-    payment === "UPI"
-  ) {
+  if (payment === "UPI") {
 
     upiBox.style.display =
       "block";
-
 
     placeButton.textContent =
       "✅ I Have Paid - Place Order";
@@ -880,7 +863,6 @@ function changePayment() {
 
     upiBox.style.display =
       "none";
-
 
     placeButton.textContent =
       "🛍️ Place Order";
@@ -896,9 +878,7 @@ function changePayment() {
 
 function payWithUPI() {
 
-  if (
-    totalAmount <= 0
-  ) {
+  if (totalAmount <= 0) {
 
     alert(
       "Invalid order amount."
@@ -912,13 +892,9 @@ function payWithUPI() {
   const upiURL =
     "upi://pay" +
     "?pa=" +
-    encodeURIComponent(
-      SAFARIA_UPI
-    ) +
+    encodeURIComponent(SAFARIA_UPI) +
     "&pn=" +
-    encodeURIComponent(
-      "SAFARIA Order"
-    ) +
+    encodeURIComponent("SAFARIA Order") +
     "&am=" +
     encodeURIComponent(
       totalAmount.toFixed(2)
@@ -948,8 +924,14 @@ async function placeOrder() {
     );
 
 
-  errorBox.textContent =
-    "";
+  errorBox.textContent = "";
+
+
+  /*
+    Reload cart before placing order.
+  */
+
+  loadCart();
 
 
   if (!cart.length) {
@@ -962,9 +944,7 @@ async function placeOrder() {
   }
 
 
-  if (
-    totalAmount <= 0
-  ) {
+  if (totalAmount <= 0) {
 
     errorBox.textContent =
       "Invalid order amount.";
@@ -974,21 +954,14 @@ async function placeOrder() {
   }
 
 
-  /* =========================
-     GET CURRENT SESSION
-  ========================= */
-
   const {
     data,
-    error:
-      sessionError
+    error: sessionError
   } =
     await supabaseClient.auth.getSession();
 
 
-  if (
-    sessionError
-  ) {
+  if (sessionError) {
 
     console.error(
       sessionError
@@ -1067,9 +1040,7 @@ async function placeOrder() {
 
 
   if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      email
-    )
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   ) {
 
     errorBox.textContent =
@@ -1081,9 +1052,7 @@ async function placeOrder() {
 
 
   if (
-    !/^[0-9]{10}$/.test(
-      phone
-    )
+    !/^[0-9]{10}$/.test(phone)
   ) {
 
     errorBox.textContent =
@@ -1115,9 +1084,7 @@ async function placeOrder() {
 
 
   if (
-    !/^[0-9]{6}$/.test(
-      pincode
-    )
+    !/^[0-9]{6}$/.test(pincode)
   ) {
 
     errorBox.textContent =
@@ -1132,20 +1099,15 @@ async function placeOrder() {
      UPI CONFIRMATION
   ========================= */
 
-  if (
-    payment === "UPI"
-  ) {
+  if (payment === "UPI") {
 
     const paid =
       confirm(
         "UPI payment karne ke baad OK dabakar order place karein."
       );
 
-
     if (!paid) {
-
       return;
-
     }
 
   }
@@ -1161,9 +1123,7 @@ async function placeOrder() {
     );
 
 
-  button.disabled =
-    true;
-
+  button.disabled = true;
 
   button.textContent =
     "Placing Order...";
@@ -1171,9 +1131,6 @@ async function placeOrder() {
 
   /* =========================
      SHIPPING ADDRESS
-     
-     Database mein sirf
-     shipping_address column hai.
   ========================= */
 
   const completeAddress =
@@ -1200,10 +1157,6 @@ async function placeOrder() {
 
   /* =========================
      ORDER DATA
-     
-     IMPORTANT:
-     Ye fields tumhari actual
-     orders table ke according hain.
   ========================= */
 
   const orderData = {
@@ -1240,15 +1193,9 @@ async function placeOrder() {
   };
 
 
-  /*
-    Logged-in customer:
-    user_id = current user's UUID
-
-    Guest customer:
-    user_id = NULL
-
-    RLS dono cases ko allow karta hai.
-  */
+  /* =========================
+     USER ID
+  ========================= */
 
   if (
     currentSession &&
@@ -1273,8 +1220,7 @@ async function placeOrder() {
   try {
 
     const {
-      data:
-        insertedOrder,
+      data: insertedOrder,
       error
     } =
       await supabaseClient
@@ -1308,9 +1254,7 @@ async function placeOrder() {
       "safaria_cart"
     );
 
-
     cart = [];
-
 
     document.getElementById(
       "successOrderId"
@@ -1347,8 +1291,7 @@ async function placeOrder() {
       );
 
 
-    button.disabled =
-      false;
+    button.disabled = false;
 
 
     button.textContent =
@@ -1367,19 +1310,14 @@ async function placeOrder() {
 
 function escapeHTML(value) {
 
-  return String(
-    value ?? ""
-  )
-    .replace(
-      /&/g,
-      "&amp;"
-    )
-    .replace(
-      /</g,
-      "&lt;"
-    )
-    .replace(
-      />/g,
-      "&gt;"
-    )
-  
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* ============
