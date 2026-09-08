@@ -73,7 +73,6 @@
       border-radius: 5px;
     }
 
-    /* ADMIN IS HIDDEN BY DEFAULT */
     #adminBtn {
       display: none !important;
     }
@@ -362,7 +361,6 @@
     🛒 Cart (<span id="cartCount">0</span>)
   </a>
 
-  <!-- ADMIN BUTTON: COMPLETELY HIDDEN BY DEFAULT -->
   <a
     href="admin.html"
     class="header-btn"
@@ -388,8 +386,6 @@
   <h1>Welcome to SAFARIA</h1>
   <p>Everything you need, all in one place.</p>
 </section>
-
-<!-- CUSTOMER ACCOUNT -->
 
 <div id="accountBox" class="account-box">
 
@@ -440,8 +436,6 @@
   </div>
 
 </div>
-
-<!-- CUSTOMER ORDERS -->
 
 <div id="myOrders" class="my-orders">
 
@@ -521,10 +515,47 @@ const ADMIN_EMAIL =
 
 let allProducts = [];
 
-let cart =
-  JSON.parse(
-    localStorage.getItem("safaria_cart") || "[]"
-  );
+let cart = [];
+
+
+/* =========================
+   READ CART FROM STORAGE
+========================= */
+
+function readCart() {
+
+  try {
+
+    const saved =
+      localStorage.getItem(
+        "safaria_cart"
+      );
+
+    if (!saved) {
+      return [];
+    }
+
+    const parsed =
+      JSON.parse(saved);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed;
+
+  } catch (error) {
+
+    console.error(
+      "Cart read error:",
+      error
+    );
+
+    return [];
+
+  }
+
+}
 
 
 /* =========================
@@ -638,29 +669,50 @@ function displayProducts(products) {
 
 
 /* =========================
-   CART
+   ADD TO CART
 ========================= */
 
 function addToCart(id) {
 
+  /*
+    ALWAYS READ THE LATEST CART
+    FROM LOCAL STORAGE FIRST
+  */
+
+  cart = readCart();
+
   const product =
     allProducts.find(
-      p => Number(p.id) === Number(id)
+      p =>
+        Number(p.id) ===
+        Number(id)
     );
 
   if (!product) {
-    alert("Product not found.");
+
+    alert(
+      "Product not found."
+    );
+
     return;
   }
 
-  if (Number(product.stock || 0) <= 0) {
-    alert("This product is out of stock.");
+  if (
+    Number(product.stock || 0) <= 0
+  ) {
+
+    alert(
+      "This product is out of stock."
+    );
+
     return;
   }
 
   const existing =
     cart.find(
-      item => Number(item.id) === Number(id)
+      item =>
+        Number(item.id) ===
+        Number(id)
     );
 
   if (existing) {
@@ -675,27 +727,48 @@ function addToCart(id) {
 
     } else {
 
-      alert("Maximum stock reached.");
+      alert(
+        "Maximum stock reached."
+      );
+
       return;
     }
 
   } else {
 
     cart.push({
-      id: product.id,
-      name: product.name,
-      price: Number(product.price || 0),
-      image: product.image,
-      quantity: 1
+
+      id:
+        product.id,
+
+      name:
+        product.name,
+
+      price:
+        Number(product.price || 0),
+
+      image:
+        product.image,
+
+      quantity:
+        1
+
     });
 
   }
 
   saveCart();
 
-  alert("✅ Product added to cart!");
+  alert(
+    "✅ Product added to cart!"
+  );
+
 }
 
+
+/* =========================
+   SAVE CART
+========================= */
 
 function saveCart() {
 
@@ -705,33 +778,101 @@ function saveCart() {
   );
 
   updateCartCount();
+
 }
 
+
+/* =========================
+   UPDATE CART COUNT
+========================= */
 
 function updateCartCount() {
 
+  /*
+    READ LATEST CART
+    EVERY TIME
+  */
+
+  cart = readCart();
+
   const count =
     cart.reduce(
-      (total, item) =>
-        total + Number(item.quantity || 1),
+      (total, item) => {
+
+        return (
+          total +
+          Math.max(
+            1,
+            Number(
+              item.quantity || 1
+            )
+          )
+        );
+
+      },
       0
     );
 
-  document.getElementById("cartCount")
-    .textContent = count;
+  const cartCount =
+    document.getElementById(
+      "cartCount"
+    );
+
+  if (cartCount) {
+
+    cartCount.textContent =
+      count;
+
+  }
+
 }
 
 
+/* =========================
+   OPEN CART
+========================= */
+
 function openCart() {
 
-  if (!cart.length) {
+  /*
+    IMPORTANT:
+    READ CART DIRECTLY FROM
+    LOCAL STORAGE BEFORE OPENING
+  */
 
-    alert("🛒 Your cart is empty.");
+  const latestCart =
+    readCart();
+
+  /*
+    SYNC GLOBAL CART
+  */
+
+  cart =
+    latestCart;
+
+
+  if (
+    !Array.isArray(latestCart) ||
+    latestCart.length === 0
+  ) {
+
+    alert(
+      "🛒 Your cart is empty."
+    );
+
     return;
+
   }
+
+
+  /*
+    CART EXISTS
+    OPEN CHECKOUT
+  */
 
   window.location.href =
     "checkout.html";
+
 }
 
 
@@ -753,37 +894,49 @@ function searchProducts() {
       .textContent =
       "🛍️ Latest Products";
 
-    displayProducts(allProducts);
+    displayProducts(
+      allProducts
+    );
 
     return;
   }
 
   const filtered =
-    allProducts.filter(product =>
+    allProducts.filter(
+      product =>
 
-      String(product.name || "")
-        .toLowerCase()
-        .includes(value)
+        String(
+          product.name || ""
+        )
+          .toLowerCase()
+          .includes(value)
 
-      ||
+        ||
 
-      String(product.category || "")
-        .toLowerCase()
-        .includes(value)
+        String(
+          product.category || ""
+        )
+          .toLowerCase()
+          .includes(value)
 
-      ||
+        ||
 
-      String(product.description || "")
-        .toLowerCase()
-        .includes(value)
-
+        String(
+          product.description || ""
+        )
+          .toLowerCase()
+          .includes(value)
     );
 
-  document.getElementById("productTitle")
-    .textContent =
+  document.getElementById(
+    "productTitle"
+  ).textContent =
     `🔍 Search Results (${filtered.length})`;
 
-  displayProducts(filtered);
+  displayProducts(
+    filtered
+  );
+
 }
 
 
@@ -794,30 +947,45 @@ function searchProducts() {
 function filterCategory(category) {
 
   const filtered =
-    allProducts.filter(product =>
-      String(product.category || "")
-        .toLowerCase() ===
-      String(category).toLowerCase()
+    allProducts.filter(
+      product =>
+        String(
+          product.category || ""
+        )
+          .toLowerCase() ===
+        String(
+          category
+        )
+          .toLowerCase()
     );
 
-  document.getElementById("productTitle")
-    .textContent =
+  document.getElementById(
+    "productTitle"
+  ).textContent =
     `🛍️ ${category}`;
 
-  displayProducts(filtered);
+  displayProducts(
+    filtered
+  );
+
 }
 
 
 function showAllProducts() {
 
-  document.getElementById("searchInput")
-    .value = "";
+  document.getElementById(
+    "searchInput"
+  ).value = "";
 
-  document.getElementById("productTitle")
-    .textContent =
+  document.getElementById(
+    "productTitle"
+  ).textContent =
     "🛍️ Latest Products";
 
-  displayProducts(allProducts);
+  displayProducts(
+    allProducts
+  );
+
 }
 
 
@@ -833,34 +1001,52 @@ async function checkLogin() {
     await supabaseClient.auth.getSession();
 
   const accountBtn =
-    document.getElementById("accountBtn");
+    document.getElementById(
+      "accountBtn"
+    );
 
   const accountBox =
-    document.getElementById("accountBox");
+    document.getElementById(
+      "accountBox"
+    );
 
   const adminBtn =
-    document.getElementById("adminBtn");
+    document.getElementById(
+      "adminBtn"
+    );
 
   const customerName =
-    document.getElementById("customerName");
+    document.getElementById(
+      "customerName"
+    );
 
   const customerEmail =
-    document.getElementById("customerEmail");
+    document.getElementById(
+      "customerEmail"
+    );
 
   const customerPhone =
-    document.getElementById("customerPhone");
+    document.getElementById(
+      "customerPhone"
+    );
 
   const customerAddress =
-    document.getElementById("customerAddress");
+    document.getElementById(
+      "customerAddress"
+    );
 
 
-  /* ALWAYS HIDE ADMIN FIRST */
+  adminBtn.hidden =
+    true;
 
-  adminBtn.hidden = true;
-  adminBtn.style.display = "none";
+  adminBtn.style.display =
+    "none";
 
 
-  if (!session || !session.user) {
+  if (
+    !session ||
+    !session.user
+  ) {
 
     accountBtn.textContent =
       "👤 Login";
@@ -868,17 +1054,21 @@ async function checkLogin() {
     accountBtn.href =
       "auth.html";
 
-    accountBtn.onclick = null;
+    accountBtn.onclick =
+      null;
 
     accountBox.style.display =
       "none";
 
     return;
+
   }
 
 
   const email =
-    String(session.user.email || "")
+    String(
+      session.user.email || ""
+    )
       .trim()
       .toLowerCase();
 
@@ -889,12 +1079,13 @@ async function checkLogin() {
   accountBtn.href =
     "javascript:void(0)";
 
-  accountBtn.onclick = function() {
+  accountBtn.onclick =
+    function() {
 
-    accountBox.style.display =
-      "flex";
+      accountBox.style.display =
+        "flex";
 
-  };
+    };
 
 
   const name =
@@ -908,8 +1099,8 @@ async function checkLogin() {
     name;
 
   customerEmail.textContent =
-    session.user.email || "-";
-
+    session.user.email ||
+    "-";
 
   customerPhone.textContent =
     "Loading...";
@@ -918,16 +1109,13 @@ async function checkLogin() {
     "Loading...";
 
 
-  /*
-    ADMIN ONLY
-  */
-
   if (
     email ===
     ADMIN_EMAIL.toLowerCase()
   ) {
 
-    adminBtn.hidden = false;
+    adminBtn.hidden =
+      false;
 
     adminBtn.style.setProperty(
       "display",
@@ -938,12 +1126,10 @@ async function checkLogin() {
   }
 
 
-  /*
-    LOAD CUSTOMER DETAILS
-    FROM THEIR LATEST ORDER
-  */
-
-  const { data: orders, error } =
+  const {
+    data: orders,
+    error
+  } =
     await supabaseClient
       .from("orders")
       .select(
@@ -955,7 +1141,9 @@ async function checkLogin() {
       )
       .order(
         "created_at",
-        { ascending: false }
+        {
+          ascending: false
+        }
       )
       .limit(1);
 
@@ -1010,17 +1198,28 @@ async function showMyOrders() {
   } =
     await supabaseClient.auth.getSession();
 
-  if (!session || !session.user) {
+  if (
+    !session ||
+    !session.user
+  ) {
 
-    alert("Please login first.");
+    alert(
+      "Please login first."
+    );
+
     return;
+
   }
 
   const ordersBox =
-    document.getElementById("myOrders");
+    document.getElementById(
+      "myOrders"
+    );
 
   const list =
-    document.getElementById("myOrdersList");
+    document.getElementById(
+      "myOrdersList"
+    );
 
   ordersBox.style.display =
     "block";
@@ -1029,7 +1228,10 @@ async function showMyOrders() {
     "Loading your orders...";
 
 
-  const { data, error } =
+  const {
+    data,
+    error
+  } =
     await supabaseClient
       .from("orders")
       .select("*")
@@ -1039,7 +1241,9 @@ async function showMyOrders() {
       )
       .order(
         "created_at",
-        { ascending: false }
+        {
+          ascending: false
+        }
       );
 
 
@@ -1051,172 +1255,66 @@ async function showMyOrders() {
       "❌ Orders load nahi ho rahe.";
 
     return;
+
   }
 
 
-  if (!data || data.length === 0) {
+  if (
+    !data ||
+    data.length === 0
+  ) {
 
     list.innerHTML =
       "📦 Aapka abhi koi order nahi hai.";
 
     return;
-  }
-
-
-  list.innerHTML = "";
-
-
-  data.forEach(order => {
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      "my-order";
-
-
-    let itemsText = "-";
-
-
-    try {
-
-      const items =
-        typeof order.items === "string"
-          ? JSON.parse(order.items)
-          : order.items;
-
-
-      if (Array.isArray(items)) {
-
-        itemsText =
-          items
-            .map(item =>
-              `${item.name || "Product"} × ${item.quantity || 1}`
-            )
-            .join(", ");
-
-      }
-
-    } catch (e) {}
-
-
-    div.innerHTML = `
-
-      <b>Order ID:</b>
-      ${escapeHTML(order.order_id || "-")}
-      <br>
-
-      <b>Total:</b>
-      ₹${Number(order.total || 0).toLocaleString("en-IN")}
-      <br>
-
-      <b>Items:</b>
-      ${escapeHTML(itemsText)}
-      <br>
-
-      <b>Status:</b>
-      <span class="order-status">
-        ${escapeHTML(order.status || "Pending")}
-      </span>
-      <br>
-
-      <b>Date:</b>
-      ${
-        order.created_at
-          ? new Date(order.created_at)
-              .toLocaleString("en-IN")
-          : "-"
-      }
-
-    `;
-
-    list.appendChild(div);
-
-  });
-
-}
-
-
-/* =========================
-   LOGOUT
-========================= */
-
-async function logout() {
-
-  await supabaseClient.auth.signOut();
-
-  localStorage.removeItem(
-    "safaria_cart"
-  );
-
-  cart = [];
-
-  updateCartCount();
-
-  window.location.reload();
-}
-
-
-/* =========================
-   SECURITY
-========================= */
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-
-/* =========================
-   START
-========================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  async () => {
-
-    /*
-      Hide admin immediately
-      before checking login.
-    */
-
-    const adminBtn =
-      document.getElementById("adminBtn");
-
-    adminBtn.hidden = true;
-    adminBtn.style.display = "none";
-
-
-    loadProducts();
-
-    updateCartCount();
-
-    await checkLogin();
 
   }
-);
 
 
-/* =========================
-   AUTH STATE
-========================= */
+  list.innerHTML =
+    "";
 
-supabaseClient.auth.onAuthStateChange(
-  () => {
 
-    setTimeout(() => {
-      checkLogin();
-    }, 0);
+  data.forEach(
+    order => {
 
-  }
-);
+      const div =
+        document.createElement(
+          "div"
+        );
 
-</script>
+      div.className =
+        "my-order";
 
-</body>
-</html>
+
+      let itemsText =
+        "-";
+
+
+      try {
+
+        const items =
+          typeof order.items === "string"
+            ? JSON.parse(order.items)
+            : order.items;
+
+
+        if (
+          Array.isArray(items)
+        ) {
+
+          itemsText =
+            items
+              .map(
+                item =>
+                  `${item.name || "Product"} × ${item.quantity || 1}`
+              )
+              .join(", ");
+
+        }
+
+      } catch (e) {}
+
+
+      div.innerHT
