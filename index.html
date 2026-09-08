@@ -1274,7 +1274,75 @@ async function showMyOrders() {
 
   list.innerHTML =
     "";
+      div.innerHTML = `
+        <b>Order ID:</b> ${escapeHTML(order.order_id || "-")}<br>
+        <b>Items:</b> ${escapeHTML(itemsText)}<br>
+        <b>Total:</b> ₹${Number(order.total || 0).toFixed(2)}<br>
+        <b>Status:</b>
+        <span class="order-status">
+          ${escapeHTML(order.status || "pending")}
+        </span>
+      `;
 
+      list.appendChild(div);
+
+    }
+  );
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout() {
+
+  await supabaseClient.auth.signOut();
+
+  window.location.href =
+    "auth.html";
+
+}
+
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHTML(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+/* =========================
+   START WEBSITE
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async function() {
+
+    updateCartCount();
+
+    await loadProducts();
+
+    await checkLogin();
+
+  }
+);
+
+</script>
+
+</body>
+</html>
 
   data.forEach(
     order => {
