@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -230,8 +230,7 @@
       margin-left: 8px;
     }
 
-    .empty,
-    .login-box {
+    .empty {
       background: white;
       padding: 30px;
       text-align: center;
@@ -244,6 +243,15 @@
       font-size: 14px;
     }
 
+    .info {
+      background: #f3f4f6;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      color: #555;
+      font-size: 14px;
+    }
+
     footer {
       background: #131921;
       color: white;
@@ -253,6 +261,7 @@
     }
 
     @media (max-width: 600px) {
+
       header {
         gap: 10px;
       }
@@ -269,6 +278,10 @@
       .total {
         font-size: 19px;
       }
+
+      .orders-button {
+        margin-left: 0;
+      }
     }
   </style>
 </head>
@@ -276,37 +289,28 @@
 <body>
 
 <header>
-  <div class="logo">SAFARIA</div>
+
+  <div class="logo">
+    SAFARIA
+  </div>
 
   <a href="index.html" class="back">
     ← Continue Shopping
   </a>
+
 </header>
 
 
 <div class="container">
 
-  <div id="loginRequired" style="display:none;">
-    <div class="login-box">
+  <!-- CHECKOUT -->
 
-      <h2>🔐 Login Required</h2>
-
-      <p style="margin-top:10px;color:#666;">
-        Order place karne ke liye pehle SAFARIA account mein login karein.
-      </p>
-
-      <a href="auth.html" class="home-button">
-        Login / Sign Up
-      </a>
-
-    </div>
-  </div>
-
-
-  <div id="checkoutPage" style="display:none;">
+  <div id="checkoutPage">
 
     <h1>🛒 Checkout</h1>
 
+
+    <!-- CART -->
 
     <div class="box">
 
@@ -315,19 +319,28 @@
       <div id="cartItems"></div>
 
       <div class="total">
+
         <span>Total</span>
 
         <span>
           ₹<span id="totalAmount">0</span>
         </span>
+
       </div>
 
     </div>
 
 
+    <!-- DELIVERY DETAILS -->
+
     <div class="box">
 
       <h2>📍 Delivery Details</h2>
+
+      <div id="loginInfo" class="info">
+        You can place an order without creating an account.
+      </div>
+
 
       <label for="customerName">
         Full Name
@@ -342,6 +355,19 @@
       >
 
 
+      <label for="customerEmail">
+        Email Address
+      </label>
+
+      <input
+        id="customerEmail"
+        type="email"
+        maxlength="150"
+        placeholder="Enter your email"
+        autocomplete="email"
+      >
+
+
       <label for="customerPhone">
         Phone Number
       </label>
@@ -351,11 +377,12 @@
         type="tel"
         maxlength="10"
         placeholder="10-digit mobile number"
+        inputmode="numeric"
         autocomplete="tel"
       >
 
 
-      <label>
+      <label for="shippingAddress">
         Delivery Address
       </label>
 
@@ -408,6 +435,8 @@
     </div>
 
 
+    <!-- PAYMENT -->
+
     <div class="box">
 
       <h2>💳 Payment Method</h2>
@@ -444,7 +473,9 @@
 
       <div id="upiBox" class="upi-box">
 
-        <strong>📱 Pay using UPI</strong>
+        <strong>
+          📱 Pay using UPI
+        </strong>
 
         <p style="margin-top:8px;color:#555;">
           UPI app se payment karne ke baad
@@ -474,12 +505,18 @@
         🛍️ Place Order
       </button>
 
-      <div id="errorMessage" class="error"></div>
+
+      <div
+        id="errorMessage"
+        class="error"
+      ></div>
 
     </div>
 
   </div>
 
+
+  <!-- SUCCESS -->
 
   <div
     id="successPage"
@@ -488,22 +525,34 @@
 
     <div class="success">
 
-      <h2>🎉 Order Placed Successfully!</h2>
+      <h2>
+        🎉 Order Placed Successfully!
+      </h2>
 
       <p style="margin-top:10px;">
         Thank you for shopping with SAFARIA.
       </p>
 
       <div class="order-id">
+
         Order ID:
         <span id="successOrderId"></span>
+
       </div>
 
-      <a href="index.html" class="home-button">
+
+      <a
+        href="index.html"
+        class="home-button"
+      >
         🏠 Back to Store
       </a>
 
-      <a href="my-orders.html" class="orders-button">
+
+      <a
+        href="my-orders.html"
+        class="orders-button"
+      >
         📦 My Orders
       </a>
 
@@ -515,18 +564,25 @@
 
 
 <footer>
+
   <h2>SAFARIA</h2>
+
   <p>India's Shopping Store</p>
+
 </footer>
 
 
 <script>
 
+/* =========================
+   SUPABASE
+========================= */
+
 const SUPABASE_URL =
   "https://dcwdzbejpwvskajukxrh.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+  "sb_publishable_1IsM8N7-OEcBJYIH5HnsFw_cl6F5oPU";
 
 const supabaseClient =
   window.supabase.createClient(
@@ -535,52 +591,133 @@ const supabaseClient =
   );
 
 
+/* =========================
+   SAFARIA UPI
+========================= */
+
 const SAFARIA_UPI =
   "7484014866-2@ybl";
 
 
+/* =========================
+   CART
+========================= */
+
 let cart =
   JSON.parse(
-    localStorage.getItem("safaria_cart") || "[]"
+    localStorage.getItem(
+      "safaria_cart"
+    ) || "[]"
   );
 
 
 let totalAmount = 0;
 
 
+/* =========================
+   CURRENT SESSION
+========================= */
+
+let currentSession = null;
+
+
+/* =========================
+   CHECK LOGIN
+========================= */
+
 async function checkLogin() {
 
-  const {
-    data: { session },
-    error
-  } =
-    await supabaseClient.auth.getSession();
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth.getSession();
 
 
-  if (error || !session) {
+    if (error) {
 
-    document.getElementById(
-      "loginRequired"
-    ).style.display = "block";
+      console.error(
+        "Session error:",
+        error
+      );
 
-    return false;
+      return null;
+    }
+
+
+    currentSession =
+      data.session || null;
+
+
+    if (
+      currentSession &&
+      currentSession.user
+    ) {
+
+      const email =
+        currentSession.user.email || "";
+
+
+      document.getElementById(
+        "customerEmail"
+      ).value = email;
+
+
+      const name =
+        currentSession.user.user_metadata?.full_name ||
+        currentSession.user.user_metadata?.name ||
+        "";
+
+
+      if (name) {
+
+        document.getElementById(
+          "customerName"
+        ).value = name;
+
+      }
+
+
+      document.getElementById(
+        "loginInfo"
+      ).textContent =
+        "✅ You are logged in. Your order will be linked to your account.";
+
+    } else {
+
+      document.getElementById(
+        "loginInfo"
+      ).textContent =
+        "🛍️ Guest checkout is available. Login is not required.";
+
+    }
+
+
+    return currentSession;
+
+  } catch (error) {
+
+    console.error(error);
+
+    return null;
 
   }
-
-
-  document.getElementById(
-    "checkoutPage"
-  ).style.display = "block";
-
-  return true;
 
 }
 
 
+/* =========================
+   LOAD CART
+========================= */
+
 function loadCart() {
 
   const container =
-    document.getElementById("cartItems");
+    document.getElementById(
+      "cartItems"
+    );
 
 
   if (!cart.length) {
@@ -589,15 +726,21 @@ function loadCart() {
       <div class="empty">
         🛒 Your cart is empty.
         <br><br>
-        <a href="index.html" class="home-button">
+
+        <a
+          href="index.html"
+          class="home-button"
+        >
           Start Shopping
         </a>
       </div>
     `;
 
+
     document.getElementById(
       "placeOrderButton"
     ).disabled = true;
+
 
     return;
 
@@ -614,25 +757,37 @@ function loadCart() {
     const quantity =
       Math.max(
         1,
-        Number(item.quantity || 1)
+        Number(
+          item.quantity || 1
+        )
       );
+
 
     const price =
       Math.max(
         0,
-        Number(item.price || 0)
+        Number(
+          item.price || 0
+        )
       );
+
 
     const itemTotal =
       price * quantity;
 
-    totalAmount += itemTotal;
+
+    totalAmount +=
+      itemTotal;
 
 
     const div =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
-    div.className = "item";
+
+    div.className =
+      "item";
 
 
     const image =
@@ -651,7 +806,9 @@ function loadCart() {
       <div class="item-info">
 
         <div class="item-name">
-          ${escapeHTML(item.name || "Product")}
+          ${escapeHTML(
+            item.name || "Product"
+          )}
         </div>
 
         <div class="quantity">
@@ -667,7 +824,9 @@ function loadCart() {
     `;
 
 
-    container.appendChild(div);
+    container.appendChild(
+      div
+    );
 
   });
 
@@ -675,10 +834,16 @@ function loadCart() {
   document.getElementById(
     "totalAmount"
   ).textContent =
-    totalAmount.toLocaleString("en-IN");
+    totalAmount.toLocaleString(
+      "en-IN"
+    );
 
 }
 
+
+/* =========================
+   PAYMENT CHANGE
+========================= */
 
 function changePayment() {
 
@@ -689,7 +854,9 @@ function changePayment() {
 
 
   const upiBox =
-    document.getElementById("upiBox");
+    document.getElementById(
+      "upiBox"
+    );
 
 
   const placeButton =
@@ -698,16 +865,22 @@ function changePayment() {
     );
 
 
-  if (payment === "UPI") {
+  if (
+    payment === "UPI"
+  ) {
 
-    upiBox.style.display = "block";
+    upiBox.style.display =
+      "block";
+
 
     placeButton.textContent =
       "✅ I Have Paid - Place Order";
 
   } else {
 
-    upiBox.style.display = "none";
+    upiBox.style.display =
+      "none";
+
 
     placeButton.textContent =
       "🛍️ Place Order";
@@ -717,11 +890,19 @@ function changePayment() {
 }
 
 
+/* =========================
+   UPI PAYMENT
+========================= */
+
 function payWithUPI() {
 
-  if (totalAmount <= 0) {
+  if (
+    totalAmount <= 0
+  ) {
 
-    alert("Invalid order amount.");
+    alert(
+      "Invalid order amount."
+    );
 
     return;
 
@@ -731,9 +912,13 @@ function payWithUPI() {
   const upiURL =
     "upi://pay" +
     "?pa=" +
-    encodeURIComponent(SAFARIA_UPI) +
+    encodeURIComponent(
+      SAFARIA_UPI
+    ) +
     "&pn=" +
-    encodeURIComponent("SAFARIA Order") +
+    encodeURIComponent(
+      "SAFARIA Order"
+    ) +
     "&am=" +
     encodeURIComponent(
       totalAmount.toFixed(2)
@@ -745,10 +930,15 @@ function payWithUPI() {
     );
 
 
-  window.location.href = upiURL;
+  window.location.href =
+    upiURL;
 
 }
 
+
+/* =========================
+   PLACE ORDER
+========================= */
 
 async function placeOrder() {
 
@@ -757,7 +947,9 @@ async function placeOrder() {
       "errorMessage"
     );
 
-  errorBox.textContent = "";
+
+  errorBox.textContent =
+    "";
 
 
   if (!cart.length) {
@@ -770,34 +962,63 @@ async function placeOrder() {
   }
 
 
-  const {
-    data: { session },
-    error: sessionError
-  } =
-    await supabaseClient.auth.getSession();
-
-
   if (
-    sessionError ||
-    !session ||
-    !session.user
+    totalAmount <= 0
   ) {
 
-    alert(
-      "Login required. Please login first."
-    );
-
-    window.location.href =
-      "auth.html";
+    errorBox.textContent =
+      "Invalid order amount.";
 
     return;
 
   }
 
 
+  /* =========================
+     GET CURRENT SESSION
+  ========================= */
+
+  const {
+    data,
+    error:
+      sessionError
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (
+    sessionError
+  ) {
+
+    console.error(
+      sessionError
+    );
+
+    errorBox.textContent =
+      "Unable to check login status.";
+
+    return;
+
+  }
+
+
+  currentSession =
+    data.session || null;
+
+
+  /* =========================
+     CUSTOMER DETAILS
+  ========================= */
+
   const name =
     document.getElementById(
       "customerName"
+    ).value.trim();
+
+
+  const email =
+    document.getElementById(
+      "customerEmail"
     ).value.trim();
 
 
@@ -831,6 +1052,10 @@ async function placeOrder() {
     )?.value || "COD";
 
 
+  /* =========================
+     VALIDATION
+  ========================= */
+
   if (!name) {
 
     errorBox.textContent =
@@ -841,7 +1066,25 @@ async function placeOrder() {
   }
 
 
-  if (!/^[0-9]{10}$/.test(phone)) {
+  if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+      email
+    )
+  ) {
+
+    errorBox.textContent =
+      "Please enter a valid email address.";
+
+    return;
+
+  }
+
+
+  if (
+    !/^[0-9]{10}$/.test(
+      phone
+    )
+  ) {
 
     errorBox.textContent =
       "Please enter a valid 10-digit phone number.";
@@ -871,7 +1114,11 @@ async function placeOrder() {
   }
 
 
-  if (!/^[0-9]{6}$/.test(pincode)) {
+  if (
+    !/^[0-9]{6}$/.test(
+      pincode
+    )
+  ) {
 
     errorBox.textContent =
       "Please enter a valid 6-digit PIN code.";
@@ -881,22 +1128,19 @@ async function placeOrder() {
   }
 
 
-  if (totalAmount <= 0) {
+  /* =========================
+     UPI CONFIRMATION
+  ========================= */
 
-    errorBox.textContent =
-      "Invalid order amount.";
-
-    return;
-
-  }
-
-
-  if (payment === "UPI") {
+  if (
+    payment === "UPI"
+  ) {
 
     const paid =
       confirm(
         "UPI payment karne ke baad OK dabakar order place karein."
       );
+
 
     if (!paid) {
 
@@ -907,153 +1151,235 @@ async function placeOrder() {
   }
 
 
+  /* =========================
+     BUTTON
+  ========================= */
+
   const button =
     document.getElementById(
       "placeOrderButton"
     );
 
 
-  button.disabled = true;
+  button.disabled =
+    true;
+
 
   button.textContent =
     "Placing Order...";
 
 
-  /*
-    Important:
-    user_id database mein current
-    authenticated user ke ID se save hoga.
-  */
+  /* =========================
+     SHIPPING ADDRESS
+     
+     Database mein sirf
+     shipping_address column hai.
+  ========================= */
+
+  const completeAddress =
+    address +
+    ", " +
+    city +
+    " - " +
+    pincode;
+
+
+  /* =========================
+     ORDER ID
+  ========================= */
+
+  const generatedOrderId =
+    "SAF-" +
+    Date.now() +
+    "-" +
+    Math.floor(
+      1000 +
+      Math.random() * 9000
+    );
+
+
+  /* =========================
+     ORDER DATA
+     
+     IMPORTANT:
+     Ye fields tumhari actual
+     orders table ke according hain.
+  ========================= */
 
   const orderData = {
 
-    user_id:
-      session.user.id,
+    order_id:
+      generatedOrderId,
 
     customer_name:
       name,
 
-    phone:
+    customer_email:
+      email,
+
+    customer_phone:
       phone,
 
-    address:
-      address,
-
-    city:
-      city,
-
-    pincode:
-      pincode,
+    shipping_address:
+      completeAddress,
 
     items:
       cart,
 
     total:
-      totalAmount,
-
-    payment_method:
-      payment,
+      Number(
+        totalAmount.toFixed(2)
+      ),
 
     status:
-      "pending"
+      "pending",
+
+    payment_method:
+      payment
 
   };
 
 
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("orders")
-      .insert(orderData)
-      .select()
-      .single();
+  /*
+    Logged-in customer:
+    user_id = current user's UUID
+
+    Guest customer:
+    user_id = NULL
+
+    RLS dono cases ko allow karta hai.
+  */
+
+  if (
+    currentSession &&
+    currentSession.user
+  ) {
+
+    orderData.user_id =
+      currentSession.user.id;
+
+  } else {
+
+    orderData.user_id =
+      null;
+
+  }
 
 
-  if (error) {
+  /* =========================
+     INSERT ORDER
+  ========================= */
+
+  try {
+
+    const {
+      data:
+        insertedOrder,
+      error
+    } =
+      await supabaseClient
+        .from("orders")
+        .insert([
+          orderData
+        ])
+        .select(
+          "id, order_id"
+        )
+        .single();
+
+
+    if (error) {
+
+      console.error(
+        "Order insert error:",
+        error
+      );
+
+      throw error;
+
+    }
+
+
+    /* =========================
+       SUCCESS
+    ========================= */
+
+    localStorage.removeItem(
+      "safaria_cart"
+    );
+
+
+    cart = [];
+
+
+    document.getElementById(
+      "successOrderId"
+    ).textContent =
+      insertedOrder?.order_id ||
+      generatedOrderId;
+
+
+    document.getElementById(
+      "checkoutPage"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "successPage"
+    ).style.display =
+      "block";
+
+
+  } catch (error) {
 
     console.error(
       "Order error:",
       error
     );
 
+
     errorBox.textContent =
       "Order place nahi hua: " +
-      error.message;
+      (
+        error.message ||
+        "Unknown error"
+      );
 
-    button.disabled = false;
+
+    button.disabled =
+      false;
+
 
     button.textContent =
       payment === "UPI"
         ? "✅ I Have Paid - Place Order"
         : "🛍️ Place Order";
 
-    return;
-
   }
-
-
-  localStorage.removeItem(
-    "safaria_cart"
-  );
-
-  cart = [];
-
-
-  document.getElementById(
-    "successOrderId"
-  ).textContent =
-    data.id;
-
-
-  document.getElementById(
-    "checkoutPage"
-  ).style.display =
-    "none";
-
-
-  document.getElementById(
-    "successPage"
-  ).style.display =
-    "block";
 
 }
 
+
+/* =========================
+   ESCAPE HTML
+========================= */
 
 function escapeHTML(value) {
 
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
-
-async function init() {
-
-  const loggedIn =
-    await checkLogin();
-
-
-  if (loggedIn) {
-
-    loadCart();
-
-  }
-
-}
-
-
-document.addEventListener(
-  "DOMContentLoaded",
-  init
-);
-
-</script>
-
-</body>
-</html>
+  return String(
+    value ?? ""
+  )
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+  
