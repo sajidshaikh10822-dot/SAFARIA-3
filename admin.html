@@ -312,6 +312,18 @@
       margin-bottom: 5px;
     }
 
+    .order-card-mobile {
+      border: 1px solid #e5e7eb;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+    }
+
+    .order-card-mobile strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
     @media (max-width: 900px) {
       .stats {
         grid-template-columns: repeat(2, 1fr);
@@ -350,31 +362,71 @@
       .section {
         padding: 16px;
       }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .stat-card {
+        padding: 15px;
+      }
+
+      .stat-card p {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <!-- AUTH SCREEN -->
+  <!-- =========================
+       AUTH SCREEN
+  ========================== -->
+
   <div id="authScreen" class="auth-screen">
+
     <div class="auth-box">
+
       <h1>SAFARIA Admin</h1>
-      <p id="authMessage">Checking administrator access...</p>
+
+      <p id="authMessage">
+        Checking administrator access...
+      </p>
+
     </div>
+
   </div>
 
-  <!-- ADMIN CONTENT -->
+
+  <!-- =========================
+       ADMIN CONTENT
+  ========================== -->
+
   <div id="adminContent">
 
     <header>
+
       <h1>🛍️ SAFARIA Admin Panel</h1>
-      <button class="logout-btn" onclick="logout()">Logout</button>
+
+      <button
+        class="logout-btn"
+        onclick="logout()"
+      >
+        Logout
+      </button>
+
     </header>
+
 
     <main class="container">
 
-      <!-- STATS -->
+
+      <!-- =========================
+           STATS
+      ========================== -->
+
       <div class="stats">
 
         <div class="stat-card">
@@ -399,52 +451,129 @@
 
       </div>
 
-      <!-- ADD PRODUCT -->
+
+      <!-- =========================
+           ADD / EDIT PRODUCT
+      ========================== -->
+
       <section class="section">
 
-        <h2 id="formTitle">➕ Add Product</h2>
+        <h2 id="formTitle">
+          ➕ Add Product
+        </h2>
 
-        <div id="productMessage" class="message"></div>
+        <div
+          id="productMessage"
+          class="message"
+        ></div>
+
 
         <div class="form-grid">
 
           <div class="form-group">
-            <label>Product Name</label>
-            <input id="productName" type="text" placeholder="Enter product name">
+
+            <label>
+              Product Name
+            </label>
+
+            <input
+              id="productName"
+              type="text"
+              placeholder="Enter product name"
+            >
+
           </div>
 
-          <div class="form-group">
-            <label>Category</label>
-            <input id="productCategory" type="text" placeholder="e.g. Electronics">
-          </div>
 
           <div class="form-group">
-            <label>Price (₹)</label>
-            <input id="productPrice" type="number" min="0" step="0.01" placeholder="Enter price">
+
+            <label>
+              Category
+            </label>
+
+            <input
+              id="productCategory"
+              type="text"
+              placeholder="e.g. Electronics"
+            >
+
           </div>
 
+
           <div class="form-group">
-            <label>Stock</label>
-            <input id="productStock" type="number" min="0" step="1" placeholder="Enter stock">
+
+            <label>
+              Price (₹)
+            </label>
+
+            <input
+              id="productPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Enter price"
+            >
+
           </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Stock
+            </label>
+
+            <input
+              id="productStock"
+              type="number"
+              min="0"
+              step="1"
+              placeholder="Enter stock"
+            >
+
+          </div>
+
 
           <div class="form-group full">
-            <label>Image URL</label>
-            <input id="productImage" type="url" placeholder="https://example.com/image.jpg">
+
+            <label>
+              Image URL
+            </label>
+
+            <input
+              id="productImage"
+              type="url"
+              placeholder="https://example.com/image.jpg"
+            >
+
           </div>
 
+
           <div class="form-group full">
-            <label>Description</label>
-            <textarea id="productDescription" placeholder="Enter product description"></textarea>
+
+            <label>
+              Description
+            </label>
+
+            <textarea
+              id="productDescription"
+              placeholder="Enter product description"
+            ></textarea>
+
           </div>
 
         </div>
 
+
         <div class="buttons">
 
-          <button class="primary" onclick="saveProduct()">
+          <button
+            class="primary"
+            onclick="saveProduct()"
+          >
             💾 Save Product
           </button>
+
 
           <button
             id="cancelEditBtn"
@@ -455,7 +584,11 @@
             Cancel Edit
           </button>
 
-          <button class="secondary" onclick="clearForm()">
+
+          <button
+            class="secondary"
+            onclick="clearForm()"
+          >
             Clear
           </button>
 
@@ -463,438 +596,602 @@
 
       </section>
 
-      <!-- PRODUCTS -->
+
+      <!-- =========================
+           PRODUCTS
+      ========================== -->
+
       <section class="section">
 
-        <h2>📦 Products</h2>
+        <h2>
+          📦 Products
+        </h2>
 
         <div id="productsContainer">
-          <div class="loading">Loading products...</div>
-        </div>
 
-      </section>
-
-      <!-- ORDERS -->
-      <section class="section">
-
-        <h2>🧾 Customer Orders</h2>
-
-        <div id="ordersMessage" class="message"></div>
-
-        <div class="orders-wrapper">
-
-          <div id="ordersContainer">
-            <div class="loading">Loading orders...</div>
+          <div class="loading">
+            Loading products...
           </div>
 
         </div>
 
       </section>
 
+
+      <!-- =========================
+           ORDERS
+      ========================== -->
+
+      <section class="section">
+
+        <h2>
+          🧾 Customer Orders
+        </h2>
+
+        <div
+          id="ordersMessage"
+          class="message"
+        ></div>
+
+
+        <div class="orders-wrapper">
+
+          <div id="ordersContainer">
+
+            <div class="loading">
+              Loading orders...
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
     </main>
 
   </div>
 
+
 <script>
 
-  /* =========================================
-     SUPABASE
-  ========================================= */
+/* =========================================
+   SUPABASE CONFIGURATION
+========================================= */
 
-  const SUPABASE_URL =
-    "https://dcwdzbejpwvskajukxrh.supabase.co";
+const SUPABASE_URL =
+  "https://dcwdzbejpwvskajukxrh.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+const SUPABASE_KEY =
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
 
-  const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* =========================================
+   ADMIN CONFIGURATION
+========================================= */
+
+const ADMIN_EMAIL =
+  "sajidshaikh10822@gmail.com";
+
+let adminVerified = false;
+let editingProductId = null;
+let redirecting = false;
+
+
+/* =========================================
+   START ADMIN PANEL
+========================================= */
+
+window.addEventListener(
+  "load",
+  function() {
+
+    checkAdminAccess();
+
+  }
+);
+
+
+/* =========================================
+   CHECK ADMIN ACCESS
+========================================= */
+
+async function checkAdminAccess() {
+
+  const message =
+    document.getElementById(
+      "authMessage"
+    );
+
+  try {
+
+    message.textContent =
+      "Checking administrator access...";
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const session =
+      data.session;
+
+
+    /* No login */
+
+    if (
+      !session ||
+      !session.user
+    ) {
+
+      message.textContent =
+        "❌ Please login as administrator.";
+
+      setTimeout(
+        function() {
+
+          redirectToLogin();
+
+        },
+        800
+      );
+
+      return;
+    }
+
+
+    /* Get logged-in email */
+
+    const email =
+      String(
+        session.user.email || ""
+      )
+      .trim()
+      .toLowerCase();
+
+
+    /* Check admin email */
+
+    if (
+      email !==
+      ADMIN_EMAIL.toLowerCase()
+    ) {
+
+      message.textContent =
+        "❌ Access denied. Admin account required.";
+
+      await supabaseClient
+        .auth
+        .signOut();
+
+
+      setTimeout(
+        function() {
+
+          redirectToLogin();
+
+        },
+        1000
+      );
+
+      return;
+    }
+
+
+    /* Admin verified */
+
+    adminVerified = true;
+
+
+    document.getElementById(
+      "authScreen"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "adminContent"
+    ).style.display =
+      "block";
+
+
+    /* Load dashboard */
+
+    await loadProducts();
+
+    await loadOrders();
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Admin authentication error:",
+      error
     );
 
 
-  /* =========================================
-     ADMIN
-  ========================================= */
-
-  const ADMIN_EMAIL =
-    "sajidshaikh10822@gmail.com";
-
-  let adminVerified = false;
-  let editingProductId = null;
-  let redirecting = false;
-
-
-  /* =========================================
-     START
-  ========================================= */
-
-  window.addEventListener("load", function() {
-    checkAdminAccess();
-  });
-
-
-  /* =========================================
-     AUTH CHECK
-  ========================================= */
-
-  async function checkAdminAccess() {
-
-    const message =
-      document.getElementById("authMessage");
-
-    try {
-
-      message.textContent =
-        "Checking administrator access...";
-
-      const {
-        data,
-        error
-      } = await supabaseClient.auth.getSession();
-
-      if (error) {
-        throw error;
-      }
-
-      const session = data.session;
-
-      if (!session || !session.user) {
-
-        message.textContent =
-          "❌ Please login as administrator.";
-
-        setTimeout(function() {
-          redirectToLogin();
-        }, 500);
-
-        return;
-      }
-
-      const email =
-        String(session.user.email || "")
-          .trim()
-          .toLowerCase();
-
-      if (
-        email !==
-        ADMIN_EMAIL.toLowerCase()
-      ) {
-
-        message.textContent =
-          "❌ Access denied. Admin account required.";
-
-        await supabaseClient.auth.signOut();
-
-        setTimeout(function() {
-          redirectToLogin();
-        }, 500);
-
-        return;
-      }
-
-      adminVerified = true;
-
-      document.getElementById(
-        "authScreen"
-      ).style.display = "none";
-
-      document.getElementById(
-        "adminContent"
-      ).style.display = "block";
-
-      await loadProducts();
-      await loadOrders();
-
-    } catch (error) {
-
-      console.error(
-        "Admin authentication error:",
-        error
+    message.innerHTML =
+      "❌ Authentication error.<br><br>" +
+      escapeHtml(
+        error.message ||
+        "Unable to verify administrator."
       );
 
-      message.innerHTML =
-        "❌ Authentication error.<br><br>" +
-        escapeHtml(
-          error.message ||
-          "Unable to verify administrator."
-        );
-
-      /*
-        Do not immediately redirect.
-        This lets us see the actual Supabase error.
-      */
-
-    }
-
   }
 
+}
 
-  /* =========================================
-     LOGIN REDIRECT
-  ========================================= */
 
-  function redirectToLogin() {
+/* =========================================
+   LOGIN REDIRECT
+========================================= */
 
-    if (redirecting) return;
+function redirectToLogin() {
 
-    redirecting = true;
-
-    const loginUrl =
-      new URL(
-        "auth.html",
-        window.location.href
-      ).href;
-
-    window.location.href =
-      loginUrl;
+  if (redirecting) {
+    return;
   }
 
+  redirecting = true;
 
-  /* =========================================
-     AUTH LISTENER
-  ========================================= */
 
-  supabaseClient.auth.onAuthStateChange(
-    function(event, session) {
+  const loginUrl =
+    new URL(
+      "auth.html",
+      window.location.href
+    ).href;
 
-      if (event === "SIGNED_OUT") {
 
-        adminVerified = false;
+  window.location.href =
+    loginUrl;
+
+}
+
+
+/* =========================================
+   AUTH STATE LISTENER
+========================================= */
+
+supabaseClient
+  .auth
+  .onAuthStateChange(
+    function(
+      event,
+      session
+    ) {
+
+      if (
+        event ===
+        "SIGNED_OUT"
+      ) {
+
+        adminVerified =
+          false;
+
 
         if (
           !window.location.pathname
             .toLowerCase()
-            .endsWith("auth.html")
+            .endsWith(
+              "auth.html"
+            )
         ) {
+
           redirectToLogin();
+
         }
+
       }
 
     }
   );
 
 
-  /* =========================================
-     LOGOUT
-  ========================================= */
+/* =========================================
+   LOGOUT
+========================================= */
 
-  async function logout() {
+async function logout() {
 
-    try {
+  try {
 
-      await supabaseClient.auth.signOut();
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
+    await supabaseClient
+      .auth
+      .signOut();
 
   }
 
+  catch (error) {
 
-  /* =========================================
-     FORM DATA
-  ========================================= */
+    console.error(error);
 
-  function getProductFormData() {
+    alert(
+      error.message ||
+      "Logout failed."
+    );
 
-    return {
+  }
 
-      name:
-        document.getElementById(
+}
+
+
+/* =========================================
+   GET FORM DATA
+========================================= */
+
+function getProductFormData() {
+
+  return {
+
+    name:
+      document
+        .getElementById(
           "productName"
-        ).value.trim(),
-
-      description:
-        document.getElementById(
-          "productDescription"
-        ).value.trim(),
-
-      price:
-        Number(
-          document.getElementById(
-            "productPrice"
-          ).value
-        ),
-
-      image:
-        document.getElementById(
-          "productImage"
-        ).value.trim(),
-
-      category:
-        document.getElementById(
-          "productCategory"
-        ).value.trim(),
-
-      stock:
-        Number(
-          document.getElementById(
-            "productStock"
-          ).value
         )
+        .value
+        .trim(),
 
-    };
+    description:
+      document
+        .getElementById(
+          "productDescription"
+        )
+        .value
+        .trim(),
 
+    price:
+      Number(
+        document
+          .getElementById(
+            "productPrice"
+          )
+          .value
+      ),
+
+    image:
+      document
+        .getElementById(
+          "productImage"
+        )
+        .value
+        .trim(),
+
+    category:
+      document
+        .getElementById(
+          "productCategory"
+        )
+        .value
+        .trim(),
+
+    stock:
+      Number(
+        document
+          .getElementById(
+            "productStock"
+          )
+          .value
+      )
+
+  };
+
+}
+
+
+/* =========================================
+   SAVE PRODUCT
+========================================= */
+
+async function saveProduct() {
+
+  if (!adminVerified) {
+
+    alert(
+      "Admin access required."
+    );
+
+    return;
   }
 
 
-  /* =========================================
-     SAVE PRODUCT
-  ========================================= */
+  const data =
+    getProductFormData();
 
-  async function saveProduct() {
 
-    if (!adminVerified) {
+  if (!data.name) {
 
-      alert("Admin access required.");
-      return;
+    alert(
+      "Please enter product name."
+    );
 
-    }
-
-    const data =
-      getProductFormData();
-
-    if (!data.name) {
-
-      alert("Please enter product name.");
-      return;
-
-    }
-
-    if (
-      Number.isNaN(data.price) ||
-      data.price < 0
-    ) {
-
-      alert("Please enter a valid price.");
-      return;
-
-    }
-
-    if (
-      Number.isNaN(data.stock) ||
-      data.stock < 0
-    ) {
-
-      alert("Please enter a valid stock.");
-      return;
-
-    }
-
-    try {
-
-      let result;
-
-      if (editingProductId !== null) {
-
-        result =
-          await supabaseClient
-            .from("products")
-            .update(data)
-            .eq(
-              "id",
-              editingProductId
-            );
-
-      } else {
-
-        result =
-          await supabaseClient
-            .from("products")
-            .insert([data]);
-
-      }
-
-      if (result.error) {
-        throw result.error;
-      }
-
-      showProductMessage(
-        editingProductId !== null
-          ? "✅ Product updated successfully."
-          : "✅ Product added successfully.",
-        true
-      );
-
-      clearForm();
-
-      await loadProducts();
-
-    } catch (error) {
-
-      console.error(error);
-
-      showProductMessage(
-        "❌ " +
-        (
-          error.message ||
-          "Failed to save product."
-        ),
-        false
-      );
-
-    }
-
+    return;
   }
 
 
-  /* =========================================
-     LOAD PRODUCTS
-  ========================================= */
+  if (
+    Number.isNaN(data.price) ||
+    data.price < 0
+  ) {
 
-  async function loadProducts() {
+    alert(
+      "Please enter a valid price."
+    );
 
-    const container =
-      document.getElementById(
-        "productsContainer"
-      );
+    return;
+  }
 
-    container.innerHTML =
-      '<div class="loading">Loading products...</div>';
 
-    try {
+  if (
+    Number.isNaN(data.stock) ||
+    data.stock < 0
+  ) {
 
-      const {
-        data,
-        error
-      } =
+    alert(
+      "Please enter a valid stock."
+    );
+
+    return;
+  }
+
+
+  try {
+
+    let result;
+
+
+    /* EDIT */
+
+    if (
+      editingProductId !== null
+    ) {
+
+      result =
         await supabaseClient
           .from("products")
-          .select("*")
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
+          .update(data)
+          .eq(
+            "id",
+            editingProductId
           );
 
-      if (error) {
-        throw error;
-      }
+    }
 
-      const products =
-        data || [];
+    /* ADD */
 
-      if (!products.length) {
+    else {
 
-        container.innerHTML =
-          '<div class="empty">No products found.</div>';
+      result =
+        await supabaseClient
+          .from("products")
+          .insert([
+            data
+          ]);
 
-        return;
-      }
+    }
 
-      let html =
-        '<div class="products-grid">';
 
-      products.forEach(function(product) {
+    if (result.error) {
+      throw result.error;
+    }
+
+
+    showProductMessage(
+      editingProductId !== null
+        ? "✅ Product updated successfully."
+        : "✅ Product added successfully.",
+      true
+    );
+
+
+    clearForm();
+
+
+    await loadProducts();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+
+    showProductMessage(
+      "❌ " +
+      (
+        error.message ||
+        "Failed to save product."
+      ),
+      false
+    );
+
+  }
+
+}
+
+
+/* =========================================
+   LOAD PRODUCTS
+========================================= */
+
+async function loadProducts() {
+
+  const container =
+    document.getElementById(
+      "productsContainer"
+    );
+
+
+  container.innerHTML =
+    '<div class="loading">Loading products...</div>';
+
+
+  try {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("products")
+        .select("*")
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (error) {
+      throw error;
+    }
+
+
+    const products =
+      data || [];
+
+
+    if (
+      !products.length
+    ) {
+
+      container.innerHTML =
+        '<div class="empty">No products found.</div>';
+
+      return;
+    }
+
+
+    let html =
+      '<div class="products-grid">';
+
+
+    products.forEach(
+      function(product) {
+
 
         const image =
           product.image ||
           "https://via.placeholder.com/500x350?text=SAFARIA";
+
 
         html += `
 
@@ -902,7 +1199,10 @@
 
             <img
               src="${escapeHtml(image)}"
-              alt="${escapeHtml(product.name || "Product")}"
+              alt="${escapeHtml(
+                product.name ||
+                "Product"
+              )}"
               onerror="this.src='https://via.placeholder.com/500x350?text=SAFARIA'"
             >
 
@@ -925,11 +1225,15 @@
 
               <p>
                 Stock:
-                ${Number(product.stock || 0)}
+                ${Number(
+                  product.stock || 0
+                )}
               </p>
 
               <div class="product-price">
-                ₹${formatMoney(product.price)}
+                ₹${formatMoney(
+                  product.price
+                )}
               </div>
 
               <p>
@@ -943,14 +1247,18 @@
 
                 <button
                   class="warning"
-                  onclick="editProduct('${String(product.id)}')"
+                  onclick="editProduct('${escapeJs(
+                    String(product.id)
+                  )}')"
                 >
                   Edit
                 </button>
 
                 <button
                   class="danger"
-                  onclick="deleteProduct('${String(product.id)}')"
+                  onclick="deleteProduct('${escapeJs(
+                    String(product.id)
+                  )}')"
                 >
                   Delete
                 </button>
@@ -963,140 +1271,17 @@
 
         `;
 
-      });
-
-      html += "</div>";
-
-      container.innerHTML =
-        html;
-
-    } catch (error) {
-
-      console.error(error);
-
-      container.innerHTML = `
-        <div class="empty">
-          ❌ Failed to load products.<br><br>
-          ${escapeHtml(
-            error.message ||
-            "Unknown error"
-          )}
-        </div>
-      `;
-
-    }
-
-  }
-
-
-  /* =========================================
-     EDIT PRODUCT
-  ========================================= */
-
-  async function editProduct(id) {
-
-    if (!adminVerified) return;
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-          .from("products")
-          .select("*")
-          .eq("id", id)
-          .single();
-
-      if (error) {
-        throw error;
       }
+    );
 
-      const product =
-        data;
 
-      editingProductId =
-        product.id;
+    html +=
+      "</div>";
 
-      document.getElementById(
-        "productName"
-      ).value =
-        product.name || "";
 
-      document.getElementById(
-        "productDescription"
-      ).value =
-        product.description || "";
-
-      document.getElementById(
-        "productPrice"
-      ).value =
-        product.price ?? "";
-
-      document.getElementById(
-        "productImage"
-      ).value =
-        product.image || "";
-
-      document.getElementById(
-        "productCategory"
-      ).value =
-        product.category || "";
-
-      document.getElementById(
-        "productStock"
-      ).value =
-        product.stock ?? "";
-
-      document.getElementById(
-        "formTitle"
-      ).textContent =
-        "✏️ Edit Product";
-
-      document.getElementById(
-        "cancelEditBtn"
-      ).style.display =
-        "inline-block";
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "Failed to load product: " +
-        (
-          error.message ||
-          "Unknown error"
-        )
-      );
-
-    }
+    container.innerHTML =
+      html;
 
   }
 
-
-  /* =========================================
-     DELETE PRODUCT
-  ========================================= */
-
-  async function deleteProduct(id) {
-
-    if (!adminVerified) return;
-
-    const confirmed =
-      confirm(
-        "Are you sure you want to delete this product?"
-      );
-
-    if (!confirmed) return;
-
-    try {
-
-      const {
-        erro
+  catch (err
