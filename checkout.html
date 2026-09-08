@@ -130,6 +130,41 @@
       cursor: not-allowed;
     }
 
+    .upi-box {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f1f7ff;
+      border: 1px solid #c9ddf5;
+    }
+
+    .upi-title {
+      font-size: 19px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .upi-id {
+      font-weight: bold;
+      color: #222;
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      word-break: break-all;
+    }
+
+    .pay-button {
+      background: #16a34a;
+      color: white;
+    }
+
+    .paid-button {
+      background: #2563eb;
+      color: white;
+    }
+
     .empty {
       text-align: center;
       padding: 40px 10px;
@@ -161,6 +196,13 @@
       display: none;
     }
 
+    .note {
+      margin-top: 10px;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
     @media (max-width: 600px) {
       .cart-item img {
         width: 65px;
@@ -188,7 +230,10 @@
 
   <div id="checkoutPage">
 
+    <!-- CART -->
+
     <div class="box">
+
       <h2>🛒 Your Cart</h2>
 
       <div id="cartItems"></div>
@@ -196,46 +241,127 @@
       <div class="total">
         Total: ₹<span id="totalAmount">0</span>
       </div>
+
     </div>
 
+
+    <!-- DELIVERY -->
+
     <div class="box">
+
       <h2>📦 Delivery Details</h2>
 
       <label>Full Name</label>
+
       <input
         type="text"
         id="customerName"
         placeholder="Enter your full name"
       >
 
+
       <label>Email</label>
+
       <input
         type="email"
         id="customerEmail"
         placeholder="Enter your email"
       >
 
+
       <label>Phone Number</label>
+
       <input
         type="tel"
         id="customerPhone"
         placeholder="Enter phone number"
       >
 
+
       <label>Shipping Address</label>
+
       <textarea
         id="shippingAddress"
         placeholder="Enter complete delivery address"
       ></textarea>
 
+
+      <!-- PAYMENT METHOD -->
+
       <label>Payment Method</label>
 
       <select id="paymentMethod">
-        <option value="COD">Cash on Delivery</option>
-        <option value="UPI">UPI</option>
+
+        <option value="COD">
+          Cash on Delivery
+        </option>
+
+        <option value="UPI">
+          UPI
+        </option>
+
       </select>
 
-      <div id="errorBox" class="error"></div>
+
+      <!-- UPI -->
+
+      <div
+        id="upiBox"
+        class="upi-box"
+      >
+
+        <div class="upi-title">
+          💳 Pay using UPI
+        </div>
+
+        <div>
+          Pay the exact amount using any UPI app.
+        </div>
+
+        <div
+          class="upi-id"
+        >
+          UPI ID:
+          <strong>safaria6@ybl</strong>
+        </div>
+
+
+        <button
+          type="button"
+          class="pay-button"
+          onclick="payWithUPI()"
+        >
+          Pay ₹<span id="upiAmount">0</span> via UPI
+        </button>
+
+
+        <div class="note">
+          Tap the button and complete the payment
+          in your UPI app. After payment, return to
+          SAFARIA and tap the button below.
+        </div>
+
+
+        <button
+          type="button"
+          id="paidButton"
+          class="paid-button"
+          onclick="placeOrder()"
+          style="display:none;"
+        >
+          ✅ I've Paid & Place Order
+        </button>
+
+      </div>
+
+
+      <div
+        id="errorBox"
+        class="error"
+      ></div>
+
+
+      <!-- COD BUTTON -->
 
       <button
         id="placeOrderBtn"
@@ -249,9 +375,17 @@
 
   </div>
 
-  <div id="successPage" class="box success">
 
-    <h2>🎉 Order Placed Successfully!</h2>
+  <!-- SUCCESS -->
+
+  <div
+    id="successPage"
+    class="box success"
+  >
+
+    <h2>
+      🎉 Order Placed Successfully!
+    </h2>
 
     <p style="margin-top:15px;">
       Your order has been received.
@@ -276,601 +410,930 @@
 
 <script>
 
-  /* ==============================
-     SUPABASE
-  ============================== */
+/* =====================================================
+   SUPABASE
+===================================================== */
 
-  const SUPABASE_URL =
-    "https://dcwdzbejpwvskajukxrh.supabase.co";
+const SUPABASE_URL =
+  "https://dcwdzbejpwvskajukxrh.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+const SUPABASE_KEY =
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
 
-  const supabaseClient =
-    window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* =====================================================
+   SAFARIA UPI ID
+===================================================== */
+
+const UPI_ID =
+  "safaria6@ybl";
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+let cart = [];
+
+let totalAmount = 0;
+
+let currentSession = null;
+
+let upiPaymentStarted = false;
+
+
+/* =====================================================
+   READ CART
+===================================================== */
+
+function readCart() {
+
+  try {
+
+    const raw =
+      localStorage.getItem("safaria_cart");
+
+    if (!raw) {
+      return [];
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed;
+
+  } catch (error) {
+
+    console.error(
+      "Cart read error:",
+      error
     );
 
-
-  /* ==============================
-     CART
-  ============================== */
-
-  let cart = [];
-
-  let totalAmount = 0;
-
-  let currentSession = null;
-
-
-  function readCart() {
-
-    try {
-
-      const raw =
-        localStorage.getItem("safaria_cart");
-
-      console.log(
-        "SAFARIA CART RAW:",
-        raw
-      );
-
-      if (!raw) {
-        return [];
-      }
-
-      const parsed =
-        JSON.parse(raw);
-
-      if (!Array.isArray(parsed)) {
-        return [];
-      }
-
-      return parsed;
-
-    } catch (error) {
-
-      console.error(
-        "Cart read error:",
-        error
-      );
-
-      return [];
-
-    }
+    return [];
 
   }
 
-
-  function loadCart() {
-
-    cart = readCart();
-
-    const cartItems =
-      document.getElementById("cartItems");
-
-    const totalElement =
-      document.getElementById("totalAmount");
-
-    totalAmount = 0;
-
-    cartItems.innerHTML = "";
+}
 
 
-    if (!cart.length) {
+/* =====================================================
+   LOAD CART
+===================================================== */
 
-      cartItems.innerHTML = `
-        <div class="empty">
-          🛒 Your cart is empty.
-          <br><br>
-          <button
-            class="back"
-            onclick="window.location.href='index.html'"
-          >
-            Go Shopping
-          </button>
-        </div>
-      `;
+function loadCart() {
 
-      totalElement.textContent = "0";
+  cart = readCart();
 
-      document.getElementById(
-        "placeOrderBtn"
-      ).disabled = true;
+  const cartItems =
+    document.getElementById(
+      "cartItems"
+    );
 
-      return;
-
-    }
+  const totalElement =
+    document.getElementById(
+      "totalAmount"
+    );
 
 
-    cart.forEach(function(item) {
+  totalAmount = 0;
 
-      const quantity =
-        Math.max(
-          1,
-          Number(item.quantity || 1)
-        );
-
-      const price =
-        Math.max(
-          0,
-          Number(item.price || 0)
-        );
-
-      const itemTotal =
-        price * quantity;
-
-      totalAmount += itemTotal;
+  cartItems.innerHTML = "";
 
 
-      const div =
-        document.createElement("div");
+  if (!cart.length) {
 
-      div.className = "cart-item";
+    cartItems.innerHTML = `
 
+      <div class="empty">
 
-      const image =
-        item.image || "";
+        🛒 Your cart is empty.
 
+        <br><br>
 
-      div.innerHTML = `
+        <button
+          class="back"
+          onclick="window.location.href='index.html'"
+        >
+          Go Shopping
+        </button>
 
-        ${
-          image
-            ? `<img
-                src="${escapeHTML(image)}"
-                alt=""
-                onerror="this.style.display='none'"
-              >`
-            : ""
-        }
+      </div>
 
-        <div class="item-info">
-
-          <div class="item-name">
-            ${escapeHTML(
-              String(item.name || "Product")
-            )}
-          </div>
-
-          <div class="item-price">
-            ₹${price.toLocaleString("en-IN")}
-          </div>
-
-          <div class="qty">
-            Quantity: ${quantity}
-          </div>
-
-        </div>
-
-        <div>
-          ₹${itemTotal.toLocaleString("en-IN")}
-        </div>
-
-      `;
-
-
-      cartItems.appendChild(div);
-
-    });
+    `;
 
 
     totalElement.textContent =
-      totalAmount.toLocaleString("en-IN");
+      "0";
 
 
     document.getElementById(
       "placeOrderBtn"
-    ).disabled = false;
+    ).disabled = true;
+
+
+    return;
 
   }
 
 
-  /* ==============================
-     SECURITY ESCAPE
-  ============================== */
-
-  function escapeHTML(value) {
-
-    return String(value)
-
-      .replace(/&/g, "&amp;")
-
-      .replace(/</g, "&lt;")
-
-      .replace(/>/g, "&gt;")
-
-      .replace(/"/g, "&quot;")
-
-      .replace(/'/g, "&#039;");
-
-  }
-
-
-  /* ==============================
-     LOGIN CHECK
-  ============================== */
-
-  async function checkLogin() {
-
-    try {
-
-      const {
-        data
-      } =
-        await supabaseClient.auth.getSession();
-
-
-      currentSession =
-        data?.session || null;
-
-
-      if (
-        currentSession &&
-        currentSession.user
-      ) {
-
-        const user =
-          currentSession.user;
-
-
-        const email =
-          user.email || "";
-
-
-        document.getElementById(
-          "customerEmail"
-        ).value = email;
-
-
-        const metadata =
-          user.user_metadata || {};
-
-
-        const possibleName =
-          metadata.full_name ||
-          metadata.name ||
-          "";
-
-
-        if (possibleName) {
-
-          document.getElementById(
-            "customerName"
-          ).value =
-            possibleName;
-
-        }
-
-      }
-
-    } catch (error) {
-
-      console.error(
-        "Login check error:",
-        error
-      );
-
-    }
-
-  }
-
-
-  /* ==============================
-     PLACE ORDER
-  ============================== */
-
-  async function placeOrder() {
-
-    const button =
-      document.getElementById(
-        "placeOrderBtn"
-      );
-
-    const errorBox =
-      document.getElementById(
-        "errorBox"
-      );
-
-
-    errorBox.style.display = "none";
-
-
-    /* ALWAYS READ CART AGAIN */
-
-    cart = readCart();
-
-
-    if (!cart.length) {
-
-      showError(
-        "Your cart is empty. Please add a product first."
-      );
-
-      return;
-
-    }
-
-
-    const name =
-      document.getElementById(
-        "customerName"
-      ).value.trim();
-
-
-    const email =
-      document.getElementById(
-        "customerEmail"
-      ).value.trim();
-
-
-    const phone =
-      document.getElementById(
-        "customerPhone"
-      ).value.trim();
-
-
-    const address =
-      document.getElementById(
-        "shippingAddress"
-      ).value.trim();
-
-
-    const payment =
-      document.getElementById(
-        "paymentMethod"
-      ).value;
-
-
-    if (!name) {
-
-      showError(
-        "Please enter your name."
-      );
-
-      return;
-
-    }
-
-
-    if (!email) {
-
-      showError(
-        "Please enter your email."
-      );
-
-      return;
-
-    }
-
-
-    if (!phone) {
-
-      showError(
-        "Please enter your phone number."
-      );
-
-      return;
-
-    }
-
-
-    if (!address) {
-
-      showError(
-        "Please enter your shipping address."
-      );
-
-      return;
-
-    }
-
-
-    button.disabled = true;
-
-    button.textContent =
-      "Placing Order...";
-
-
-    try {
-
-      /* RECALCULATE TOTAL */
-
-      let finalTotal = 0;
-
-
-      cart.forEach(function(item) {
-
-        const price =
-          Math.max(
-            0,
-            Number(item.price || 0)
-          );
-
-        const quantity =
-          Math.max(
-            1,
-            Number(item.quantity || 1)
-          );
-
-        finalTotal +=
-          price * quantity;
-
-      });
-
-
-      const generatedOrderId =
-        "SAF-" +
-        Date.now() +
-        "-" +
-        Math.floor(
-          1000 +
-          Math.random() * 9000
-        );
-
-
-      const orderData = {
-
-        order_id:
-          generatedOrderId,
-
-        customer_name:
-          name,
-
-        customer_email:
-          email,
-
-        customer_phone:
-          phone,
-
-        shipping_address:
-          address,
-
-        items:
-          cart,
-
-        total:
-          Number(
-            finalTotal.toFixed(2)
-          ),
-
-        status:
-          "pending",
-
-        payment_method:
-          payment,
-
-        user_id:
-          currentSession?.user?.id || null
-
-      };
-
-
-      console.log(
-        "SAFARIA ORDER:",
-        orderData
-      );
-
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient
-
-          .from("orders")
-
-          .insert([orderData])
-
-          .select(
-            "id, order_id"
-          )
-
-          .single();
-
-
-      if (error) {
-
-        console.error(
-          "ORDER ERROR:",
-          error
-        );
-
-        throw error;
-
-      }
-
-
-      /* CLEAR CART ONLY AFTER SUCCESS */
-
-      localStorage.removeItem(
-        "safaria_cart"
-      );
-
-      cart = [];
-
-
-      document.getElementById(
-        "successOrderId"
-      ).textContent =
-        data?.order_id ||
-        generatedOrderId;
-
-
-      document.getElementById(
-        "checkoutPage"
-      ).style.display =
-        "none";
-
-
-      document.getElementById(
-        "successPage"
-      ).style.display =
-        "block";
-
-
-    } catch (error) {
-
-      console.error(
-        "Place order error:",
-        error
-      );
-
-
-      showError(
-        "Order failed: " +
-        (
-          error?.message ||
-          "Unknown error"
+  cart.forEach(function(item) {
+
+    const quantity =
+      Math.max(
+        1,
+        Number(
+          item.quantity || 1
         )
       );
 
 
-      button.disabled = false;
+    const price =
+      Math.max(
+        0,
+        Number(
+          item.price || 0
+        )
+      );
 
-      button.textContent =
-        "Place Order";
+
+    const itemTotal =
+      price * quantity;
+
+
+    totalAmount +=
+      itemTotal;
+
+
+    const div =
+      document.createElement(
+        "div"
+      );
+
+
+    div.className =
+      "cart-item";
+
+
+    const image =
+      item.image || "";
+
+
+    div.innerHTML = `
+
+      ${
+        image
+          ? `<img
+              src="${escapeHTML(image)}"
+              alt=""
+              onerror="this.style.display='none'"
+            >`
+          : ""
+      }
+
+
+      <div class="item-info">
+
+        <div class="item-name">
+
+          ${escapeHTML(
+            String(
+              item.name ||
+              "Product"
+            )
+          )}
+
+        </div>
+
+
+        <div class="item-price">
+
+          ₹${price.toLocaleString("en-IN")}
+
+        </div>
+
+
+        <div class="qty">
+
+          Quantity: ${quantity}
+
+        </div>
+
+      </div>
+
+
+      <div>
+
+        ₹${itemTotal.toLocaleString("en-IN")}
+
+      </div>
+
+    `;
+
+
+    cartItems.appendChild(
+      div
+    );
+
+  });
+
+
+  totalElement.textContent =
+    totalAmount.toLocaleString(
+      "en-IN"
+    );
+
+
+  document.getElementById(
+    "placeOrderBtn"
+  ).disabled = false;
+
+
+  updateUPIAmount();
+
+}
+
+
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
+function escapeHTML(value) {
+
+  return String(value)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+/* =====================================================
+   LOGIN CHECK
+===================================================== */
+
+async function checkLogin() {
+
+  try {
+
+    const {
+      data
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    currentSession =
+      data?.session ||
+      null;
+
+
+    if (
+      currentSession &&
+      currentSession.user
+    ) {
+
+      const user =
+        currentSession.user;
+
+
+      const email =
+        user.email ||
+        "";
+
+
+      document.getElementById(
+        "customerEmail"
+      ).value =
+        email;
+
+
+      const metadata =
+        user.user_metadata ||
+        {};
+
+
+      const possibleName =
+        metadata.full_name ||
+        metadata.name ||
+        "";
+
+
+      if (possibleName) {
+
+        document.getElementById(
+          "customerName"
+        ).value =
+          possibleName;
+
+      }
 
     }
 
-  }
+  } catch (error) {
 
-
-  function showError(message) {
-
-    const errorBox =
-      document.getElementById(
-        "errorBox"
-      );
-
-    errorBox.textContent =
-      message;
-
-    errorBox.style.display =
-      "block";
+    console.error(
+      "Login check error:",
+      error
+    );
 
   }
 
+}
 
-  /* ==============================
-     START
-  ============================== */
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    async function() {
+/* =====================================================
+   PAYMENT METHOD
+===================================================== */
 
-      console.log(
-        "SAFARIA CHECKOUT STARTED"
-      );
+document
+  .getElementById(
+    "paymentMethod"
+  )
+  .addEventListener(
+    "change",
+    function() {
 
-      loadCart();
+      const method =
+        this.value;
 
-      await checkLogin();
+
+      const upiBox =
+        document.getElementById(
+          "upiBox"
+        );
+
+
+      const placeButton =
+        document.getElementById(
+          "placeOrderBtn"
+        );
+
+
+      const paidButton =
+        document.getElementById(
+          "paidButton"
+        );
+
+
+      if (
+        method === "UPI"
+      ) {
+
+        upiBox.style.display =
+          "block";
+
+
+        placeButton.style.display =
+          "none";
+
+
+        paidButton.style.display =
+          "none";
+
+
+        upiPaymentStarted =
+          false;
+
+
+        updateUPIAmount();
+
+      } else {
+
+        upiBox.style.display =
+          "none";
+
+
+        placeButton.style.display =
+          "block";
+
+
+        paidButton.style.display =
+          "none";
+
+
+        upiPaymentStarted =
+          false;
+
+      }
 
     }
   );
+
+
+/* =====================================================
+   UPDATE UPI AMOUNT
+===================================================== */
+
+function updateUPIAmount() {
+
+  const amount =
+    Number(totalAmount || 0);
+
+
+  document.getElementById(
+    "upiAmount"
+  ).textContent =
+    amount.toLocaleString(
+      "en-IN"
+    );
+
+}
+
+
+/* =====================================================
+   PAY WITH UPI
+===================================================== */
+
+function payWithUPI() {
+
+  if (!cart.length) {
+
+    showError(
+      "Your cart is empty."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    totalAmount <= 0
+  ) {
+
+    showError(
+      "Invalid payment amount."
+    );
+
+    return;
+
+  }
+
+
+  const amount =
+    Number(totalAmount)
+      .toFixed(2);
+
+
+  const upiURL =
+    "upi://pay" +
+    "?pa=" +
+    encodeURIComponent(
+      UPI_ID
+    ) +
+    "&pn=" +
+    encodeURIComponent(
+      "SAFARIA"
+    ) +
+    "&am=" +
+    encodeURIComponent(
+      amount
+    ) +
+    "&cu=INR" +
+    "&tn=" +
+    encodeURIComponent(
+      "SAFARIA Order Payment"
+    );
+
+
+  console.log(
+    "Opening UPI:",
+    upiURL
+  );
+
+
+  upiPaymentStarted =
+    true;
+
+
+  /*
+    Open UPI application
+  */
+
+  window.location.href =
+    upiURL;
+
+
+  /*
+    Show confirmation button
+  */
+
+  setTimeout(
+    function() {
+
+      document.getElementById(
+        "paidButton"
+      ).style.display =
+        "block";
+
+    },
+    1200
+  );
+
+}
+
+
+/* =====================================================
+   PLACE ORDER
+===================================================== */
+
+async function placeOrder() {
+
+  const button =
+    document.getElementById(
+      "placeOrderBtn"
+    );
+
+
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+
+  errorBox.style.display =
+    "none";
+
+
+  cart =
+    readCart();
+
+
+  if (!cart.length) {
+
+    showError(
+      "Your cart is empty. Please add a product first."
+    );
+
+    return;
+
+  }
+
+
+  const name =
+    document.getElementById(
+      "customerName"
+    ).value.trim();
+
+
+  const email =
+    document.getElementById(
+      "customerEmail"
+    ).value.trim();
+
+
+  const phone =
+    document.getElementById(
+      "customerPhone"
+    ).value.trim();
+
+
+  const address =
+    document.getElementById(
+      "shippingAddress"
+    ).value.trim();
+
+
+  const payment =
+    document.getElementById(
+      "paymentMethod"
+    ).value;
+
+
+  /* VALIDATION */
+
+  if (!name) {
+
+    showError(
+      "Please enter your name."
+    );
+
+    return;
+
+  }
+
+
+  if (!email) {
+
+    showError(
+      "Please enter your email."
+    );
+
+    return;
+
+  }
+
+
+  if (!phone) {
+
+    showError(
+      "Please enter your phone number."
+    );
+
+    return;
+
+  }
+
+
+  if (!address) {
+
+    showError(
+      "Please enter your shipping address."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    UPI PAYMENT CHECK
+  */
+
+  if (
+    payment === "UPI" &&
+    !upiPaymentStarted
+  ) {
+
+    showError(
+      "Please tap 'Pay via UPI' first."
+    );
+
+    return;
+
+  }
+
+
+  button.disabled =
+    true;
+
+
+  button.textContent =
+    "Placing Order...";
+
+
+  try {
+
+    /* RECALCULATE TOTAL */
+
+    let finalTotal =
+      0;
+
+
+    cart.forEach(
+      function(item) {
+
+        const price =
+          Math.max(
+            0,
+            Number(
+              item.price || 0
+            )
+          );
+
+
+        const quantity =
+          Math.max(
+            1,
+            Number(
+              item.quantity || 1
+            )
+          );
+
+
+        finalTotal +=
+          price * quantity;
+
+      }
+    );
+
+
+    /* ORDER ID */
+
+    const generatedOrderId =
+      "SAF-" +
+      Date.now() +
+      "-" +
+      Math.floor(
+        1000 +
+        Math.random() *
+        9000
+      );
+
+
+    /* ORDER DATA */
+
+    const orderData = {
+
+      order_id:
+        generatedOrderId,
+
+      customer_name:
+        name,
+
+      customer_email:
+        email,
+
+      customer_phone:
+        phone,
+
+      shipping_address:
+        address,
+
+      items:
+        cart,
+
+      total:
+        Number(
+          finalTotal.toFixed(2)
+        ),
+
+      status:
+        "pending",
+
+      payment_method:
+        payment,
+
+      user_id:
+        currentSession?.user?.id ||
+        null
+
+    };
+
+
+    console.log(
+      "SAFARIA ORDER:",
+      orderData
+    );
+
+
+    /* INSERT ORDER */
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+
+        .from("orders")
+
+        .insert([
+          orderData
+        ])
+
+        .select(
+          "id, order_id"
+        )
+
+        .single();
+
+
+    if (error) {
+
+      console.error(
+        "ORDER ERROR:",
+        error
+      );
+
+      throw error;
+
+    }
+
+
+    /* CLEAR CART */
+
+    localStorage.removeItem(
+      "safaria_cart"
+    );
+
+
+    cart = [];
+
+
+    /* SUCCESS */
+
+    document.getElementById(
+      "successOrderId"
+    ).textContent =
+      data?.order_id ||
+      generatedOrderId;
+
+
+    document.getElementById(
+      "checkoutPage"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "successPage"
+    ).style.display =
+      "block";
+
+  } catch (error) {
+
+    console.error(
+      "Place order error:",
+      error
+    );
+
+
+    showError(
+      "Order failed: " +
+      (
+        error?.message ||
+        "Unknown error"
+      )
+    );
+
+
+    button.disabled =
+      false;
+
+
+    button.textContent =
+      "Place Order";
+
+  }
+
+}
+
+
+/* =====================================================
+   ERROR MESSAGE
+===================================================== */
+
+function showError(
+  message
+) {
+
+  const errorBox =
+    document.getElementById(
+      "errorBox"
+    );
+
+
+  errorBox.textContent =
+    message;
+
+
+  errorBox.style.display =
+    "block";
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async function() {
+
+    console.log(
+      "SAFARIA CHECKOUT STARTED"
+    );
+
+
+    loadCart();
+
+
+    await checkLogin();
+
+  }
+);
 
 </script>
 
