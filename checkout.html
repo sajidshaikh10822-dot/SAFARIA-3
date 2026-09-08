@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -84,6 +84,12 @@
     textarea {
       min-height: 90px;
       resize: vertical;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
     }
 
     .item {
@@ -203,34 +209,39 @@
       font-weight: bold;
     }
 
-    .home-button {
+    .home-button,
+    .orders-button {
       display: inline-block;
-      background: #ff9900;
-      color: #111;
       text-decoration: none;
       padding: 12px 20px;
       border-radius: 6px;
       font-weight: bold;
       margin-top: 10px;
+    }
+
+    .home-button {
+      background: #ff9900;
+      color: #111;
     }
 
     .orders-button {
-      display: inline-block;
       background: #37475a;
       color: white;
-      text-decoration: none;
-      padding: 12px 20px;
-      border-radius: 6px;
-      font-weight: bold;
-      margin-top: 10px;
       margin-left: 8px;
     }
 
-    .empty {
+    .empty,
+    .login-box {
       background: white;
       padding: 30px;
       text-align: center;
       border-radius: 8px;
+    }
+
+    .error {
+      color: #b00020;
+      margin-top: 10px;
+      font-size: 14px;
     }
 
     footer {
@@ -248,6 +259,11 @@
 
       .logo {
         font-size: 23px;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 0;
       }
 
       .total {
@@ -270,7 +286,24 @@
 
 <div class="container">
 
-  <div id="checkoutPage">
+  <div id="loginRequired" style="display:none;">
+    <div class="login-box">
+
+      <h2>🔐 Login Required</h2>
+
+      <p style="margin-top:10px;color:#666;">
+        Order place karne ke liye pehle SAFARIA account mein login karein.
+      </p>
+
+      <a href="auth.html" class="home-button">
+        Login / Sign Up
+      </a>
+
+    </div>
+  </div>
+
+
+  <div id="checkoutPage" style="display:none;">
 
     <h1>🛒 Checkout</h1>
 
@@ -296,39 +329,81 @@
 
       <h2>📍 Delivery Details</h2>
 
-      <label>Full Name</label>
+      <label for="customerName">
+        Full Name
+      </label>
 
       <input
         id="customerName"
         type="text"
+        maxlength="100"
         placeholder="Enter your full name"
+        autocomplete="name"
       >
 
 
-      <label>Phone Number</label>
+      <label for="customerPhone">
+        Phone Number
+      </label>
 
       <input
         id="customerPhone"
         type="tel"
-        placeholder="Enter your phone number"
+        maxlength="10"
+        placeholder="10-digit mobile number"
+        autocomplete="tel"
       >
 
 
-      <label>Email</label>
-
-      <input
-        id="customerEmail"
-        type="email"
-        placeholder="Enter your email"
-      >
-
-
-      <label>Delivery Address</label>
+      <label>
+        Delivery Address
+      </label>
 
       <textarea
         id="shippingAddress"
-        placeholder="House/Flat, Street, Area, City, State, PIN"
+        maxlength="500"
+        placeholder="House/Flat, Street, Area"
+        autocomplete="street-address"
       ></textarea>
+
+
+      <div class="row">
+
+        <div>
+
+          <label for="customerCity">
+            City
+          </label>
+
+          <input
+            id="customerCity"
+            type="text"
+            maxlength="100"
+            placeholder="Enter city"
+            autocomplete="address-level2"
+          >
+
+        </div>
+
+
+        <div>
+
+          <label for="customerPincode">
+            PIN Code
+          </label>
+
+          <input
+            id="customerPincode"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="6-digit PIN code"
+            autocomplete="postal-code"
+          >
+
+        </div>
+
+      </div>
 
     </div>
 
@@ -372,8 +447,8 @@
         <strong>📱 Pay using UPI</strong>
 
         <p style="margin-top:8px;color:#555;">
-          Your order amount will automatically be filled
-          in your UPI app.
+          UPI app se payment karne ke baad
+          "I Have Paid - Place Order" dabayein.
         </p>
 
         <div class="upi-id">
@@ -399,6 +474,8 @@
         🛍️ Place Order
       </button>
 
+      <div id="errorMessage" class="error"></div>
+
     </div>
 
   </div>
@@ -422,17 +499,11 @@
         <span id="successOrderId"></span>
       </div>
 
-      <a
-        href="index.html"
-        class="home-button"
-      >
+      <a href="index.html" class="home-button">
         🏠 Back to Store
       </a>
 
-      <a
-        href="my-orders.html"
-        class="orders-button"
-      >
+      <a href="my-orders.html" class="orders-button">
         📦 My Orders
       </a>
 
@@ -477,6 +548,35 @@ let cart =
 let totalAmount = 0;
 
 
+async function checkLogin() {
+
+  const {
+    data: { session },
+    error
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (error || !session) {
+
+    document.getElementById(
+      "loginRequired"
+    ).style.display = "block";
+
+    return false;
+
+  }
+
+
+  document.getElementById(
+    "checkoutPage"
+  ).style.display = "block";
+
+  return true;
+
+}
+
+
 function loadCart() {
 
   const container =
@@ -495,10 +595,12 @@ function loadCart() {
       </div>
     `;
 
-    document.getElementById("placeOrderButton")
-      .disabled = true;
+    document.getElementById(
+      "placeOrderButton"
+    ).disabled = true;
 
     return;
+
   }
 
 
@@ -510,10 +612,16 @@ function loadCart() {
   cart.forEach(item => {
 
     const quantity =
-      Number(item.quantity || 1);
+      Math.max(
+        1,
+        Number(item.quantity || 1)
+      );
 
     const price =
-      Number(item.price || 0);
+      Math.max(
+        0,
+        Number(item.price || 0)
+      );
 
     const itemTotal =
       price * quantity;
@@ -564,8 +672,9 @@ function loadCart() {
   });
 
 
-  document.getElementById("totalAmount")
-    .textContent =
+  document.getElementById(
+    "totalAmount"
+  ).textContent =
     totalAmount.toLocaleString("en-IN");
 
 }
@@ -619,23 +728,21 @@ function payWithUPI() {
   }
 
 
-  const name =
-    "SAFARIA Order";
-
-
-  const transactionNote =
-    "SAFARIA Shopping Order";
-
-
   const upiURL =
     "upi://pay" +
-    "?pa=" + encodeURIComponent(SAFARIA_UPI) +
-    "&pn=" + encodeURIComponent(name) +
-    "&am=" + encodeURIComponent(
+    "?pa=" +
+    encodeURIComponent(SAFARIA_UPI) +
+    "&pn=" +
+    encodeURIComponent("SAFARIA Order") +
+    "&am=" +
+    encodeURIComponent(
       totalAmount.toFixed(2)
     ) +
     "&cu=INR" +
-    "&tn=" + encodeURIComponent(transactionNote);
+    "&tn=" +
+    encodeURIComponent(
+      "SAFARIA Shopping Order"
+    );
 
 
   window.location.href = upiURL;
@@ -645,9 +752,43 @@ function payWithUPI() {
 
 async function placeOrder() {
 
+  const errorBox =
+    document.getElementById(
+      "errorMessage"
+    );
+
+  errorBox.textContent = "";
+
+
   if (!cart.length) {
 
-    alert("Your cart is empty.");
+    errorBox.textContent =
+      "Your cart is empty.";
+
+    return;
+
+  }
+
+
+  const {
+    data: { session },
+    error: sessionError
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if (
+    sessionError ||
+    !session ||
+    !session.user
+  ) {
+
+    alert(
+      "Login required. Please login first."
+    );
+
+    window.location.href =
+      "auth.html";
 
     return;
 
@@ -655,23 +796,33 @@ async function placeOrder() {
 
 
   const name =
-    document.getElementById("customerName")
-      .value.trim();
+    document.getElementById(
+      "customerName"
+    ).value.trim();
 
 
   const phone =
-    document.getElementById("customerPhone")
-      .value.trim();
-
-
-  const email =
-    document.getElementById("customerEmail")
-      .value.trim();
+    document.getElementById(
+      "customerPhone"
+    ).value.trim();
 
 
   const address =
-    document.getElementById("shippingAddress")
-      .value.trim();
+    document.getElementById(
+      "shippingAddress"
+    ).value.trim();
+
+
+  const city =
+    document.getElementById(
+      "customerCity"
+    ).value.trim();
+
+
+  const pincode =
+    document.getElementById(
+      "customerPincode"
+    ).value.trim();
 
 
   const payment =
@@ -682,25 +833,18 @@ async function placeOrder() {
 
   if (!name) {
 
-    alert("Please enter your name.");
+    errorBox.textContent =
+      "Please enter your full name.";
 
     return;
 
   }
 
 
-  if (!phone) {
+  if (!/^[0-9]{10}$/.test(phone)) {
 
-    alert("Please enter your phone number.");
-
-    return;
-
-  }
-
-
-  if (!email) {
-
-    alert("Please enter your email.");
+    errorBox.textContent =
+      "Please enter a valid 10-digit phone number.";
 
     return;
 
@@ -709,7 +853,38 @@ async function placeOrder() {
 
   if (!address) {
 
-    alert("Please enter your delivery address.");
+    errorBox.textContent =
+      "Please enter your delivery address.";
+
+    return;
+
+  }
+
+
+  if (!city) {
+
+    errorBox.textContent =
+      "Please enter your city.";
+
+    return;
+
+  }
+
+
+  if (!/^[0-9]{6}$/.test(pincode)) {
+
+    errorBox.textContent =
+      "Please enter a valid 6-digit PIN code.";
+
+    return;
+
+  }
+
+
+  if (totalAmount <= 0) {
+
+    errorBox.textContent =
+      "Invalid order amount.";
 
     return;
 
@@ -744,54 +919,68 @@ async function placeOrder() {
     "Placing Order...";
 
 
+  /*
+    Important:
+    user_id database mein current
+    authenticated user ke ID se save hoga.
+  */
+
+  const orderData = {
+
+    user_id:
+      session.user.id,
+
+    customer_name:
+      name,
+
+    phone:
+      phone,
+
+    address:
+      address,
+
+    city:
+      city,
+
+    pincode:
+      pincode,
+
+    items:
+      cart,
+
+    total:
+      totalAmount,
+
+    payment_method:
+      payment,
+
+    status:
+      "pending"
+
+  };
+
+
   const {
-    data: { session }
+    data,
+    error
   } =
-    await supabaseClient.auth.getSession();
-
-
-  const orderId =
-    "SAF-" + Date.now();
-
-
-  const { data, error } =
     await supabaseClient
       .from("orders")
-      .insert({
-
-        order_id: orderId,
-
-        user_id:
-          session?.user?.id || null,
-
-        customer_name: name,
-
-        customer_email: email,
-
-        customer_phone: phone,
-
-        shipping_address: address,
-
-        items: cart,
-
-        total: totalAmount,
-
-        status: "pending",
-
-        payment_method: payment
-
-      })
-      .select();
+      .insert(orderData)
+      .select()
+      .single();
 
 
   if (error) {
 
-    console.error(error);
-
-    alert(
-      "❌ Order place nahi hua:\n" +
-      error.message
+    console.error(
+      "Order error:",
+      error
     );
+
+    errorBox.textContent =
+      "Order place nahi hua: " +
+      error.message;
 
     button.disabled = false;
 
@@ -815,7 +1004,7 @@ async function placeOrder() {
   document.getElementById(
     "successOrderId"
   ).textContent =
-    orderId;
+    data.id;
 
 
   document.getElementById(
@@ -844,9 +1033,24 @@ function escapeHTML(value) {
 }
 
 
+async function init() {
+
+  const loggedIn =
+    await checkLogin();
+
+
+  if (loggedIn) {
+
+    loadCart();
+
+  }
+
+}
+
+
 document.addEventListener(
   "DOMContentLoaded",
-  loadCart
+  init
 );
 
 </script>
