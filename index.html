@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -71,6 +71,10 @@
       color: #111;
       padding: 9px 12px;
       border-radius: 5px;
+    }
+
+    #adminBtn {
+      display: none;
     }
 
     nav {
@@ -204,20 +208,65 @@
     .account-box {
       background: white;
       margin: 15px;
-      padding: 15px;
+      padding: 20px;
       border-radius: 8px;
       display: none;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .account-title {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .account-info {
+      line-height: 1.8;
+      color: #333;
+    }
+
+    .account-actions {
+      display: flex;
       gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .logout,
+    .orders-btn {
+      border: none;
+      padding: 10px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .logout {
       background: #e7e7e7;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
+    }
+
+    .orders-btn {
+      background: #ff9900;
+    }
+
+    .my-orders {
+      display: none;
+      background: white;
+      margin: 15px;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .my-order {
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      padding: 14px;
+      margin-top: 12px;
+      line-height: 1.7;
+    }
+
+    .order-status {
       font-weight: bold;
     }
 
@@ -305,12 +354,21 @@
     👤 Login
   </a>
 
-  <a href="javascript:void(0)" class="header-btn" onclick="openCart()">
+  <a
+    href="javascript:void(0)"
+    class="header-btn"
+    onclick="openCart()"
+  >
     🛒 Cart (<span id="cartCount">0</span>)
   </a>
 
-  <a href="admin.html" class="header-btn">
-    Admin
+  <!-- ADMIN BUTTON -->
+  <a
+    href="admin.html"
+    class="header-btn"
+    id="adminBtn"
+  >
+    🔐 Admin
   </a>
 
 </header>
@@ -333,16 +391,58 @@
 </section>
 
 
+<!-- CUSTOMER ACCOUNT -->
+
 <div id="accountBox" class="account-box">
 
-  <div>
-    👋 Welcome,
-    <strong id="customerName">Customer</strong>
+  <div class="account-title">
+    👤 My Account
   </div>
 
-  <button class="logout" onclick="logout()">
-    Logout
-  </button>
+  <div class="account-info">
+
+    <div>
+      <b>Name:</b>
+      <span id="customerName">Customer</span>
+    </div>
+
+    <div>
+      <b>Email:</b>
+      <span id="customerEmail">-</span>
+    </div>
+
+  </div>
+
+  <div class="account-actions">
+
+    <button
+      class="orders-btn"
+      onclick="showMyOrders()"
+    >
+      📦 My Orders
+    </button>
+
+    <button
+      class="logout"
+      onclick="logout()"
+    >
+      Logout
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- CUSTOMER ORDERS -->
+
+<div id="myOrders" class="my-orders">
+
+  <h2>📦 My Orders</h2>
+
+  <div id="myOrdersList">
+    Loading orders...
+  </div>
 
 </div>
 
@@ -401,6 +501,10 @@
 
 <script>
 
+  /* =========================
+     SUPABASE
+  ========================= */
+
   const SUPABASE_URL =
     "https://dcwdzbejpwvskajukxrh.supabase.co";
 
@@ -414,6 +518,14 @@
     );
 
 
+  /* =========================
+     ADMIN EMAIL
+  ========================= */
+
+  const ADMIN_EMAIL =
+    "sajidshaikh10822@gmail.com";
+
+
   let allProducts = [];
 
   let cart =
@@ -421,6 +533,10 @@
       localStorage.getItem("safaria_cart") || "[]"
     );
 
+
+  /* =========================
+     LOAD PRODUCTS
+  ========================= */
 
   async function loadProducts() {
 
@@ -457,6 +573,10 @@
 
   }
 
+
+  /* =========================
+     DISPLAY PRODUCTS
+  ========================= */
 
   function displayProducts(products) {
 
@@ -533,6 +653,10 @@
 
   }
 
+
+  /* =========================
+     CART
+  ========================= */
 
   function addToCart(id) {
 
@@ -640,6 +764,10 @@
   }
 
 
+  /* =========================
+     SEARCH
+  ========================= */
+
   function searchProducts() {
 
     const value =
@@ -693,6 +821,10 @@
   }
 
 
+  /* =========================
+     CATEGORY
+  ========================= */
+
   function filterCategory(category) {
 
     const filtered =
@@ -727,6 +859,10 @@
   }
 
 
+  /* =========================
+     LOGIN / ACCOUNT
+  ========================= */
+
   async function checkLogin() {
 
     const {
@@ -741,17 +877,30 @@
     const accountBox =
       document.getElementById("accountBox");
 
+    const adminBtn =
+      document.getElementById("adminBtn");
+
     const customerName =
       document.getElementById("customerName");
 
+    const customerEmail =
+      document.getElementById("customerEmail");
+
 
     if (session && session.user) {
+
+      const email =
+        String(session.user.email || "")
+          .trim()
+          .toLowerCase();
+
 
       accountBtn.textContent =
         "👤 My Account";
 
       accountBtn.href =
         "javascript:void(0)";
+
 
       accountBtn.onclick = function() {
 
@@ -762,11 +911,33 @@
 
       const name =
         session.user.user_metadata?.full_name ||
+        session.user.user_metadata?.name ||
         session.user.email ||
         "Customer";
 
 
-      customerName.textContent = name;
+      customerName.textContent =
+        name;
+
+      customerEmail.textContent =
+        session.user.email || "-";
+
+
+      /*
+        ONLY ADMIN EMAIL CAN SEE ADMIN BUTTON
+      */
+
+      if (email === ADMIN_EMAIL.toLowerCase()) {
+
+        adminBtn.style.display =
+          "inline-block";
+
+      } else {
+
+        adminBtn.style.display =
+          "none";
+
+      }
 
     } else {
 
@@ -781,10 +952,169 @@
       accountBox.style.display =
         "none";
 
+      adminBtn.style.display =
+        "none";
+
     }
 
   }
 
+
+  /* =========================
+     MY ORDERS
+  ========================= */
+
+  async function showMyOrders() {
+
+    const {
+      data: { session }
+    } =
+      await supabaseClient.auth.getSession();
+
+
+    if (!session || !session.user) {
+
+      alert("Please login first.");
+
+      return;
+
+    }
+
+
+    const ordersBox =
+      document.getElementById("myOrders");
+
+    const list =
+      document.getElementById("myOrdersList");
+
+
+    ordersBox.style.display =
+      "block";
+
+    list.innerHTML =
+      "Loading your orders...";
+
+
+    /*
+      We currently match orders by customer email.
+      Supabase RLS will be added in the next security step.
+    */
+
+    const { data, error } =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .eq(
+          "customer_email",
+          session.user.email
+        )
+        .order(
+          "created_at",
+          { ascending: false }
+        );
+
+
+    if (error) {
+
+      console.error(error);
+
+      list.innerHTML =
+        "❌ Orders load nahi ho rahe.";
+
+      return;
+
+    }
+
+
+    if (!data || data.length === 0) {
+
+      list.innerHTML =
+        "📦 Aapka abhi koi order nahi hai.";
+
+      return;
+
+    }
+
+
+    list.innerHTML = "";
+
+
+    data.forEach(order => {
+
+      const div =
+        document.createElement("div");
+
+      div.className =
+        "my-order";
+
+
+      let itemsText = "-";
+
+
+      try {
+
+        const items =
+          typeof order.items === "string"
+            ? JSON.parse(order.items)
+            : order.items;
+
+
+        if (Array.isArray(items)) {
+
+          itemsText =
+            items
+              .map(item =>
+                `${item.name || "Product"} × ${item.quantity || 1}`
+              )
+              .join(", ");
+
+        }
+
+      } catch (e) {}
+
+
+
+      div.innerHTML = `
+
+        <b>Order ID:</b>
+        ${escapeHTML(order.order_id || "-")}
+        <br>
+
+        <b>Total:</b>
+        ₹${Number(order.total || 0).toLocaleString("en-IN")}
+        <br>
+
+        <b>Items:</b>
+        ${escapeHTML(itemsText)}
+        <br>
+
+        <b>Status:</b>
+        <span class="order-status">
+          ${escapeHTML(order.status || "Pending")}
+        </span>
+        <br>
+
+        <b>Date:</b>
+        ${
+          order.created_at
+            ? new Date(order.created_at)
+                .toLocaleString("en-IN")
+            : "-"
+        }
+
+      `;
+
+
+      list.appendChild(div);
+
+    });
+
+  }
+
+
+  /* =========================
+     LOGOUT
+  ========================= */
 
   async function logout() {
 
@@ -801,6 +1131,10 @@
   }
 
 
+  /* =========================
+     SECURITY HELPERS
+  ========================= */
+
   function escapeHTML(value) {
 
     return String(value ?? "")
@@ -813,6 +1147,10 @@
   }
 
 
+  /* =========================
+     START
+  ========================= */
+
   document.addEventListener(
     "DOMContentLoaded",
     () => {
@@ -823,6 +1161,18 @@
 
       checkLogin();
 
+    }
+  );
+
+
+  /*
+    IMPORTANT:
+    Keep checking session when auth state changes.
+  */
+
+  supabaseClient.auth.onAuthStateChange(
+    () => {
+      checkLogin();
     }
   );
 
