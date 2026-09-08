@@ -65,6 +65,7 @@
 
     .item-info {
       flex: 1;
+      min-width: 0;
     }
 
     .item-name {
@@ -76,11 +77,57 @@
     .item-price {
       color: #b12704;
       font-weight: bold;
+      margin-bottom: 8px;
     }
 
-    .qty {
-      margin-top: 5px;
-      color: #555;
+    .item-total {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .quantity-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .qty-btn {
+      width: 36px;
+      height: 34px;
+      padding: 0;
+      margin: 0;
+      background: #eee;
+      color: #111;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .qty-number {
+      min-width: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .remove-btn {
+      width: auto;
+      padding: 8px 12px;
+      margin: 0 0 0 5px;
+      background: #fff;
+      color: #b00020;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .remove-btn:hover {
+      background: #ffe5e5;
     }
 
     .total {
@@ -204,6 +251,11 @@
     }
 
     @media (max-width: 600px) {
+
+      .cart-item {
+        align-items: flex-start;
+      }
+
       .cart-item img {
         width: 65px;
         height: 65px;
@@ -213,8 +265,17 @@
         font-size: 15px;
       }
 
+      .item-total {
+        font-size: 14px;
+      }
+
       .total {
         font-size: 20px;
+      }
+
+      .remove-btn {
+        margin-left: 0;
+        margin-top: 5px;
       }
     }
   </style>
@@ -259,7 +320,6 @@
         placeholder="Enter your full name"
       >
 
-
       <label>Email</label>
 
       <input
@@ -268,7 +328,6 @@
         placeholder="Enter your email"
       >
 
-
       <label>Phone Number</label>
 
       <input
@@ -276,7 +335,6 @@
         id="customerPhone"
         placeholder="Enter phone number"
       >
-
 
       <label>Shipping Address</label>
 
@@ -318,13 +376,10 @@
           Pay the exact amount using any UPI app.
         </div>
 
-        <div
-          class="upi-id"
-        >
+        <div class="upi-id">
           UPI ID:
           <strong>safaria6@ybl</strong>
         </div>
-
 
         <button
           type="button"
@@ -334,13 +389,11 @@
           Pay ₹<span id="upiAmount">0</span> via UPI
         </button>
 
-
         <div class="note">
           Tap the button and complete the payment
           in your UPI app. After payment, return to
           SAFARIA and tap the button below.
         </div>
-
 
         <button
           type="button"
@@ -428,7 +481,7 @@ const supabaseClient =
 
 
 /* =====================================================
-   SAFARIA UPI ID
+   SAFARIA UPI
 ===================================================== */
 
 const UPI_ID =
@@ -487,6 +540,20 @@ function readCart() {
 
 
 /* =====================================================
+   SAVE CART
+===================================================== */
+
+function saveCart() {
+
+  localStorage.setItem(
+    "safaria_cart",
+    JSON.stringify(cart)
+  );
+
+}
+
+
+/* =====================================================
    LOAD CART
 ===================================================== */
 
@@ -531,38 +598,31 @@ function loadCart() {
 
     `;
 
-
-    totalElement.textContent =
-      "0";
-
+    totalElement.textContent = "0";
 
     document.getElementById(
       "placeOrderBtn"
     ).disabled = true;
 
+    updateUPIAmount();
 
     return;
-
   }
 
 
-  cart.forEach(function(item) {
+  cart.forEach(function(item, index) {
 
     const quantity =
       Math.max(
         1,
-        Number(
-          item.quantity || 1
-        )
+        Number(item.quantity || 1)
       );
 
 
     const price =
       Math.max(
         0,
-        Number(
-          item.price || 0
-        )
+        Number(item.price || 0)
       );
 
 
@@ -570,14 +630,11 @@ function loadCart() {
       price * quantity;
 
 
-    totalAmount +=
-      itemTotal;
+    totalAmount += itemTotal;
 
 
     const div =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
 
     div.className =
@@ -592,11 +649,13 @@ function loadCart() {
 
       ${
         image
-          ? `<img
+          ? `
+            <img
               src="${escapeHTML(image)}"
               alt=""
               onerror="this.style.display='none'"
-            >`
+            >
+          `
           : ""
       }
 
@@ -604,53 +663,72 @@ function loadCart() {
       <div class="item-info">
 
         <div class="item-name">
-
           ${escapeHTML(
             String(
               item.name ||
               "Product"
             )
           )}
-
         </div>
 
 
         <div class="item-price">
-
           ₹${price.toLocaleString("en-IN")}
-
         </div>
 
 
-        <div class="qty">
+        <div class="quantity-box">
 
-          Quantity: ${quantity}
+          <button
+            type="button"
+            class="qty-btn"
+            onclick="decreaseQuantity(${index})"
+          >
+            −
+          </button>
+
+
+          <span class="qty-number">
+            ${quantity}
+          </span>
+
+
+          <button
+            type="button"
+            class="qty-btn"
+            onclick="increaseQuantity(${index})"
+          >
+            +
+          </button>
+
+
+          <button
+            type="button"
+            class="remove-btn"
+            onclick="removeFromCart(${index})"
+          >
+            🗑️ Remove from Cart
+          </button>
 
         </div>
 
       </div>
 
 
-      <div>
-
+      <div class="item-total">
         ₹${itemTotal.toLocaleString("en-IN")}
-
       </div>
 
     `;
 
 
-    cartItems.appendChild(
-      div
-    );
+    cartItems.appendChild(div);
 
   });
 
 
   totalElement.textContent =
-    totalAmount.toLocaleString(
-      "en-IN"
-    );
+    totalAmount.toLocaleString("en-IN");
 
 
   document.getElementById(
@@ -659,6 +737,128 @@ function loadCart() {
 
 
   updateUPIAmount();
+
+}
+
+
+/* =====================================================
+   INCREASE QUANTITY
+===================================================== */
+
+function increaseQuantity(index) {
+
+  if (
+    !cart[index]
+  ) {
+    return;
+  }
+
+
+  const currentQuantity =
+    Math.max(
+      1,
+      Number(
+        cart[index].quantity || 1
+      )
+    );
+
+
+  cart[index].quantity =
+    currentQuantity + 1;
+
+
+  saveCart();
+
+  loadCart();
+
+}
+
+
+/* =====================================================
+   DECREASE QUANTITY
+===================================================== */
+
+function decreaseQuantity(index) {
+
+  if (
+    !cart[index]
+  ) {
+    return;
+  }
+
+
+  const currentQuantity =
+    Math.max(
+      1,
+      Number(
+        cart[index].quantity || 1
+      )
+    );
+
+
+  if (
+    currentQuantity <= 1
+  ) {
+
+    removeFromCart(index);
+
+    return;
+
+  }
+
+
+  cart[index].quantity =
+    currentQuantity - 1;
+
+
+  saveCart();
+
+  loadCart();
+
+}
+
+
+/* =====================================================
+   REMOVE FROM CART
+===================================================== */
+
+function removeFromCart(index) {
+
+  if (
+    index < 0 ||
+    index >= cart.length
+  ) {
+    return;
+  }
+
+
+  const productName =
+    cart[index]?.name ||
+    "this product";
+
+
+  const confirmed =
+    confirm(
+      "Remove " +
+      productName +
+      " from your cart?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  cart.splice(
+    index,
+    1
+  );
+
+
+  saveCart();
+
+  loadCart();
 
 }
 
@@ -927,27 +1127,13 @@ function payWithUPI() {
     );
 
 
-  console.log(
-    "Opening UPI:",
-    upiURL
-  );
-
-
   upiPaymentStarted =
     true;
 
 
-  /*
-    Open UPI application
-  */
-
   window.location.href =
     upiURL;
 
-
-  /*
-    Show confirmation button
-  */
 
   setTimeout(
     function() {
@@ -1031,8 +1217,6 @@ async function placeOrder() {
     ).value;
 
 
-  /* VALIDATION */
-
   if (!name) {
 
     showError(
@@ -1077,10 +1261,6 @@ async function placeOrder() {
   }
 
 
-  /*
-    UPI PAYMENT CHECK
-  */
-
   if (
     payment === "UPI" &&
     !upiPaymentStarted
@@ -1104,8 +1284,6 @@ async function placeOrder() {
 
 
   try {
-
-    /* RECALCULATE TOTAL */
 
     let finalTotal =
       0;
@@ -1139,8 +1317,6 @@ async function placeOrder() {
     );
 
 
-    /* ORDER ID */
-
     const generatedOrderId =
       "SAF-" +
       Date.now() +
@@ -1151,8 +1327,6 @@ async function placeOrder() {
         9000
       );
 
-
-    /* ORDER DATA */
 
     const orderData = {
 
@@ -1192,14 +1366,6 @@ async function placeOrder() {
     };
 
 
-    console.log(
-      "SAFARIA ORDER:",
-      orderData
-    );
-
-
-    /* INSERT ORDER */
-
     const {
       data,
       error
@@ -1220,122 +1386,3 @@ async function placeOrder() {
 
 
     if (error) {
-
-      console.error(
-        "ORDER ERROR:",
-        error
-      );
-
-      throw error;
-
-    }
-
-
-    /* CLEAR CART */
-
-    localStorage.removeItem(
-      "safaria_cart"
-    );
-
-
-    cart = [];
-
-
-    /* SUCCESS */
-
-    document.getElementById(
-      "successOrderId"
-    ).textContent =
-      data?.order_id ||
-      generatedOrderId;
-
-
-    document.getElementById(
-      "checkoutPage"
-    ).style.display =
-      "none";
-
-
-    document.getElementById(
-      "successPage"
-    ).style.display =
-      "block";
-
-  } catch (error) {
-
-    console.error(
-      "Place order error:",
-      error
-    );
-
-
-    showError(
-      "Order failed: " +
-      (
-        error?.message ||
-        "Unknown error"
-      )
-    );
-
-
-    button.disabled =
-      false;
-
-
-    button.textContent =
-      "Place Order";
-
-  }
-
-}
-
-
-/* =====================================================
-   ERROR MESSAGE
-===================================================== */
-
-function showError(
-  message
-) {
-
-  const errorBox =
-    document.getElementById(
-      "errorBox"
-    );
-
-
-  errorBox.textContent =
-    message;
-
-
-  errorBox.style.display =
-    "block";
-
-}
-
-
-/* =====================================================
-   START
-===================================================== */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  async function() {
-
-    console.log(
-      "SAFARIA CHECKOUT STARTED"
-    );
-
-
-    loadCart();
-
-
-    await checkLogin();
-
-  }
-);
-
-</script>
-
-</body>
-</html>
