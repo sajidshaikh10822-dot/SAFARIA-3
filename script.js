@@ -1,11 +1,11 @@
-const SUPABASE_URL = ;"https://wyavyrphoqmdaslsfbzq.supabase.co";
+const SUPABASE_URL = "https://wyavyrphoqmdaslsfbzq.supabase.co";
 
 const SUPABASE_KEY =
   "sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx";
 
 const supabaseClient = window.supabase.createClient(
-  https://wyavyrphoqmdaslsfbzq.supabase.co,
-  sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
 let allProducts = [];
@@ -44,7 +44,6 @@ function updateCartCount() {
   }
 }
 
-
 function saveCart() {
   localStorage.setItem(
     "safaria_cart",
@@ -71,51 +70,31 @@ async function loadProducts() {
   `;
 
   try {
-
     const result = await supabaseClient
       .from("products")
       .select("*")
       .order("id", { ascending: false });
 
-
-    console.log(
-      "SAFARIA PRODUCT RESULT:",
-      result
-    );
-
+    console.log("SAFARIA PRODUCT RESULT:", result);
 
     if (result.error) {
       throw result.error;
     }
 
-
     allProducts = result.data || [];
 
-
-    console.log(
-      "SAFARIA PRODUCTS:",
-      allProducts
-    );
-
+    console.log("SAFARIA PRODUCTS:", allProducts);
 
     displayProducts(allProducts);
 
-
   } catch (error) {
-
-    console.error(
-      "SAFARIA PRODUCT ERROR:",
-      error
-    );
-
+    console.error("SAFARIA PRODUCT ERROR:", error);
 
     container.innerHTML = `
       <div class="error-box">
         ❌ Products could not be loaded.
         <br><br>
-        ${escapeHTML(
-          error.message || "Unknown error"
-        )}
+        ${escapeHTML(error.message || "Unknown error")}
       </div>
     `;
   }
@@ -127,18 +106,11 @@ async function loadProducts() {
 // ===============================
 
 function displayProducts(products) {
-
-  const container =
-    document.getElementById("products");
+  const container = document.getElementById("products");
 
   if (!container) return;
 
-
-  if (
-    !products ||
-    products.length === 0
-  ) {
-
+  if (!products || products.length === 0) {
     container.innerHTML = `
       <div class="empty">
         😔 No products found.
@@ -148,89 +120,74 @@ function displayProducts(products) {
     return;
   }
 
+  container.innerHTML = products.map(product => {
 
-  container.innerHTML = products.map(
-    product => {
+    const name =
+      product.name ||
+      product.title ||
+      "Product";
 
-      const name =
-        product.name ||
-        product.title ||
-        "Product";
+    const image =
+      product.image ||
+      product.image_url ||
+      product.imageUrl ||
+      "https://via.placeholder.com/300x300?text=SAFARIA";
 
+    const price =
+      Number(product.price || 0);
 
-      const image =
-        product.image ||
-        product.image_url ||
-        product.imageUrl ||
-        "https://via.placeholder.com/300x300?text=SAFARIA";
+    const stock =
+      Number(
+        product.stock ??
+        product.quantity ??
+        0
+      );
 
+    return `
+      <div class="product">
 
-      const price =
-        Number(product.price || 0);
+        <img
+          src="${escapeHTML(image)}"
+          alt="${escapeHTML(name)}"
+          onerror="this.src='https://via.placeholder.com/300x300?text=SAFARIA'"
+        >
 
+        <h3>
+          ${escapeHTML(name)}
+        </h3>
 
-      const stock =
-        Number(
-          product.stock ??
-          product.quantity ??
-          0
-        );
-
-
-      return `
-        <div class="product">
-
-          <img
-            src="${escapeHTML(image)}"
-            alt="${escapeHTML(name)}"
-            onerror="this.src='https://via.placeholder.com/300x300?text=SAFARIA'"
-          >
-
-          <h3>
-            ${escapeHTML(name)}
-          </h3>
-
-          <div class="description">
-            ${escapeHTML(
-              product.description || ""
-            )}
-          </div>
-
-          <div class="price">
-            ₹${price.toLocaleString("en-IN")}
-          </div>
-
-          <div class="stock">
-            ${
-              stock > 0
-                ? `${stock} available`
-                : "Out of stock"
-            }
-          </div>
-
-          <button
-            class="buy"
-            ${
-              stock <= 0
-                ? "disabled"
-                : ""
-            }
-            onclick="addToCart('${String(
-              product.id
-            ).replace(/'/g, "\\'")}')"
-          >
-            ${
-              stock > 0
-                ? "Add to Cart"
-                : "Out of Stock"
-            }
-          </button>
-
+        <div class="description">
+          ${escapeHTML(product.description || "")}
         </div>
-      `;
 
-    }
-  ).join("");
+        <div class="price">
+          ₹${price.toLocaleString("en-IN")}
+        </div>
+
+        <div class="stock">
+          ${
+            stock > 0
+              ? `${stock} available`
+              : "Out of stock"
+          }
+        </div>
+
+        <button
+          class="buy"
+          ${stock <= 0 ? "disabled" : ""}
+          onclick="addToCart('${String(product.id).replace(/'/g, "\\'")}')"
+        >
+          ${
+            stock > 0
+              ? "Add to Cart"
+              : "Out of Stock"
+          }
+        </button>
+
+      </div>
+    `;
+
+  }).join("");
 }
 
 
@@ -247,16 +204,10 @@ function addToCart(productId) {
         String(productId)
     );
 
-
   if (!product) {
-
-    alert(
-      "Product not found."
-    );
-
+    alert("Product not found.");
     return;
   }
-
 
   const stock =
     Number(
@@ -265,16 +216,10 @@ function addToCart(productId) {
       0
     );
 
-
   if (stock <= 0) {
-
-    alert(
-      "This product is out of stock."
-    );
-
+    alert("This product is out of stock.");
     return;
   }
-
 
   const existing =
     cart.find(
@@ -283,28 +228,18 @@ function addToCart(productId) {
         String(product.id)
     );
 
-
   if (existing) {
 
-    if (
-      existing.quantity >= stock
-    ) {
-
-      alert(
-        "Maximum available stock reached."
-      );
-
+    if (existing.quantity >= stock) {
+      alert("Maximum available stock reached.");
       return;
     }
 
-
     existing.quantity++;
-
 
   } else {
 
     cart.push({
-
       id: product.id,
 
       name:
@@ -322,17 +257,12 @@ function addToCart(productId) {
         "",
 
       quantity: 1
-
     });
   }
 
-
   saveCart();
 
-
-  alert(
-    "✅ Product added to cart!"
-  );
+  alert("✅ Product added to cart!");
 }
 
 
@@ -343,48 +273,28 @@ function addToCart(productId) {
 function openCart() {
 
   const panel =
-    document.getElementById(
-      "cartPanel"
-    );
-
+    document.getElementById("cartPanel");
 
   if (panel) {
-
-    panel.style.display =
-      "block";
-
+    panel.style.display = "block";
   } else {
-
-    window.location.href =
-      "checkout.html";
+    window.location.href = "checkout.html";
   }
 }
-
 
 function goToCheckout() {
 
   if (cart.length === 0) {
-
-    alert(
-      "Your cart is empty."
-    );
-
+    alert("Your cart is empty.");
     return;
   }
 
-
   saveCart();
 
-
-  window.location.href =
-    "checkout.html";
+  window.location.href = "checkout.html";
 }
 
-
-function changeQuantity(
-  productId,
-  change
-) {
+function changeQuantity(productId, change) {
 
   const item =
     cart.find(
@@ -393,17 +303,11 @@ function changeQuantity(
         String(productId)
     );
 
-
   if (!item) return;
 
+  item.quantity += Number(change);
 
-  item.quantity +=
-    Number(change);
-
-
-  if (
-    item.quantity <= 0
-  ) {
+  if (item.quantity <= 0) {
 
     cart =
       cart.filter(
@@ -413,14 +317,10 @@ function changeQuantity(
       );
   }
 
-
   saveCart();
 }
 
-
-function removeFromCart(
-  productId
-) {
+function removeFromCart(productId) {
 
   cart =
     cart.filter(
@@ -429,15 +329,11 @@ function removeFromCart(
         String(productId)
     );
 
-
   saveCart();
 }
 
-
 function clearCart() {
-
   cart = [];
-
   saveCart();
 }
 
@@ -449,69 +345,51 @@ function clearCart() {
 function searchProducts() {
 
   const input =
-    document.getElementById(
-      "searchInput"
-    );
-
+    document.getElementById("searchInput");
 
   if (!input) return;
-
 
   const search =
     input.value
       .trim()
       .toLowerCase();
 
-
   if (!search) {
-
-    displayProducts(
-      allProducts
-    );
-
+    displayProducts(allProducts);
     return;
   }
 
-
   const filtered =
-    allProducts.filter(
-      product => {
+    allProducts.filter(product => {
 
-        const name =
-          String(
-            product.name ||
-            product.title ||
-            ""
-          ).toLowerCase();
+      const name =
+        String(
+          product.name ||
+          product.title ||
+          ""
+        ).toLowerCase();
 
+      const description =
+        String(
+          product.description ||
+          ""
+        ).toLowerCase();
 
-        const description =
-          String(
-            product.description ||
-            ""
-          ).toLowerCase();
+      const category =
+        String(
+          product.category ||
+          ""
+        ).toLowerCase();
 
+      return (
+        name.includes(search) ||
+        description.includes(search) ||
+        category.includes(search)
+      );
 
-        const category =
-          String(
-            product.category ||
-            ""
-          ).toLowerCase();
+    });
 
-
-        return (
-          name.includes(search) ||
-          description.includes(search) ||
-          category.includes(search)
-        );
-
-      }
-    );
-
-
-  displayProducts(
-    filtered
-  );
+  displayProducts(filtered);
 }
 
 
@@ -519,59 +397,35 @@ function searchProducts() {
 // CATEGORY FILTER
 // ===============================
 
-function filterCategory(
-  category
-) {
+function filterCategory(category) {
 
   const filtered =
     allProducts.filter(
       product =>
-        String(
-          product.category || ""
-        ).toLowerCase() ===
-        String(
-          category || ""
-        ).toLowerCase()
+        String(product.category || "").toLowerCase() ===
+        String(category || "").toLowerCase()
     );
-
 
   const title =
-    document.getElementById(
-      "productTitle"
-    );
-
+    document.getElementById("productTitle");
 
   if (title) {
-
-    title.textContent =
-      `🛍️ ${category}`;
+    title.textContent = `🛍️ ${category}`;
   }
 
-
-  displayProducts(
-    filtered
-  );
+  displayProducts(filtered);
 }
-
 
 function showAllProducts() {
 
   const title =
-    document.getElementById(
-      "productTitle"
-    );
-
+    document.getElementById("productTitle");
 
   if (title) {
-
-    title.textContent =
-      "🛍️ Latest Products";
+    title.textContent = "🛍️ Latest Products";
   }
 
-
-  displayProducts(
-    allProducts
-  );
+  displayProducts(allProducts);
 }
 
 
@@ -588,67 +442,40 @@ async function checkLogin() {
     } =
       await supabaseClient.auth.getSession();
 
-
     const accountBtn =
-      document.getElementById(
-        "accountBtn"
-      );
-
+      document.getElementById("accountBtn");
 
     const accountBox =
-      document.getElementById(
-        "accountBox"
-      );
-
+      document.getElementById("accountBox");
 
     const emailElement =
-      document.getElementById(
-        "customerEmail"
-      );
+      document.getElementById("customerEmail");
 
-
-    if (
-      session &&
-      session.user
-    ) {
+    if (session && session.user) {
 
       if (accountBtn) {
-
-        accountBtn.style.display =
-          "none";
+        accountBtn.style.display = "none";
       }
-
 
       if (accountBox) {
-
-        accountBox.style.display =
-          "flex";
+        accountBox.style.display = "flex";
       }
 
-
       if (emailElement) {
-
         emailElement.textContent =
           session.user.email || "-";
       }
 
-
     } else {
 
       if (accountBtn) {
-
-        accountBtn.style.display =
-          "block";
+        accountBtn.style.display = "block";
       }
-
 
       if (accountBox) {
-
-        accountBox.style.display =
-          "none";
+        accountBox.style.display = "none";
       }
     }
-
 
   } catch (error) {
 
@@ -672,7 +499,6 @@ async function logout() {
 
     window.location.reload();
 
-
   } catch (error) {
 
     console.error(
@@ -690,30 +516,17 @@ async function logout() {
 async function showMyOrders() {
 
   const ordersBox =
-    document.getElementById(
-      "myOrders"
-    );
-
+    document.getElementById("myOrders");
 
   const ordersList =
-    document.getElementById(
-      "myOrdersList"
-    );
+    document.getElementById("myOrdersList");
 
+  if (!ordersBox || !ordersList) return;
 
-  if (
-    !ordersBox ||
-    !ordersList
-  ) return;
-
-
-  ordersBox.style.display =
-    "block";
-
+  ordersBox.style.display = "block";
 
   ordersList.innerHTML =
     "⏳ Loading orders...";
-
 
   try {
 
@@ -722,18 +535,13 @@ async function showMyOrders() {
     } =
       await supabaseClient.auth.getSession();
 
-
-    if (
-      !session ||
-      !session.user
-    ) {
+    if (!session || !session.user) {
 
       ordersList.innerHTML =
         "Please login first.";
 
       return;
     }
-
 
     const {
       data,
@@ -753,23 +561,17 @@ async function showMyOrders() {
           }
         );
 
-
     if (error) {
       throw error;
     }
 
-
-    if (
-      !data ||
-      data.length === 0
-    ) {
+    if (!data || data.length === 0) {
 
       ordersList.innerHTML =
         "No orders found.";
 
       return;
     }
-
 
     ordersList.innerHTML =
       data.map(
@@ -804,14 +606,12 @@ async function showMyOrders() {
         `
       ).join("");
 
-
   } catch (error) {
 
     console.error(
       "Orders error:",
       error
     );
-
 
     ordersList.innerHTML =
       "Unable to load orders.";
