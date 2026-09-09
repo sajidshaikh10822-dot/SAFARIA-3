@@ -1,11 +1,11 @@
-const SUPABASE_URL = "https://dcwdzbejpwvskajukxrh.supabase.co";
+const SUPABASE_URL = ;"https://wyavyrphoqmdaslsfbzq.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
+  "sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx";
 
 const supabaseClient = window.supabase.createClient(
-  https://dcwdzbejpwvskajukxrh.supabase.co,
-  sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU
+  https://wyavyrphoqmdaslsfbzq.supabase.co,
+  sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx
 );
 
 let allProducts = [];
