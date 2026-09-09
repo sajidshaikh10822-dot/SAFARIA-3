@@ -1,4 +1,8 @@
-const products = [];
+/* =====================================================
+   SAFARIA - MAIN SCRIPT
+   Product + Cart + Search + Category
+===================================================== */
+
 
 /* =========================
    SUPABASE
@@ -11,253 +15,86 @@ const SUPABASE_KEY =
   "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
 
 const supabaseClient =
-  window.supabase
-    ? window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      )
-    : null;
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
 
 /* =========================
-   CART
+   VARIABLES
 ========================= */
+
+let allProducts = [];
 
 let cart = [];
 
-try {
-  cart = JSON.parse(
-    localStorage.getItem("safaria_cart") || "[]"
-  );
 
-  if (!Array.isArray(cart)) {
-    cart = [];
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHTML(value) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
   }
 
-  cart = cart.filter(item =>
-    item &&
-    item.id !== undefined &&
-    item.id !== null
-  );
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-  cart.forEach(item => {
-    item.quantity = Math.max(
-      1,
-      Number(item.quantity || 1)
-    );
-  });
-
-} catch (e) {
-  cart = [];
 }
 
 
 /* =========================
-   LOAD PRODUCTS
+   READ CART
 ========================= */
 
-async function loadProductsFromSupabase() {
-
-  if (!supabaseClient) {
-    console.error("Supabase library not loaded");
-    return;
-  }
+function readCart() {
 
   try {
 
-    const { data, error } =
-      await supabaseClient
-        .from("products")
-        .select("*")
-        .order("created_at", {
-          ascending: false
-        });
+    const saved =
+      localStorage.getItem(
+        "safaria_cart"
+      );
 
-    if (error) {
-      console.error(error);
-      return;
+    if (!saved) {
+      return [];
     }
 
-    window.safariaProducts = data || [];
+    const parsed =
+      JSON.parse(saved);
 
-    renderProducts(
-      window.safariaProducts
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter(
+      item =>
+        item &&
+        item.id !== undefined &&
+        item.id !== null
     );
 
   } catch (error) {
-    console.error(error);
-  }
-}
 
-
-/* =========================
-   RENDER PRODUCTS
-========================= */
-
-function renderProducts(list) {
-
-  const container =
-    document.getElementById("products") ||
-    document.querySelector(".products");
-
-  if (!container) return;
-
-  if (!list || !list.length) {
-
-    container.innerHTML =
-      "<p>No products available.</p>";
-
-    return;
-  }
-
-  container.innerHTML =
-    list.map(product => {
-
-      const price =
-        Number(product.price || 0);
-
-      const stock =
-        Number(product.stock || 0);
-
-      const image =
-        product.image ||
-        "https://via.placeholder.com/300";
-
-      return `
-        <div class="product">
-
-          <img
-            src="${escapeHtml(image)}"
-            alt="${escapeHtml(product.name || "Product")}"
-            style="max-width:100%;height:180px;object-fit:contain"
-          >
-
-          <h3>
-            ${escapeHtml(product.name || "Product")}
-          </h3>
-
-          <p>
-            ${escapeHtml(product.description || "")}
-          </p>
-
-          <h2>
-            ₹${price.toLocaleString("en-IN")}
-          </h2>
-
-          <p>
-            ${escapeHtml(product.category || "General")}
-          </p>
-
-          <p>
-            ${
-              stock > 0
-                ? "✅ In Stock"
-                : "❌ Out of Stock"
-            }
-          </p>
-
-          <button
-            onclick="addToCart(${JSON.stringify(product.id)})"
-            ${stock <= 0 ? "disabled" : ""}
-          >
-            🛒 Add to Cart
-          </button>
-
-        </div>
-      `;
-
-    }).join("");
-}
-
-
-/* =========================
-   ADD TO CART
-========================= */
-
-function addToCart(productId) {
-
-  const list =
-    window.safariaProducts || [];
-
-  const product =
-    list.find(
-      p =>
-        String(p.id) ===
-        String(productId)
+    console.error(
+      "Cart read error:",
+      error
     );
 
-  if (!product) {
-    alert("Product not found");
-    return;
-  }
-
-  const stock =
-    Number(product.stock || 0);
-
-  if (stock <= 0) {
-    alert("❌ This product is out of stock.");
-    return;
-  }
-
-  const existing =
-    cart.find(
-      item =>
-        String(item.id) ===
-        String(product.id)
-    );
-
-  if (existing) {
-
-    const currentQuantity =
-      Number(existing.quantity || 1);
-
-    if (currentQuantity >= stock) {
-      alert(
-        `Only ${stock} item(s) available in stock.`
-      );
-      return;
-    }
-
-    existing.quantity =
-      currentQuantity + 1;
-
-  } else {
-
-    cart.push({
-
-      id: product.id,
-
-      name:
-        product.name || "Product",
-
-      description:
-        product.description || "",
-
-      price:
-        Number(product.price || 0),
-
-      image:
-        product.image || "",
-
-      category:
-        product.category || "",
-
-      stock:
-        stock,
-
-      quantity: 1
-
-    });
+    return [];
 
   }
 
-  saveCart();
-
-  alert("✅ Product added to Cart!");
-
-  if (typeof openCart === "function") {
-    openCart();
-  }
 }
 
 
@@ -272,62 +109,601 @@ function saveCart() {
     JSON.stringify(cart)
   );
 
-  updateCart();
+  updateCartCount();
+
 }
 
 
 /* =========================
-   UPDATE CART
+   CART COUNT
 ========================= */
 
-function updateCart() {
+function updateCartCount() {
 
-  const countElement =
-    document.getElementById("cartCount");
+  cart = readCart();
 
-  const cartQuantity =
-    cart.reduce(
-      (sum, item) =>
-        sum + Number(item.quantity || 1),
-      0
+  let count = 0;
+
+  cart.forEach(item => {
+
+    count += Math.max(
+      1,
+      Number(
+        item.quantity || 1
+      )
     );
 
-  if (countElement) {
-    countElement.innerText =
-      cartQuantity;
+  });
+
+
+  const element =
+    document.getElementById(
+      "cartCount"
+    );
+
+
+  if (element) {
+
+    element.textContent =
+      count;
+
+  }
+
+}
+
+
+/* =====================================================
+   LOAD PRODUCTS
+===================================================== */
+
+async function loadProducts() {
+
+  const container =
+    document.getElementById(
+      "products"
+    );
+
+
+  if (!container) {
+    console.error(
+      "Products container not found."
+    );
+    return;
   }
 
 
-  const itemsElement =
-    document.getElementById("cartItems");
-
-  const totalElement =
-    document.getElementById("total") ||
-    document.getElementById("cartTotal");
-
-  if (!itemsElement) return;
+  container.innerHTML = `
+    <div class="loading">
+      ⏳ Loading products...
+    </div>
+  `;
 
 
-  if (!cart.length) {
+  try {
 
-    itemsElement.innerHTML = `
-      <div class="empty-cart">
-        <p style="font-size:18px;font-weight:bold;">
-          Your cart is empty 🛒
-        </p>
+    console.log(
+      "SAFARIA: Loading products..."
+    );
 
-        <p style="margin-top:8px;color:#666;">
-          Add products to your cart.
-        </p>
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("products")
+        .select("*");
+
+
+    console.log(
+      "SAFARIA PRODUCTS:",
+      data
+    );
+
+
+    if (error) {
+
+      console.error(
+        "Supabase product error:",
+        error
+      );
+
+
+      container.innerHTML = `
+        <div class="error-box">
+
+          ❌ Products load nahi ho rahe.
+
+          <br><br>
+
+          <b>Supabase Error:</b>
+
+          <br>
+
+          ${escapeHTML(
+            error.message ||
+            "Unknown error"
+          )}
+
+        </div>
+      `;
+
+      return;
+
+    }
+
+
+    allProducts =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    window.safariaProducts =
+      allProducts;
+
+
+    if (
+      allProducts.length === 0
+    ) {
+
+      container.innerHTML = `
+        <div class="empty">
+
+          📦 Abhi koi product available nahi hai.
+
+          <br><br>
+
+          Admin Panel se product add karo.
+
+        </div>
+      `;
+
+      updateCartCount();
+
+      return;
+
+    }
+
+
+    displayProducts(
+      allProducts
+    );
+
+
+    updateCartCount();
+
+
+  } catch (error) {
+
+    console.error(
+      "Product loading error:",
+      error
+    );
+
+
+    container.innerHTML = `
+      <div class="error-box">
+
+        ❌ Product loading error.
+
+        <br><br>
+
+        ${escapeHTML(
+          error.message ||
+          String(error)
+        )}
+
       </div>
     `;
 
+  }
+
+}
+
+
+/* =====================================================
+   DISPLAY PRODUCTS
+===================================================== */
+
+function displayProducts(
+  products
+) {
+
+  const container =
+    document.getElementById(
+      "products"
+    );
+
+
+  if (!container) {
+    return;
+  }
+
+
+  if (
+    !Array.isArray(products) ||
+    products.length === 0
+  ) {
+
+    container.innerHTML = `
+      <div class="empty">
+        😔 No products found.
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML = "";
+
+
+  products.forEach(
+    product => {
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+
+      card.className =
+        "product";
+
+
+      const image =
+        product.image ||
+        "https://via.placeholder.com/300x200?text=SAFARIA";
+
+
+      const name =
+        product.name ||
+        "Product";
+
+
+      const description =
+        product.description ||
+        "";
+
+
+      const price =
+        Number(
+          product.price || 0
+        );
+
+
+      const stock =
+        Number(
+          product.stock || 0
+        );
+
+
+      card.innerHTML = `
+
+        <img
+          src="${escapeHTML(image)}"
+          alt="${escapeHTML(name)}"
+          onerror="
+            this.src='https://via.placeholder.com/300x200?text=SAFARIA'
+          "
+        >
+
+        <h3>
+          ${escapeHTML(name)}
+        </h3>
+
+        <div class="description">
+          ${escapeHTML(description)}
+        </div>
+
+        <div class="price">
+          ₹${price.toLocaleString("en-IN")}
+        </div>
+
+        <div class="stock">
+
+          ${
+            stock > 0
+              ? "✓ In Stock"
+              : "❌ Out of Stock"
+          }
+
+        </div>
+
+        <button
+          class="buy"
+          ${
+            stock <= 0
+              ? "disabled"
+              : ""
+          }
+          onclick="
+            addToCart('${String(
+              product.id
+            ).replace(/'/g, "\\'")}')
+          "
+        >
+
+          🛒 Add to Cart
+
+        </button>
+
+      `;
+
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   ADD TO CART
+===================================================== */
+
+function addToCart(
+  productId
+) {
+
+  cart =
+    readCart();
+
+
+  const product =
+    allProducts.find(
+      product =>
+        String(product.id) ===
+        String(productId)
+    );
+
+
+  if (!product) {
+
+    alert(
+      "❌ Product not found."
+    );
+
+    return;
+
+  }
+
+
+  const stock =
+    Number(
+      product.stock || 0
+    );
+
+
+  if (stock <= 0) {
+
+    alert(
+      "❌ This product is out of stock."
+    );
+
+    return;
+
+  }
+
+
+  const existing =
+    cart.find(
+      item =>
+        String(item.id) ===
+        String(product.id)
+    );
+
+
+  if (existing) {
+
+    const quantity =
+      Number(
+        existing.quantity || 1
+      );
+
+
+    if (
+      quantity >= stock
+    ) {
+
+      alert(
+        `Only ${stock} item(s) available in stock.`
+      );
+
+      return;
+
+    }
+
+
+    existing.quantity =
+      quantity + 1;
+
+  } else {
+
+    cart.push({
+
+      id:
+        product.id,
+
+      name:
+        product.name ||
+        "Product",
+
+      description:
+        product.description ||
+        "",
+
+      price:
+        Number(
+          product.price || 0
+        ),
+
+      image:
+        product.image ||
+        "",
+
+      category:
+        product.category ||
+        "",
+
+      stock:
+        stock,
+
+      quantity:
+        1
+
+    });
+
+  }
+
+
+  saveCart();
+
+
+  alert(
+    "✅ Product added to Cart!"
+  );
+
+}
+
+
+/* =====================================================
+   OPEN CART
+===================================================== */
+
+function openCart() {
+
+  cart =
+    readCart();
+
+
+  /*
+    If a cart panel exists,
+    open it.
+  */
+
+  const panel =
+    document.getElementById(
+      "cartPanel"
+    );
+
+
+  if (panel) {
+
+    panel.classList.add(
+      "open"
+    );
+
+    panel.style.display =
+      "block";
+
+    updateCart();
+
+    return;
+
+  }
+
+
+  /*
+    If there is no cart panel,
+    go to checkout.
+  */
+
+  if (
+    cart.length === 0
+  ) {
+
+    alert(
+      "🛒 Your cart is empty."
+    );
+
+    return;
+
+  }
+
+
+  window.location.href =
+    "checkout.html";
+
+}
+
+
+/* =====================================================
+   UPDATE CART
+===================================================== */
+
+function updateCart() {
+
+  cart =
+    readCart();
+
+
+  updateCartCount();
+
+
+  const itemsElement =
+    document.getElementById(
+      "cartItems"
+    );
+
+
+  const totalElement =
+    document.getElementById(
+      "total"
+    ) ||
+    document.getElementById(
+      "cartTotal"
+    );
+
+
+  if (!itemsElement) {
+    return;
+  }
+
+
+  if (
+    cart.length === 0
+  ) {
+
+    itemsElement.innerHTML = `
+      <div class="empty-cart">
+
+        <p
+          style="
+            font-size:18px;
+            font-weight:bold;
+          "
+        >
+          Your cart is empty 🛒
+        </p>
+
+        <p
+          style="
+            margin-top:8px;
+            color:#666;
+          "
+        >
+          Add products to your cart.
+        </p>
+
+      </div>
+    `;
+
+
     if (totalElement) {
+
       totalElement.innerText =
         "Total: ₹0";
+
     }
 
     return;
+
   }
 
 
@@ -335,213 +711,245 @@ function updateCart() {
 
 
   itemsElement.innerHTML =
-    cart.map((item, index) => {
+    cart.map(
+      (item, index) => {
 
-      const quantity =
-        Math.max(
-          1,
-          Number(item.quantity || 1)
-        );
-
-      const price =
-        Number(item.price || 0);
-
-      const stock =
-        Number(item.stock || 999999);
-
-      total +=
-        price * quantity;
+        const quantity =
+          Math.max(
+            1,
+            Number(
+              item.quantity || 1
+            )
+          );
 
 
-      return `
-        <div
-          class="cart-item"
-          style="
-            border:1px solid #ddd;
-            border-radius:10px;
-            padding:12px;
-            margin-bottom:12px;
-            background:#fff;
-          "
-        >
+        const price =
+          Number(
+            item.price || 0
+          );
+
+
+        const stock =
+          Number(
+            item.stock || 999999
+          );
+
+
+        total +=
+          price * quantity;
+
+
+        return `
 
           <div
+            class="cart-item"
             style="
-              display:flex;
-              gap:12px;
-              align-items:center;
+              border:1px solid #ddd;
+              border-radius:10px;
+              padding:12px;
+              margin-bottom:12px;
+              background:#fff;
             "
           >
 
-            ${
-              item.image
-                ? `
-                  <img
-                    src="${escapeHtml(item.image)}"
-                    alt="${escapeHtml(item.name)}"
-                    style="
-                      width:70px;
-                      height:70px;
-                      object-fit:contain;
-                      border-radius:8px;
-                    "
-                  >
-                `
-                : ""
-            }
+            <div
+              style="
+                display:flex;
+                gap:12px;
+                align-items:center;
+              "
+            >
 
-
-            <div style="flex:1;">
-
-              <strong
-                style="
-                  display:block;
-                  font-size:16px;
-                  margin-bottom:5px;
-                "
-              >
-                ${escapeHtml(item.name)}
-              </strong>
-
-
-              <p
-                style="
-                  margin:0 0 8px;
-                  font-weight:bold;
-                "
-              >
-                ₹${price.toLocaleString("en-IN")}
-              </p>
+              ${
+                item.image
+                  ? `
+                    <img
+                      src="${escapeHTML(
+                        item.image
+                      )}"
+                      alt="${escapeHTML(
+                        item.name
+                      )}"
+                      style="
+                        width:70px;
+                        height:70px;
+                        object-fit:contain;
+                        border-radius:8px;
+                      "
+                    >
+                  `
+                  : ""
+              }
 
 
               <div
-                style="
-                  display:flex;
-                  align-items:center;
-                  gap:8px;
-                  flex-wrap:wrap;
-                "
+                style="flex:1;"
               >
 
-                <!-- DECREASE -->
-
-                <button
-                  type="button"
-                  onclick="decreaseCartQuantity(${index})"
+                <strong
                   style="
-                    background:#eee;
-                    color:#111;
-                    border:1px solid #ccc;
-                    padding:7px 12px;
-                    border-radius:6px;
-                    cursor:pointer;
-                    font-weight:bold;
-                    margin:0;
+                    display:block;
+                    font-size:16px;
+                    margin-bottom:5px;
                   "
                 >
-                  −
-                </button>
+                  ${escapeHTML(
+                    item.name
+                  )}
+                </strong>
 
 
-                <!-- QUANTITY -->
-
-                <span
+                <p
                   style="
-                    min-width:28px;
-                    text-align:center;
+                    margin:0 0 8px;
                     font-weight:bold;
                   "
                 >
-                  ${quantity}
-                </span>
+                  ₹${price.toLocaleString(
+                    "en-IN"
+                  )}
+                </p>
 
 
-                <!-- INCREASE -->
-
-                <button
-                  type="button"
-                  onclick="increaseCartQuantity(${index})"
+                <div
                   style="
-                    background:#eee;
-                    color:#111;
-                    border:1px solid #ccc;
-                    padding:7px 12px;
-                    border-radius:6px;
-                    cursor:pointer;
-                    font-weight:bold;
-                    margin:0;
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
                   "
-                  ${
-                    quantity >= stock
-                      ? "disabled"
-                      : ""
-                  }
                 >
-                  +
-                </button>
+
+                  <button
+                    type="button"
+                    onclick="
+                      decreaseCartQuantity(
+                        ${index}
+                      )
+                    "
+                    style="
+                      background:#eee;
+                      color:#111;
+                      border:1px solid #ccc;
+                      padding:7px 12px;
+                      border-radius:6px;
+                      cursor:pointer;
+                      font-weight:bold;
+                    "
+                  >
+                    −
+                  </button>
+
+
+                  <span
+                    style="
+                      min-width:28px;
+                      text-align:center;
+                      font-weight:bold;
+                    "
+                  >
+                    ${quantity}
+                  </span>
+
+
+                  <button
+                    type="button"
+                    onclick="
+                      increaseCartQuantity(
+                        ${index}
+                      )
+                    "
+                    ${
+                      quantity >= stock
+                        ? "disabled"
+                        : ""
+                    }
+                    style="
+                      background:#eee;
+                      color:#111;
+                      border:1px solid #ccc;
+                      padding:7px 12px;
+                      border-radius:6px;
+                      cursor:pointer;
+                      font-weight:bold;
+                    "
+                  >
+                    +
+                  </button>
+
+                </div>
 
               </div>
 
             </div>
 
+
+            <button
+              type="button"
+              onclick="
+                removeFromCart(
+                  ${index}
+                )
+              "
+              style="
+                width:100%;
+                margin-top:10px;
+                background:#e53935;
+                color:white;
+                border:none;
+                padding:10px 14px;
+                border-radius:7px;
+                cursor:pointer;
+                font-weight:bold;
+              "
+            >
+              🗑️ Remove from Cart
+            </button>
+
+
+            <p
+              style="
+                margin-top:8px;
+                font-weight:bold;
+                text-align:right;
+              "
+            >
+              Item Total:
+              ₹${(
+                price *
+                quantity
+              ).toLocaleString(
+                "en-IN"
+              )}
+            </p>
+
           </div>
 
+        `;
 
-          <!-- REMOVE BUTTON -->
-
-          <button
-            type="button"
-            onclick="removeFromCart(${index})"
-            style="
-              width:100%;
-              margin-top:10px;
-              background:#e53935;
-              color:white;
-              border:none;
-              padding:10px 14px;
-              border-radius:7px;
-              cursor:pointer;
-              font-weight:bold;
-            "
-          >
-            🗑️ Remove from Cart
-          </button>
-
-
-          <!-- ITEM TOTAL -->
-
-          <p
-            style="
-              margin-top:8px;
-              font-weight:bold;
-              text-align:right;
-            "
-          >
-            Item Total:
-            ₹${(price * quantity).toLocaleString("en-IN")}
-          </p>
-
-        </div>
-      `;
-
-    }).join("");
+      }
+    ).join("");
 
 
   if (totalElement) {
 
     totalElement.innerText =
       "Total: ₹" +
-      total.toLocaleString("en-IN");
+      total.toLocaleString(
+        "en-IN"
+      );
 
   }
+
 }
 
 
-/* =========================
-   INCREASE QUANTITY
-========================= */
+/* =====================================================
+   INCREASE
+===================================================== */
 
-function increaseCartQuantity(index) {
+function increaseCartQuantity(
+  index
+) {
 
   if (
     index < 0 ||
@@ -550,38 +958,55 @@ function increaseCartQuantity(index) {
     return;
   }
 
+
   const item =
     cart[index];
 
-  const currentQuantity =
-    Number(item.quantity || 1);
+
+  const quantity =
+    Number(
+      item.quantity || 1
+    );
+
 
   const stock =
-    Number(item.stock || 999999);
+    Number(
+      item.stock || 999999
+    );
 
 
-  if (currentQuantity >= stock) {
+  if (
+    quantity >= stock
+  ) {
 
     alert(
       `Only ${stock} item(s) available in stock.`
     );
 
     return;
+
   }
 
 
   item.quantity =
-    currentQuantity + 1;
+    quantity + 1;
+
 
   saveCart();
+
+
+  updateCart();
+
 }
 
 
-/* =========================
-   DECREASE QUANTITY
-========================= */
+/* =====================================================
+   DECREASE
+===================================================== */
 
-function decreaseCartQuantity(index) {
+function decreaseCartQuantity(
+  index
+) {
 
   if (
     index < 0 ||
@@ -589,34 +1014,50 @@ function decreaseCartQuantity(index) {
   ) {
     return;
   }
+
 
   const item =
     cart[index];
 
-  const currentQuantity =
-    Number(item.quantity || 1);
+
+  const quantity =
+    Number(
+      item.quantity || 1
+    );
 
 
-  if (currentQuantity <= 1) {
+  if (
+    quantity <= 1
+  ) {
 
-    removeFromCart(index);
+    removeFromCart(
+      index
+    );
 
     return;
+
   }
 
 
   item.quantity =
-    currentQuantity - 1;
+    quantity - 1;
+
 
   saveCart();
+
+
+  updateCart();
+
 }
 
 
-/* =========================
-   REMOVE FROM CART
-========================= */
+/* =====================================================
+   REMOVE
+===================================================== */
 
-function removeFromCart(index) {
+function removeFromCart(
+  index
+) {
 
   if (
     index < 0 ||
@@ -625,99 +1066,117 @@ function removeFromCart(index) {
     return;
   }
 
-  const itemName =
-    cart[index].name || "Product";
+
+  const name =
+    cart[index].name ||
+    "Product";
 
 
-  cart.splice(index, 1);
+  cart.splice(
+    index,
+    1
+  );
+
 
   saveCart();
 
 
+  updateCart();
+
+
   alert(
-    `🗑️ ${itemName} removed from cart.`
+    `🗑️ ${name} removed from cart.`
   );
+
 }
 
 
-/* =========================
-   CLEAR ENTIRE CART
-========================= */
+/* =====================================================
+   CLEAR CART
+===================================================== */
 
 function clearCart() {
 
-  if (!cart.length) {
+  if (
+    !cart.length
+  ) {
     return;
   }
 
-  const confirmClear =
+
+  const confirmed =
     confirm(
       "Are you sure you want to remove all products from your cart?"
     );
 
-  if (!confirmClear) {
+
+  if (!confirmed) {
     return;
   }
 
+
   cart = [];
+
 
   saveCart();
 
-  alert("🗑️ Cart cleared successfully.");
-}
-
-
-/* =========================
-   OPEN CART
-========================= */
-
-function openCart() {
-
-  const panel =
-    document.getElementById("cartPanel");
-
-  if (panel) {
-
-    panel.classList.add("open");
-
-    panel.style.display =
-      "block";
-  }
 
   updateCart();
+
+
+  alert(
+    "🗑️ Cart cleared successfully."
+  );
+
 }
 
 
-/* =========================
+/* =====================================================
    CLOSE CART
-========================= */
+===================================================== */
 
 function closeCart() {
 
   const panel =
-    document.getElementById("cartPanel");
+    document.getElementById(
+      "cartPanel"
+    );
+
 
   if (panel) {
 
-    panel.classList.remove("open");
+    panel.classList.remove(
+      "open"
+    );
 
     panel.style.display =
       "none";
+
   }
+
 }
 
 
-/* =========================
+/* =====================================================
    CHECKOUT
-========================= */
+===================================================== */
 
 function goCheckout() {
 
-  if (!cart.length) {
+  cart =
+    readCart();
 
-    alert("🛒 Cart is empty!");
+
+  if (
+    cart.length === 0
+  ) {
+
+    alert(
+      "🛒 Cart is empty!"
+    );
 
     return;
+
   }
 
 
@@ -727,39 +1186,37 @@ function goCheckout() {
   );
 
 
-  /*
-    Checkout always goes to checkout.html.
-    It never goes to admin.html.
-  */
-
   window.location.assign(
     "checkout.html"
   );
+
 }
 
 
-/* =========================
-   CHECKOUT SUPPORT
-========================= */
-
 function checkout() {
+
   goCheckout();
+
 }
 
 
 function proceedToCheckout() {
+
   goCheckout();
+
 }
 
 
 function buyNow() {
+
   goCheckout();
+
 }
 
 
-/* =========================
+/* =====================================================
    SEARCH
-========================= */
+===================================================== */
 
 function searchProducts() {
 
@@ -768,118 +1225,200 @@ function searchProducts() {
       "searchInput"
     );
 
-  if (!input) return;
 
-
-  const query =
-    input.value
-      .toLowerCase()
-      .trim();
-
-
-  const list =
-    window.safariaProducts || [];
-
-
-  if (!query) {
-
-    renderProducts(list);
-
+  if (!input) {
     return;
   }
 
 
-  const filtered =
-    list.filter(product =>
+  const query =
+    input.value
+      .trim()
+      .toLowerCase();
 
-      String(product.name || "")
-        .toLowerCase()
-        .includes(query)
 
-      ||
+  if (!query) {
 
-      String(product.description || "")
-        .toLowerCase()
-        .includes(query)
+    const title =
+      document.getElementById(
+        "productTitle"
+      );
 
-      ||
 
-      String(product.category || "")
-        .toLowerCase()
-        .includes(query)
+    if (title) {
 
+      title.textContent =
+        "🛍️ Latest Products";
+
+    }
+
+
+    displayProducts(
+      allProducts
     );
 
+    return;
 
-  renderProducts(filtered);
-}
-
-
-/* =========================
-   CATEGORY
-========================= */
-
-function filterCategory(category) {
-
-  const list =
-    window.safariaProducts || [];
+  }
 
 
   const filtered =
-    list.filter(product =>
+    allProducts.filter(
+      product => {
 
-      String(product.category || "")
-        .toLowerCase() ===
-      String(category || "")
-        .toLowerCase()
+        const name =
+          String(
+            product.name || ""
+          ).toLowerCase();
 
+
+        const description =
+          String(
+            product.description ||
+            ""
+          ).toLowerCase();
+
+
+        const category =
+          String(
+            product.category ||
+            ""
+          ).toLowerCase();
+
+
+        return (
+          name.includes(query) ||
+          description.includes(query) ||
+          category.includes(query)
+        );
+
+      }
     );
 
 
-  renderProducts(filtered);
-}
+  const title =
+    document.getElementById(
+      "productTitle"
+    );
 
 
-/* =========================
-   SHOW ALL
-========================= */
+  if (title) {
 
-function showAll() {
+    title.textContent =
+      `🔍 Search Results (${filtered.length})`;
 
-  renderProducts(
-    window.safariaProducts || []
+  }
+
+
+  displayProducts(
+    filtered
   );
 
 }
 
 
-/* =========================
-   HTML ESCAPE
-========================= */
+/* =====================================================
+   CATEGORY
+===================================================== */
 
-function escapeHtml(value) {
+function filterCategory(
+  category
+) {
 
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+  const filtered =
+    allProducts.filter(
+      product =>
+
+        String(
+          product.category || ""
+        )
+          .trim()
+          .toLowerCase() ===
+
+        String(
+          category || ""
+        )
+          .trim()
+          .toLowerCase()
+
+    );
+
+
+  const title =
+    document.getElementById(
+      "productTitle"
+    );
+
+
+  if (title) {
+
+    title.textContent =
+      `🛍️ ${category}`;
+
+  }
+
+
+  displayProducts(
+    filtered
+  );
 
 }
 
 
-/* =========================
-   START
-========================= */
+/* =====================================================
+   SHOW ALL
+===================================================== */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
+function showAllProducts() {
 
-    updateCart();
+  const input =
+    document.getElementById(
+      "searchInput"
+    );
 
-    loadProductsFromSupabase();
+
+  if (input) {
+    input.value = "";
+  }
+
+
+  const title =
+    document.getElementById(
+      "productTitle"
+    );
+
+
+  if (title) {
+
+    title.textContent =
+      "🛍️ Latest Products";
 
   }
-);
+
+
+  displayProducts(
+    allProducts
+  );
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+async function checkLogin() {
+
+  try {
+
+    const {
+      data: {
+        session
+      }
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+
+    const
