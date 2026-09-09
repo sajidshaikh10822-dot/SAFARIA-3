@@ -346,10 +346,15 @@
       placeholder="Search products..."
       oninput="searchProducts()"
     >
+
     <button onclick="searchProducts()">🔍</button>
   </div>
 
-  <a href="auth.html" class="header-btn login-btn" id="accountBtn">
+  <a
+    href="auth.html"
+    class="header-btn login-btn"
+    id="accountBtn"
+  >
     👤 Login
   </a>
 
@@ -372,22 +377,53 @@
 
 </header>
 
+
 <nav>
+
   <span onclick="showAllProducts()">All</span>
-  <span onclick="filterCategory('Electronics')">Electronics</span>
-  <span onclick="filterCategory('Fashion')">Fashion</span>
-  <span onclick="filterCategory('Mobiles')">Mobiles</span>
-  <span onclick="filterCategory('Home')">Home</span>
-  <span onclick="filterCategory('Beauty')">Beauty</span>
-  <span onclick="filterCategory('Grocery')">Grocery</span>
+
+  <span onclick="filterCategory('Electronics')">
+    Electronics
+  </span>
+
+  <span onclick="filterCategory('Fashion')">
+    Fashion
+  </span>
+
+  <span onclick="filterCategory('Mobiles')">
+    Mobiles
+  </span>
+
+  <span onclick="filterCategory('Home')">
+    Home
+  </span>
+
+  <span onclick="filterCategory('Beauty')">
+    Beauty
+  </span>
+
+  <span onclick="filterCategory('Grocery')">
+    Grocery
+  </span>
+
 </nav>
 
+
 <section class="hero">
+
   <h1>Welcome to SAFARIA</h1>
-  <p>Everything you need, all in one place.</p>
+
+  <p>
+    Everything you need, all in one place.
+  </p>
+
 </section>
 
-<div id="accountBox" class="account-box">
+
+<div
+  id="accountBox"
+  class="account-box"
+>
 
   <div class="account-title">
     👤 My Account
@@ -397,25 +433,34 @@
 
     <div>
       <b>Name:</b>
-      <span id="customerName">Customer</span>
+      <span id="customerName">
+        Customer
+      </span>
     </div>
 
     <div>
       <b>Email:</b>
-      <span id="customerEmail">-</span>
+      <span id="customerEmail">
+        -
+      </span>
     </div>
 
     <div>
       <b>Phone:</b>
-      <span id="customerPhone">-</span>
+      <span id="customerPhone">
+        -
+      </span>
     </div>
 
     <div>
       <b>Address:</b>
-      <span id="customerAddress">-</span>
+      <span id="customerAddress">
+        -
+      </span>
     </div>
 
   </div>
+
 
   <div class="account-actions">
 
@@ -437,7 +482,11 @@
 
 </div>
 
-<div id="myOrders" class="my-orders">
+
+<div
+  id="myOrders"
+  class="my-orders"
+>
 
   <h2>📦 My Orders</h2>
 
@@ -447,33 +496,59 @@
 
 </div>
 
+
 <div class="categories">
 
-  <div class="category" onclick="filterCategory('Electronics')">
-    📱<br>Electronics
+  <div
+    class="category"
+    onclick="filterCategory('Electronics')"
+  >
+    📱<br>
+    Electronics
   </div>
 
-  <div class="category" onclick="filterCategory('Fashion')">
-    👕<br>Fashion
+  <div
+    class="category"
+    onclick="filterCategory('Fashion')"
+  >
+    👕<br>
+    Fashion
   </div>
 
-  <div class="category" onclick="filterCategory('Mobiles')">
-    📱<br>Mobiles
+  <div
+    class="category"
+    onclick="filterCategory('Mobiles')"
+  >
+    📱<br>
+    Mobiles
   </div>
 
-  <div class="category" onclick="filterCategory('Home')">
-    🏠<br>Home
+  <div
+    class="category"
+    onclick="filterCategory('Home')"
+  >
+    🏠<br>
+    Home
   </div>
 
-  <div class="category" onclick="filterCategory('Beauty')">
-    💄<br>Beauty
+  <div
+    class="category"
+    onclick="filterCategory('Beauty')"
+  >
+    💄<br>
+    Beauty
   </div>
 
-  <div class="category" onclick="filterCategory('Grocery')">
-    🛒<br>Grocery
+  <div
+    class="category"
+    onclick="filterCategory('Grocery')"
+  >
+    🛒<br>
+    Grocery
   </div>
 
 </div>
+
 
 <section class="section">
 
@@ -481,22 +556,44 @@
     🛍️ Latest Products
   </h2>
 
-  <div id="products" class="products">
+  <div
+    id="products"
+    class="products"
+  >
+
     <div class="loading">
       Loading products...
     </div>
+
   </div>
 
 </section>
 
+
 <footer>
-  <h2>SAFARIA</h2>
-  <p>India's Shopping Store</p>
+
+  <h2>
+    SAFARIA
+  </h2>
+
+  <p>
+    India's Shopping Store
+  </p>
+
   <br>
-  <p>© 2026 SAFARIA. All rights reserved.</p>
+
+  <p>
+    © 2026 SAFARIA. All rights reserved.
+  </p>
+
 </footer>
 
+
 <script>
+
+/* =========================
+   SUPABASE
+========================= */
 
 const SUPABASE_URL =
   "https://dcwdzbejpwvskajukxrh.supabase.co";
@@ -510,8 +607,18 @@ const supabaseClient =
     SUPABASE_KEY
   );
 
+
+/* =========================
+   ADMIN
+========================= */
+
 const ADMIN_EMAIL =
   "sajidshaikh10822@gmail.com";
+
+
+/* =========================
+   GLOBAL VARIABLES
+========================= */
 
 let allProducts = [];
 
@@ -519,7 +626,7 @@ let cart = [];
 
 
 /* =========================
-   READ CART FROM STORAGE
+   READ CART
 ========================= */
 
 function readCart() {
@@ -565,32 +672,81 @@ function readCart() {
 async function loadProducts() {
 
   const container =
-    document.getElementById("products");
+    document.getElementById(
+      "products"
+    );
 
   container.innerHTML =
     '<div class="loading">Loading products...</div>';
 
-  const { data, error } =
-    await supabaseClient
-      .from("products")
-      .select("*")
-      .order("id", { ascending: false });
 
-  if (error) {
+  try {
 
-    console.error(error);
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("products")
+        .select("*")
+        .order(
+          "id",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Products error:",
+        error
+      );
+
+      container.innerHTML =
+        `
+        <div class="empty">
+          ❌ Products load nahi ho rahe.
+          <br><br>
+          Please try again.
+        </div>
+        `;
+
+      return;
+
+    }
+
+
+    allProducts =
+      Array.isArray(data)
+        ? data
+        : [];
+
+
+    displayProducts(
+      allProducts
+    );
+
+
+    updateCartCount();
+
+  } catch (error) {
+
+    console.error(
+      "Load products error:",
+      error
+    );
 
     container.innerHTML =
-      '<div class="empty">❌ Products load nahi ho rahe.</div>';
+      `
+      <div class="empty">
+        ❌ Products load nahi ho rahe.
+      </div>
+      `;
 
-    return;
   }
 
-  allProducts = data || [];
-
-  displayProducts(allProducts);
-
-  updateCartCount();
 }
 
 
@@ -598,73 +754,128 @@ async function loadProducts() {
    DISPLAY PRODUCTS
 ========================= */
 
-function displayProducts(products) {
+function displayProducts(
+  products
+) {
 
   const container =
-    document.getElementById("products");
+    document.getElementById(
+      "products"
+    );
 
-  if (!products.length) {
+
+  if (
+    !Array.isArray(products) ||
+    products.length === 0
+  ) {
 
     container.innerHTML =
-      '<div class="empty">😔 No products found.</div>';
+      `
+      <div class="empty">
+        😔 No products found.
+      </div>
+      `;
 
     return;
+
   }
 
-  container.innerHTML = "";
 
-  products.forEach(product => {
+  container.innerHTML =
+    "";
 
-    const card =
-      document.createElement("div");
 
-    card.className = "product";
+  products.forEach(
+    product => {
 
-    const image =
-      product.image ||
-      "https://via.placeholder.com/300x200?text=SAFARIA";
+      const card =
+        document.createElement(
+          "div"
+        );
 
-    card.innerHTML = `
+      card.className =
+        "product";
 
-      <img
-        src="${escapeHTML(image)}"
-        alt="${escapeHTML(product.name)}"
-        onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
-      >
 
-      <h3>
-        ${escapeHTML(product.name || "Product")}
-      </h3>
+      const image =
+        product.image ||
+        "https://via.placeholder.com/300x200?text=SAFARIA";
 
-      <div class="description">
-        ${escapeHTML(product.description || "")}
-      </div>
 
-      <div class="price">
-        ₹${Number(product.price || 0).toLocaleString("en-IN")}
-      </div>
+      const name =
+        product.name ||
+        "Product";
 
-      <div class="stock">
-        ${
-          Number(product.stock || 0) > 0
-            ? "✓ In Stock"
-            : "❌ Out of Stock"
-        }
-      </div>
 
-      <button
-        class="buy"
-        ${Number(product.stock || 0) <= 0 ? "disabled" : ""}
-        onclick="addToCart(${Number(product.id)})"
-      >
-        🛒 Add to Cart
-      </button>
+      const description =
+        product.description ||
+        "";
 
-    `;
 
-    container.appendChild(card);
+      const price =
+        Number(
+          product.price || 0
+        );
 
-  });
+
+      const stock =
+        Number(
+          product.stock || 0
+        );
+
+
+      card.innerHTML = `
+
+        <img
+          src="${escapeHTML(image)}"
+          alt="${escapeHTML(name)}"
+          onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
+        >
+
+        <h3>
+          ${escapeHTML(name)}
+        </h3>
+
+        <div class="description">
+          ${escapeHTML(description)}
+        </div>
+
+        <div class="price">
+          ₹${price.toLocaleString("en-IN")}
+        </div>
+
+        <div class="stock">
+
+          ${
+            stock > 0
+              ? "✓ In Stock"
+              : "❌ Out of Stock"
+          }
+
+        </div>
+
+        <button
+          class="buy"
+          ${
+            stock <= 0
+              ? "disabled"
+              : ""
+          }
+          onclick="addToCart(${Number(product.id)})"
+        >
+          🛒 Add to Cart
+        </button>
+
+      `;
+
+
+      container.appendChild(
+        card
+      );
+
+    }
+  );
+
 }
 
 
@@ -674,12 +885,9 @@ function displayProducts(products) {
 
 function addToCart(id) {
 
-  /*
-    ALWAYS READ THE LATEST CART
-    FROM LOCAL STORAGE FIRST
-  */
+  cart =
+    readCart();
 
-  cart = readCart();
 
   const product =
     allProducts.find(
@@ -688,6 +896,7 @@ function addToCart(id) {
         Number(id)
     );
 
+
   if (!product) {
 
     alert(
@@ -695,7 +904,9 @@ function addToCart(id) {
     );
 
     return;
+
   }
+
 
   if (
     Number(product.stock || 0) <= 0
@@ -706,7 +917,9 @@ function addToCart(id) {
     );
 
     return;
+
   }
+
 
   const existing =
     cart.find(
@@ -715,15 +928,28 @@ function addToCart(id) {
         Number(id)
     );
 
+
   if (existing) {
 
+    const currentQuantity =
+      Number(
+        existing.quantity || 1
+      );
+
+
+    const productStock =
+      Number(
+        product.stock || 0
+      );
+
+
     if (
-      Number(existing.quantity || 1) <
-      Number(product.stock)
+      currentQuantity <
+      productStock
     ) {
 
       existing.quantity =
-        Number(existing.quantity || 1) + 1;
+        currentQuantity + 1;
 
     } else {
 
@@ -732,6 +958,7 @@ function addToCart(id) {
       );
 
       return;
+
     }
 
   } else {
@@ -745,10 +972,12 @@ function addToCart(id) {
         product.name,
 
       price:
-        Number(product.price || 0),
+        Number(
+          product.price || 0
+        ),
 
       image:
-        product.image,
+        product.image || "",
 
       quantity:
         1
@@ -757,7 +986,9 @@ function addToCart(id) {
 
   }
 
+
   saveCart();
+
 
   alert(
     "✅ Product added to cart!"
@@ -788,16 +1019,16 @@ function saveCart() {
 
 function updateCartCount() {
 
-  /*
-    READ LATEST CART
-    EVERY TIME
-  */
+  cart =
+    readCart();
 
-  cart = readCart();
 
   const count =
     cart.reduce(
-      (total, item) => {
+      (
+        total,
+        item
+      ) => {
 
         return (
           total +
@@ -813,10 +1044,12 @@ function updateCartCount() {
       0
     );
 
+
   const cartCount =
     document.getElementById(
       "cartCount"
     );
+
 
   if (cartCount) {
 
@@ -834,25 +1067,18 @@ function updateCartCount() {
 
 function openCart() {
 
-  /*
-    IMPORTANT:
-    READ CART DIRECTLY FROM
-    LOCAL STORAGE BEFORE OPENING
-  */
-
   const latestCart =
     readCart();
 
-  /*
-    SYNC GLOBAL CART
-  */
 
   cart =
     latestCart;
 
 
   if (
-    !Array.isArray(latestCart) ||
+    !Array.isArray(
+      latestCart
+    ) ||
     latestCart.length === 0
   ) {
 
@@ -864,11 +1090,6 @@ function openCart() {
 
   }
 
-
-  /*
-    CART EXISTS
-    OPEN CHECKOUT
-  */
 
   window.location.href =
     "checkout.html";
@@ -882,56 +1103,75 @@ function openCart() {
 
 function searchProducts() {
 
+  const input =
+    document.getElementById(
+      "searchInput"
+    );
+
+
   const value =
-    document.getElementById("searchInput")
-      .value
+    input.value
       .trim()
       .toLowerCase();
 
+
   if (!value) {
 
-    document.getElementById("productTitle")
-      .textContent =
+    document.getElementById(
+      "productTitle"
+    ).textContent =
       "🛍️ Latest Products";
+
 
     displayProducts(
       allProducts
     );
 
     return;
+
   }
+
 
   const filtered =
     allProducts.filter(
-      product =>
+      product => {
 
-        String(
-          product.name || ""
-        )
-          .toLowerCase()
-          .includes(value)
+        const name =
+          String(
+            product.name || ""
+          )
+            .toLowerCase();
 
-        ||
 
-        String(
-          product.category || ""
-        )
-          .toLowerCase()
-          .includes(value)
+        const category =
+          String(
+            product.category || ""
+          )
+            .toLowerCase();
 
-        ||
 
-        String(
-          product.description || ""
-        )
-          .toLowerCase()
-          .includes(value)
+        const description =
+          String(
+            product.description || ""
+          )
+            .toLowerCase();
+
+
+        return (
+          name.includes(value) ||
+          category.includes(value) ||
+          description.includes(value)
+        );
+
+      }
     );
+
 
   document.getElementById(
     "productTitle"
   ).textContent =
     `🔍 Search Results (${filtered.length})`;
+
 
   displayProducts(
     filtered
@@ -941,28 +1181,42 @@ function searchProducts() {
 
 
 /* =========================
-   CATEGORY
+   CATEGORY FILTER
 ========================= */
 
-function filterCategory(category) {
+function filterCategory(
+  category
+) {
 
   const filtered =
     allProducts.filter(
       product =>
+
         String(
           product.category || ""
         )
+          .trim()
           .toLowerCase() ===
+
         String(
           category
         )
+          .trim()
           .toLowerCase()
     );
+
+
+  document.getElementById(
+    "searchInput"
+  ).value =
+    "";
+
 
   document.getElementById(
     "productTitle"
   ).textContent =
     `🛍️ ${category}`;
+
 
   displayProducts(
     filtered
@@ -971,16 +1225,23 @@ function filterCategory(category) {
 }
 
 
+/* =========================
+   SHOW ALL PRODUCTS
+========================= */
+
 function showAllProducts() {
 
   document.getElementById(
     "searchInput"
-  ).value = "";
+  ).value =
+    "";
+
 
   document.getElementById(
     "productTitle"
   ).textContent =
     "🛍️ Latest Products";
+
 
   displayProducts(
     allProducts
@@ -995,394 +1256,192 @@ function showAllProducts() {
 
 async function checkLogin() {
 
-  const {
-    data: { session }
-  } =
-    await supabaseClient.auth.getSession();
-
-  const accountBtn =
-    document.getElementById(
-      "accountBtn"
-    );
-
-  const accountBox =
-    document.getElementById(
-      "accountBox"
-    );
-
-  const adminBtn =
-    document.getElementById(
-      "adminBtn"
-    );
-
-  const customerName =
-    document.getElementById(
-      "customerName"
-    );
-
-  const customerEmail =
-    document.getElementById(
-      "customerEmail"
-    );
-
-  const customerPhone =
-    document.getElementById(
-      "customerPhone"
-    );
-
-  const customerAddress =
-    document.getElementById(
-      "customerAddress"
-    );
-
-
-  adminBtn.hidden =
-    true;
-
-  adminBtn.style.display =
-    "none";
-
-
-  if (
-    !session ||
-    !session.user
-  ) {
-
-    accountBtn.textContent =
-      "👤 Login";
-
-    accountBtn.href =
-      "auth.html";
-
-    accountBtn.onclick =
-      null;
-
-    accountBox.style.display =
-      "none";
-
-    return;
-
-  }
-
-
-  const email =
-    String(
-      session.user.email || ""
-    )
-      .trim()
-      .toLowerCase();
-
-
-  accountBtn.textContent =
-    "👤 My Account";
-
-  accountBtn.href =
-    "javascript:void(0)";
-
-  accountBtn.onclick =
-    function() {
-
-      accountBox.style.display =
-        "flex";
-
-    };
-
-
-  const name =
-    session.user.user_metadata?.full_name ||
-    session.user.user_metadata?.name ||
-    session.user.email ||
-    "Customer";
-
-
-  customerName.textContent =
-    name;
-
-  customerEmail.textContent =
-    session.user.email ||
-    "-";
-
-  customerPhone.textContent =
-    "Loading...";
-
-  customerAddress.textContent =
-    "Loading...";
-
-
-  if (
-    email ===
-    ADMIN_EMAIL.toLowerCase()
-  ) {
-
-    adminBtn.hidden =
-      false;
-
-    adminBtn.style.setProperty(
-      "display",
-      "inline-block",
-      "important"
-    );
-
-  }
-
-
-  const {
-    data: orders,
-    error
-  } =
-    await supabaseClient
-      .from("orders")
-      .select(
-        "customer_phone, shipping_address, customer_name"
-      )
-      .eq(
-        "customer_email",
-        session.user.email
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
-      )
-      .limit(1);
-
-
-  if (
-    !error &&
-    orders &&
-    orders.length > 0
-  ) {
-
-    const latestOrder =
-      orders[0];
-
-    if (
-      latestOrder.customer_name
-    ) {
-
-      customerName.textContent =
-        latestOrder.customer_name;
-
-    }
-
-    customerPhone.textContent =
-      latestOrder.customer_phone ||
-      "-";
-
-    customerAddress.textContent =
-      latestOrder.shipping_address ||
-      "-";
-
-  } else {
-
-    customerPhone.textContent =
-      "-";
-
-    customerAddress.textContent =
-      "-";
-
-  }
-
-}
-
-
-/* =========================
-   MY ORDERS
-========================= */
-
-async function showMyOrders() {
-
-  const {
-    data: { session }
-  } =
-    await supabaseClient.auth.getSession();
-
-  if (
-    !session ||
-    !session.user
-  ) {
-
-    alert(
-      "Please login first."
-    );
-
-    return;
-
-  }
-
-  const ordersBox =
-    document.getElementById(
-      "myOrders"
-    );
-
-  const list =
-    document.getElementById(
-      "myOrdersList"
-    );
-
-  ordersBox.style.display =
-    "block";
-
-  list.innerHTML =
-    "Loading your orders...";
-
-
-  const {
-    data,
-    error
-  } =
-    await supabaseClient
-      .from("orders")
-      .select("*")
-      .eq(
-        "customer_email",
-        session.user.email
-      )
-      .order(
-        "created_at",
-        {
-          ascending: false
-        }
+  try {
+
+    const {
+      data: {
+        session
+      }
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+
+    const accountBtn =
+      document.getElementById(
+        "accountBtn"
       );
 
 
-  if (error) {
-
-    console.error(error);
-
-    list.innerHTML =
-      "❌ Orders load nahi ho rahe.";
-
-    return;
-
-  }
+    const accountBox =
+      document.getElementById(
+        "accountBox"
+      );
 
 
-  if (
-    !data ||
-    data.length === 0
-  ) {
-
-    list.innerHTML =
-      "📦 Aapka abhi koi order nahi hai.";
-
-    return;
-
-  }
+    const adminBtn =
+      document.getElementById(
+        "adminBtn"
+      );
 
 
-  list.innerHTML =
-    "";
-      div.innerHTML = `
-        <b>Order ID:</b> ${escapeHTML(order.order_id || "-")}<br>
-        <b>Items:</b> ${escapeHTML(itemsText)}<br>
-        <b>Total:</b> ₹${Number(order.total || 0).toFixed(2)}<br>
-        <b>Status:</b>
-        <span class="order-status">
-          ${escapeHTML(order.status || "pending")}
-        </span>
-      `;
+    const customerName =
+      document.getElementById(
+        "customerName"
+      );
 
-      list.appendChild(div);
+
+    const customerEmail =
+      document.getElementById(
+        "customerEmail"
+      );
+
+
+    const customerPhone =
+      document.getElementById(
+        "customerPhone"
+      );
+
+
+    const customerAddress =
+      document.getElementById(
+        "customerAddress"
+      );
+
+
+    adminBtn.hidden =
+      true;
+
+
+    adminBtn.style.display =
+      "none";
+
+
+    if (
+      !session ||
+      !session.user
+    ) {
+
+      accountBtn.textContent =
+        "👤 Login";
+
+
+      accountBtn.href =
+        "auth.html";
+
+
+      accountBtn.onclick =
+        null;
+
+
+      accountBox.style.display =
+        "none";
+
+
+      return;
 
     }
-  );
-
-}
 
 
-/* =========================
-   LOGOUT
-========================= */
-
-async function logout() {
-
-  await supabaseClient.auth.signOut();
-
-  window.location.href =
-    "auth.html";
-
-}
+    const email =
+      String(
+        session.user.email || ""
+      )
+        .trim()
+        .toLowerCase();
 
 
-/* =========================
-   HTML ESCAPE
-========================= */
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
+    accountBtn.textContent =
+      "👤 My Account";
 
 
-/* =========================
-   START WEBSITE
-========================= */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  async function() {
-
-    updateCartCount();
-
-    await loadProducts();
-
-    await checkLogin();
-
-  }
-);
-
-</script>
-
-</body>
-</html>
-
-  data.forEach(
-    order => {
-
-      const div =
-        document.createElement(
-          "div"
-        );
-
-      div.className =
-        "my-order";
+    accountBtn.href =
+      "javascript:void(0)";
 
 
-      let itemsText =
-        "-";
+    accountBtn.onclick =
+      function () {
+
+        accountBox.style.display =
+          "flex";
+
+      };
 
 
-      try {
-
-        const items =
-          typeof order.items === "string"
-            ? JSON.parse(order.items)
-            : order.items;
-
-
-        if (
-          Array.isArray(items)
-        ) {
-
-          itemsText =
-            items
-              .map(
-                item =>
-                  `${item.name || "Product"} × ${item.quantity || 1}`
-              )
-              .join(", ");
-
-        }
-
-      } catch (e) {}
+    const name =
+      session.user.user_metadata?.full_name ||
+      session.user.user_metadata?.name ||
+      session.user.email ||
+      "Customer";
 
 
-      div.innerHT
+    customerName.textContent =
+      name;
+
+
+    customerEmail.textContent =
+      session.user.email ||
+      "-";
+
+
+    customerPhone.textContent =
+      "Loading...";
+
+
+    customerAddress.textContent =
+      "Loading...";
+
+
+    if (
+      email ===
+      ADMIN_EMAIL
+        .toLowerCase()
+    ) {
+
+      adminBtn.hidden =
+        false;
+
+
+      adminBtn.style.setProperty(
+        "display",
+        "inline-block",
+        "important"
+      );
+
+    }
+
+
+    const {
+      data: orders,
+      error
+    } =
+      await supabaseClient
+        .from("orders")
+        .select(
+          "customer_phone, shipping_address, customer_name"
+        )
+        .eq(
+          "customer_email",
+          session.user.email
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        )
+        .limit(1);
+
+
+    if (
+      !error &&
+      orders &&
+      orders.length > 0
+    ) {
+
+      const latestOrder =
+        orders[0];
+
+
+   
