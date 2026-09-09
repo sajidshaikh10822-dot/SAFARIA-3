@@ -1,52 +1,60 @@
-<!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-«»
+  <title>SAFARIA - India's Shopping Store</title>
 
-  <title>SAFARIA - Online Shopping</title>  <!-- SUPABASE -->  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
     }
 
-
     body {
-      background: #eaeded;
+      font-family: Arial, sans-serif;
+      background: #f3f3f3;
       color: #111;
     }
 
+    /* HEADER */
 
     header {
       background: #131921;
       color: white;
-      padding: 12px 15px;
+      padding: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .topbar {
       display: flex;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;
+      max-width: 1400px;
+      margin: auto;
     }
-
 
     .logo {
-      color: #ff9900;
-      font-size: 28px;
+      font-size: 25px;
       font-weight: bold;
-      cursor: pointer;
+      color: #ff9900;
+      white-space: nowrap;
     }
 
-
-    .search {
+    .search-box {
       flex: 1;
-      min-width: 200px;
       display: flex;
+      max-width: 700px;
+      margin: auto;
     }
 
-
-    .search input {
+    .search-box input {
       width: 100%;
       padding: 12px;
       border: none;
@@ -54,652 +62,686 @@ content="width=device-width, initial-scale=1.0"
       font-size: 16px;
     }
 
-
-    .search button {
-      background: #febd69;
+    .search-box button {
+      width: 55px;
       border: none;
-      padding: 0 18px;
+      background: #febd69;
       cursor: pointer;
-      font-size: 19px;
+      font-size: 20px;
     }
 
-
-    .header-btn {
+    .cart-button {
+      background: transparent;
       color: white;
-      text-decoration: none;
-      font-weight: bold;
+      border: none;
+      font-size: 17px;
+      cursor: pointer;
       white-space: nowrap;
     }
 
-
-    .login-btn {
-      background: #ff9900;
-      color: #111;
-      padding: 9px 12px;
-      border-radius: 5px;
-    }
-
-
-    #adminBtn {
-      display: none !important;
-    }
-
+    /* NAV */
 
     nav {
       background: #232f3e;
       color: white;
-      padding: 11px 15px;
       display: flex;
-      gap: 22px;
+      gap: 20px;
+      padding: 12px;
       overflow-x: auto;
     }
 
-
-    nav span {
-      white-space: nowrap;
+    nav button {
+      background: transparent;
+      color: white;
+      border: none;
       cursor: pointer;
+      font-size: 15px;
+      white-space: nowrap;
     }
 
+    nav button:hover {
+      color: #ff9900;
+    }
+
+    /* HERO */
 
     .hero {
-      background: linear-gradient(
-        135deg,
-        #232f3e,
-        #37475a
-      );
-
-      color: white;
-      padding: 45px 20px;
+      background: white;
       text-align: center;
+      padding: 45px 20px;
     }
-
 
     .hero h1 {
-      font-size: 38px;
+      font-size: 36px;
       margin-bottom: 10px;
     }
-
 
     .hero p {
       font-size: 18px;
+      color: #555;
     }
 
+    /* CATEGORIES */
 
     .categories {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
       gap: 12px;
-      overflow-x: auto;
-      padding: 15px;
-      background: white;
+      padding: 20px;
+      max-width: 1400px;
+      margin: auto;
     }
-
 
     .category {
-      min-width: 110px;
-      padding: 15px;
+      background: white;
+      padding: 20px 10px;
       text-align: center;
-      background: #f3f3f3;
       border-radius: 8px;
       cursor: pointer;
-      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,.1);
     }
 
-
-    .section {
-      padding: 20px 15px;
+    .category:hover {
+      transform: translateY(-2px);
     }
 
-
-    .section h2 {
-      margin-bottom: 15px;
-      font-size: 25px;
+    .category-icon {
+      font-size: 35px;
+      margin-bottom: 8px;
     }
 
+    /* PRODUCTS */
 
-    .products {
+    .products-section {
+      max-width: 1400px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .products-section h2 {
+      margin-bottom: 20px;
+    }
+
+    #products {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 15px;
     }
 
-
-    .product {
+    .product-card {
       background: white;
-      padding: 15px;
       border-radius: 8px;
-      box-shadow:
-        0 2px 6px rgba(0,0,0,0.08);
+      padding: 12px;
+      box-shadow: 0 2px 7px rgba(0,0,0,.12);
+      overflow: hidden;
     }
 
+    .product-image {
+      height: 210px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
 
-    .product img {
+    .product-image img {
       width: 100%;
-      height: 190px;
+      height: 100%;
       object-fit: contain;
-      background: #fafafa;
-      margin-bottom: 10px;
     }
 
+    .product-info {
+      padding-top: 10px;
+    }
 
-    .product h3 {
-      font-size: 17px;
+    .product-info h3 {
+      font-size: 16px;
       min-height: 40px;
-      margin-bottom: 7px;
     }
 
-
-    .description {
-      color: #555;
+    .product-category {
+      color: #666;
       font-size: 13px;
-      min-height: 35px;
-      margin-bottom: 7px;
+      margin: 5px 0;
     }
 
-
-    .price {
-      color: #b12704;
+    .product-price {
       font-size: 21px;
       font-weight: bold;
-      margin-bottom: 5px;
+      margin: 10px 0;
     }
 
-
-    .stock {
-      color: #067d62;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
-
-    .buy {
+    .add-to-cart-btn {
       width: 100%;
+      padding: 11px;
       background: #ffd814;
       border: none;
-      padding: 11px;
       border-radius: 20px;
       cursor: pointer;
       font-weight: bold;
     }
 
-
-    .buy:disabled {
-      background: #ddd;
-      cursor: not-allowed;
+    .add-to-cart-btn:hover {
+      background: #f7ca00;
     }
 
+    /* CART */
 
-    .loading,
-    .empty {
-      background: white;
-      padding: 30px;
-      text-align: center;
-      border-radius: 8px;
-      grid-column: 1 / -1;
-    }
-
-
-    .error-box {
-      background: #fff3f3;
-      border: 1px solid #ffb3b3;
-      color: #b00020;
-      padding: 20px;
-      text-align: center;
-      border-radius: 8px;
-      grid-column: 1 / -1;
-      line-height: 1.7;
-    }
-
-
-    .account-box {
-      background: white;
-      margin: 15px;
-      padding: 20px;
-      border-radius: 8px;
+    #cartPanel {
       display: none;
-      flex-direction: column;
-      gap: 15px;
-      box-shadow:
-        0 2px 6px rgba(0,0,0,0.08);
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 390px;
+      max-width: 95%;
+      height: 100vh;
+      background: white;
+      z-index: 9999;
+      box-shadow: -5px 0 20px rgba(0,0,0,.3);
+      overflow-y: auto;
     }
 
-
-    .account-title {
-      font-size: 22px;
-      font-weight: bold;
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px;
+      background: #131921;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 2;
     }
 
-
-    .account-info {
-      line-height: 1.9;
-      color: #333;
+    .cart-header button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
     }
 
+    #cartItems {
+      padding: 15px;
+    }
 
-    .account-actions {
+    .cart-item {
       display: flex;
       gap: 10px;
-      flex-wrap: wrap;
+      padding: 12px 0;
+      border-bottom: 1px solid #ddd;
     }
 
+    .cart-item img {
+      width: 75px;
+      height: 75px;
+      object-fit: contain;
+    }
 
-    .logout,
-    .orders-btn {
-      border: none;
-      padding: 10px 14px;
-      border-radius: 5px;
-      cursor: pointer;
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-name {
       font-weight: bold;
+      margin-bottom: 5px;
     }
 
-
-    .logout {
-      background: #e7e7e7;
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
     }
 
+    .quantity-controls button {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #bbb;
+      background: white;
+      cursor: pointer;
+      font-size: 18px;
+    }
 
-    .orders-btn {
+    .remove-btn {
+      border: none;
+      background: transparent;
+      color: red;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    .cart-footer {
+      padding: 18px;
+      border-top: 1px solid #ddd;
+      background: white;
+      position: sticky;
+      bottom: 0;
+    }
+
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 7px;
       background: #ff9900;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
     }
 
+    /* CHECKOUT */
 
-    .my-orders {
+    #checkout {
       display: none;
       background: white;
-      margin: 15px;
-      padding: 20px;
+      max-width: 700px;
+      margin: 25px auto;
+      padding: 25px;
       border-radius: 8px;
-      box-shadow:
-        0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
     }
 
+    #checkout h2 {
+      margin-bottom: 20px;
+    }
 
-    .my-order {
-      border: 1px solid #ddd;
-      border-radius: 7px;
+    #checkout input,
+    #checkout select {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 12px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      font-size: 15px;
+    }
+
+    .place-order {
+      width: 100%;
       padding: 14px;
-      margin-top: 12px;
-      line-height: 1.7;
-    }
-
-
-    .order-status {
+      border: none;
+      background: #ff9900;
+      font-size: 17px;
       font-weight: bold;
+      border-radius: 7px;
+      cursor: pointer;
     }
 
+    /* FOOTER */
 
     footer {
       background: #131921;
       color: white;
       text-align: center;
-      padding: 30px 15px;
+      padding: 30px;
       margin-top: 30px;
     }
 
+    /* MOBILE */
 
     @media (max-width: 900px) {
-
-      .products {
+      .categories {
         grid-template-columns: repeat(3, 1fr);
       }
 
+      #products {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
 
-
-    @media (max-width: 650px) {
+    @media (max-width: 600px) {
+      .topbar {
+        flex-wrap: wrap;
+      }
 
       .logo {
-        font-size: 23px;
+        width: 100%;
+        text-align: center;
       }
 
-
-      .search {
-        order: 5;
-        flex-basis: 100%;
+      .search-box {
+        order: 2;
+        width: 100%;
       }
 
+      .cart-button {
+        margin: auto;
+      }
 
-      .products {
+      .categories {
         grid-template-columns: repeat(2, 1fr);
       }
 
+      #products {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
 
-      .product img {
+      .product-image {
         height: 150px;
       }
 
-
-      .hero h1 {
-        font-size: 30px;
-      }
-
-    }
-
-
-    @media (max-width: 400px) {
-
-      .products {
-        gap: 8px;
-      }
-
-
-      .product {
-        padding: 9px;
-      }
-
-
-      .product img {
-        height: 120px;
-      }
-
-
-      .product h3 {
+      .product-info h3 {
         font-size: 14px;
       }
 
-
-      .price {
-        font-size: 17px;
+      .product-price {
+        font-size: 18px;
       }
 
+      #cartPanel {
+        width: 100%;
+      }
     }
+  </style>
+</head>
 
-  </style></head><body>  <!-- =========================
-       HEADER
-  ========================== -->  <header><div
-  class="logo"
-  onclick="location.reload()"
->
-  SAFARIA
-</div>
+<body>
 
+  <!-- HEADER -->
 
-<div class="search">
+  <header>
 
-  <input
-    id="searchInput"
-    type="text"
-    placeholder="Search products..."
-    oninput="searchProducts()"
-  >
+    <div class="topbar">
 
+      <div class="logo">
+        SAFARIA
+      </div>
 
-  <button
-    type="button"
-    onclick="searchProducts()"
-  >
-    🔍
-  </button>
+      <div class="search-box">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search products..."
+        >
 
-</div>
+        <button onclick="searchProducts()">
+          🔍
+        </button>
+      </div>
 
+      <button
+        id="cartButton"
+        class="cart-button"
+        onclick="openCart()"
+      >
+        🛒 Cart (<span id="cartCount">0</span>)
+      </button>
 
-<a
-  href="auth.html"
-  class="header-btn login-btn"
-  id="accountBtn"
->
-  👤 Login
-</a>
+    </div>
 
+  </header>
 
-<a
-  href="javascript:void(0)"
-  class="header-btn"
-  onclick="openCart()"
->
-  🛒 Cart
-  (<span id="cartCount">0</span>)
-</a>
 
+  <!-- NAVIGATION -->
 
-<a
-  href="admin.html"
-  class="header-btn"
-  id="adminBtn"
->
-  🔐 Admin
-</a>
+  <nav>
 
-  </header>  <!-- =========================
-       NAVIGATION
-  ========================== -->  <nav><span onclick="showAllProducts()">
-  All
-</span>
+    <button onclick="filterCategory('all')">
+      All
+    </button>
 
+    <button onclick="filterCategory('Electronics')">
+      Electronics
+    </button>
 
-<span onclick="filterCategory('Electronics')">
-  Electronics
-</span>
+    <button onclick="filterCategory('Fashion')">
+      Fashion
+    </button>
 
+    <button onclick="filterCategory('Mobiles')">
+      Mobiles
+    </button>
 
-<span onclick="filterCategory('Fashion')">
-  Fashion
-</span>
+    <button onclick="filterCategory('Home')">
+      Home
+    </button>
 
+    <button onclick="filterCategory('Beauty')">
+      Beauty
+    </button>
 
-<span onclick="filterCategory('Mobiles')">
-  Mobiles
-</span>
+    <button onclick="filterCategory('Grocery')">
+      Grocery
+    </button>
 
+  </nav>
 
-<span onclick="filterCategory('Home')">
-  Home
-</span>
 
+  <!-- HERO -->
 
-<span onclick="filterCategory('Beauty')">
-  Beauty
-</span>
+  <section class="hero">
 
+    <h1>
+      Welcome to SAFARIA
+    </h1>
 
-<span onclick="filterCategory('Grocery')">
-  Grocery
-</span>
+    <p>
+      Everything you need, all in one place.
+    </p>
 
-  </nav>  <!-- =========================
-       HERO
-  ========================== -->  <section class="hero"><h1>
-  Welcome to SAFARIA
-</h1>
+  </section>
 
 
-<p>
-  Everything you need, all in one place.
-</p>
+  <!-- CATEGORY BOXES -->
 
-  </section>  <!-- =========================
-       ACCOUNT
-  ========================== -->  <div
-    id="accountBox"
-    class="account-box"
-  ><div class="account-title">
-  👤 My Account
-</div>
+  <section class="categories">
 
+    <div
+      class="category"
+      onclick="filterCategory('Electronics')"
+    >
+      <div class="category-icon">📱</div>
+      Electronics
+    </div>
 
-<div class="account-info">
+    <div
+      class="category"
+      onclick="filterCategory('Fashion')"
+    >
+      <div class="category-icon">👕</div>
+      Fashion
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Mobiles')"
+    >
+      <div class="category-icon">📱</div>
+      Mobiles
+    </div>
 
+    <div
+      class="category"
+      onclick="filterCategory('Home')"
+    >
+      <div class="category-icon">🏠</div>
+      Home
+    </div>
 
-  <div>
+    <div
+      class="category"
+      onclick="filterCategory('Beauty')"
+    >
+      <div class="category-icon">💄</div>
+      Beauty
+    </div>
 
-    <b>Name:</b>
+    <div
+      class="category"
+      onclick="filterCategory('Grocery')"
+    >
+      <div class="category-icon">🛒</div>
+      Grocery
+    </div>
+
+  </section>
 
-    <span id="customerName">
-      Customer
-    </span>
 
-  </div>
+  <!-- PRODUCTS -->
+
+  <section class="products-section">
+
+    <h2>
+      🛍️ Latest Products
+    </h2>
+
+    <div id="products">
+      <div style="
+        grid-column:1/-1;
+        text-align:center;
+        padding:40px;
+      ">
+        ⏳ Loading products...
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- CART PANEL -->
 
+  <aside id="cartPanel">
+
+    <div class="cart-header">
+
+      <h2>
+        🛒 Your Cart
+      </h2>
+
+      <button onclick="closeCart()">
+        ✕
+      </button>
 
-  <div>
+    </div>
 
-    <b>Email:</b>
+    <div id="cartItems">
+    </div>
 
-    <span id="customerEmail">
-      -
-    </span>
+    <div class="cart-footer">
 
-  </div>
+      <div class="cart-total">
 
+        <span>
+          Total
+        </span>
 
-  <div>
+        <span id="cartTotal">
+          ₹0
+        </span>
 
-    <b>Phone:</b>
+      </div>
 
-    <span id="customerPhone">
-      -
-    </span>
+      <button
+        class="checkout-btn"
+        onclick="
+          document.getElementById('checkout').style.display='block';
+          closeCart();
+          document.getElementById('checkout').scrollIntoView({
+            behavior:'smooth'
+          });
+        "
+      >
+        Proceed to Checkout
+      </button>
 
-  </div>
+    </div>
 
+  </aside>
 
-  <div>
 
-    <b>Address:</b>
+  <!-- CHECKOUT -->
 
-    <span id="customerAddress">
-      -
-    </span>
+  <section id="checkout">
 
-  </div>
+    <h2>
+      📦 Delivery Details
+    </h2>
 
+    <input
+      id="customerName"
+      type="text"
+      placeholder="Full Name"
+    >
 
-</div>
+    <input
+      id="customerPhone"
+      type="tel"
+      placeholder="Mobile Number"
+    >
 
+    <input
+      id="address"
+      type="text"
+      placeholder="Full Address"
+    >
 
-<div class="account-actions">
+    <input
+      id="city"
+      type="text"
+      placeholder="City"
+    >
 
+    <input
+      id="pin"
+      type="number"
+      placeholder="PIN Code"
+    >
 
-  <button
-    class="orders-btn"
-    onclick="showMyOrders()"
-  >
-    📦 My Orders
-  </button>
+    <select id="paymentMethod">
 
+      <option value="Cash on Delivery">
+        Cash on Delivery
+      </option>
 
-  <button
-    class="logout"
-    onclick="logout()"
-  >
-    Logout
-  </button>
+      <option value="UPI">
+        UPI
+      </option>
 
+    </select>
 
-</div>
+    <button
+      class="place-order"
+      onclick="placeOrder()"
+    >
+      🛍️ Place Order
+    </button>
 
-  </div>  <!-- =========================
-       MY ORDERS
-  ========================== -->  <div
-    id="myOrders"
-    class="my-orders"
-  ><h2>
-  📦 My Orders
-</h2>
+  </section>
 
 
-<div id="myOrdersList">
-  Loading orders...
-</div>
+  <!-- FOOTER -->
 
-  </div>  <!-- =========================
-       CATEGORIES
-  ========================== -->  <div class="categories"><div
-  class="category"
-  onclick="filterCategory('Electronics')"
->
-  📱
-  <br>
-  Electronics
-</div>
+  <footer>
 
+    <h2>
+      SAFARIA
+    </h2>
 
-<div
-  class="category"
-  onclick="filterCategory('Fashion')"
->
-  👕
-  <br>
-  Fashion
-</div>
+    <p>
+      India's Shopping Store
+    </p>
 
+    <br>
 
-<div
-  class="category"
-  onclick="filterCategory('Mobiles')"
->
-  📱
-  <br>
-  Mobiles
-</div>
+    <p>
+      © 2026 SAFARIA. All rights reserved.
+    </p>
 
+  </footer>
 
-<div
-  class="category"
-  onclick="filterCategory('Home')"
->
-  🏠
-  <br>
-  Home
-</div>
 
+  <!-- YOUR EXISTING SCRIPT -->
 
-<div
-  class="category"
-  onclick="filterCategory('Beauty')"
->
-  💄
-  <br>
-  Beauty
-</div>
+  <script src="script.js"></script>
 
-
-<div
-  class="category"
-  onclick="filterCategory('Grocery')"
->
-  🛒
-  <br>
-  Grocery
-</div>
-
-  </div>  <!-- =========================
-       PRODUCTS
-  ========================== -->  <section class="section"><h2 id="productTitle">
-  🛍️ Latest Products
-</h2>
-
-
-<div
-  id="products"
-  class="products"
->
-
-  <div class="loading">
-    ⏳ Loading products...
-  </div>
-
-</div>
-
-  </section>  <!-- =========================
-       FOOTER
-  ========================== -->  <footer><h2>
-  SAFARIA
-</h2>
-
-
-<p>
-  India's Shopping Store
-</p>
-
-
-<br>
-
-
-<p>
-  © 2026 SAFARIA. All rights reserved.
-</p>
-
-  </footer>  <!-- =========================
-       MAIN JAVASCRIPT
-  ========================== -->  <script src="script.js"></script></body></html>
+</body>
+</html>
