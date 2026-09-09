@@ -1,13 +1,23 @@
 const SUPABASE_URL = "https://dcwdzbejpwvskajukxrh.supabase.co";
-const SUPABASE_KEY = "sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx";
+
+const SUPABASE_KEY =
+  "sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx";
 
 const supabaseClient = window.supabase.createClient(
-  https://dcwdzbejpwvskajukxrh.supabase.co,
-  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5YXZ5cnBob3FtZGFzbHNmYnpxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2OTI0OTAsImV4cCI6MjEwNDI2ODQ5MH0.aal7dB2lvbDQRKzuzX1dzo6fgNpqM39T1vN3awY0egM
+  SUPABASE_URL,
+  SUPABASE_KEY
 );
 
 let allProducts = [];
-let cart = JSON.parse(localStorage.getItem("safaria_cart") || "[]");
+
+let cart = JSON.parse(
+  localStorage.getItem("safaria_cart") || "[]"
+);
+
+
+// ===============================
+// SECURITY
+// ===============================
 
 function escapeHTML(value) {
   return String(value ?? "")
@@ -18,8 +28,14 @@ function escapeHTML(value) {
     .replace(/'/g, "&#039;");
 }
 
+
+// ===============================
+// CART
+// ===============================
+
 function updateCartCount() {
   const el = document.getElementById("cartCount");
+
   if (el) {
     el.textContent = cart.reduce(
       (sum, item) => sum + Number(item.quantity || 1),
@@ -28,10 +44,20 @@ function updateCartCount() {
   }
 }
 
+
 function saveCart() {
-  localStorage.setItem("safaria_cart", JSON.stringify(cart));
+  localStorage.setItem(
+    "safaria_cart",
+    JSON.stringify(cart)
+  );
+
   updateCartCount();
 }
+
+
+// ===============================
+// LOAD PRODUCTS
+// ===============================
 
 async function loadProducts() {
   const container = document.getElementById("products");
@@ -45,388 +71,767 @@ async function loadProducts() {
   `;
 
   try {
+
     const result = await supabaseClient
       .from("products")
       .select("*")
       .order("id", { ascending: false });
 
-    console.log("SAFARIA PRODUCT RESULT:", result);
+
+    console.log(
+      "SAFARIA PRODUCT RESULT:",
+      result
+    );
+
 
     if (result.error) {
       throw result.error;
     }
 
+
     allProducts = result.data || [];
+
+
+    console.log(
+      "SAFARIA PRODUCTS:",
+      allProducts
+    );
+
 
     displayProducts(allProducts);
 
+
   } catch (error) {
-    console.error("SAFARIA PRODUCT ERROR:", error);
+
+    console.error(
+      "SAFARIA PRODUCT ERROR:",
+      error
+    );
+
 
     container.innerHTML = `
       <div class="error-box">
         ❌ Products could not be loaded.
         <br><br>
-        ${escapeHTML(error.message || "Unknown error")}
+        ${escapeHTML(
+          error.message || "Unknown error"
+        )}
       </div>
     `;
   }
 }
 
+
+// ===============================
+// DISPLAY PRODUCTS
+// ===============================
+
 function displayProducts(products) {
-  const container = document.getElementById("products");
+
+  const container =
+    document.getElementById("products");
 
   if (!container) return;
 
-  if (!products || products.length === 0) {
+
+  if (
+    !products ||
+    products.length === 0
+  ) {
+
     container.innerHTML = `
       <div class="empty">
         😔 No products found.
       </div>
     `;
+
     return;
   }
 
-  container.innerHTML = products.map(product => {
 
-    const name =
-      product.name ||
-      product.title ||
-      "Product";
+  container.innerHTML = products.map(
+    product => {
 
-    const image =
-      product.image ||
-      product.image_url ||
-      product.imageUrl ||
-      "https://via.placeholder.com/300x300?text=SAFARIA";
+      const name =
+        product.name ||
+        product.title ||
+        "Product";
 
-    const price = Number(product.price || 0);
 
-    const stock = Number(
+      const image =
+        product.image ||
+        product.image_url ||
+        product.imageUrl ||
+        "https://via.placeholder.com/300x300?text=SAFARIA";
+
+
+      const price =
+        Number(product.price || 0);
+
+
+      const stock =
+        Number(
+          product.stock ??
+          product.quantity ??
+          0
+        );
+
+
+      return `
+        <div class="product">
+
+          <img
+            src="${escapeHTML(image)}"
+            alt="${escapeHTML(name)}"
+            onerror="this.src='https://via.placeholder.com/300x300?text=SAFARIA'"
+          >
+
+          <h3>
+            ${escapeHTML(name)}
+          </h3>
+
+          <div class="description">
+            ${escapeHTML(
+              product.description || ""
+            )}
+          </div>
+
+          <div class="price">
+            ₹${price.toLocaleString("en-IN")}
+          </div>
+
+          <div class="stock">
+            ${
+              stock > 0
+                ? `${stock} available`
+                : "Out of stock"
+            }
+          </div>
+
+          <button
+            class="buy"
+            ${
+              stock <= 0
+                ? "disabled"
+                : ""
+            }
+            onclick="addToCart('${String(
+              product.id
+            ).replace(/'/g, "\\'")}')"
+          >
+            ${
+              stock > 0
+                ? "Add to Cart"
+                : "Out of Stock"
+            }
+          </button>
+
+        </div>
+      `;
+
+    }
+  ).join("");
+}
+
+
+// ===============================
+// ADD TO CART
+// ===============================
+
+function addToCart(productId) {
+
+  const product =
+    allProducts.find(
+      item =>
+        String(item.id) ===
+        String(productId)
+    );
+
+
+  if (!product) {
+
+    alert(
+      "Product not found."
+    );
+
+    return;
+  }
+
+
+  const stock =
+    Number(
       product.stock ??
       product.quantity ??
       0
     );
 
-    return `
-      <div class="product">
-
-        <img
-          src="${escapeHTML(image)}"
-          alt="${escapeHTML(name)}"
-          onerror="this.src='https://via.placeholder.com/300x300?text=SAFARIA'"
-        >
-
-        <h3>${escapeHTML(name)}</h3>
-
-        <div class="description">
-          ${escapeHTML(product.description || "")}
-        </div>
-
-        <div class="price">
-          ₹${price.toLocaleString("en-IN")}
-        </div>
-
-        <div class="stock">
-          ${
-            stock > 0
-              ? `${stock} available`
-              : "Out of stock"
-          }
-        </div>
-
-        <button
-          class="buy"
-          ${stock <= 0 ? "disabled" : ""}
-          onclick="addToCart('${String(product.id).replace(/'/g, "\\'")}')"
-        >
-          ${stock > 0 ? "Add to Cart" : "Out of Stock"}
-        </button>
-
-      </div>
-    `;
-
-  }).join("");
-}
-
-function addToCart(productId) {
-  const product = allProducts.find(
-    item => String(item.id) === String(productId)
-  );
-
-  if (!product) {
-    alert("Product not found.");
-    return;
-  }
-
-  const stock = Number(
-    product.stock ??
-    product.quantity ??
-    0
-  );
 
   if (stock <= 0) {
-    alert("This product is out of stock.");
+
+    alert(
+      "This product is out of stock."
+    );
+
     return;
   }
 
-  const existing = cart.find(
-    item => String(item.id) === String(product.id)
-  );
+
+  const existing =
+    cart.find(
+      item =>
+        String(item.id) ===
+        String(product.id)
+    );
+
 
   if (existing) {
 
-    if (existing.quantity >= stock) {
-      alert("Maximum available stock reached.");
+    if (
+      existing.quantity >= stock
+    ) {
+
+      alert(
+        "Maximum available stock reached."
+      );
+
       return;
     }
 
+
     existing.quantity++;
+
 
   } else {
 
     cart.push({
+
       id: product.id,
-      name: product.name || product.title || "Product",
-      price: Number(product.price || 0),
+
+      name:
+        product.name ||
+        product.title ||
+        "Product",
+
+      price:
+        Number(product.price || 0),
+
       image:
         product.image ||
         product.image_url ||
         product.imageUrl ||
         "",
+
       quantity: 1
+
     });
   }
 
+
   saveCart();
 
-  alert("✅ Product added to cart!");
+
+  alert(
+    "✅ Product added to cart!"
+  );
 }
 
+
+// ===============================
+// CART PANEL
+// ===============================
+
 function openCart() {
-  const panel = document.getElementById("cartPanel");
+
+  const panel =
+    document.getElementById(
+      "cartPanel"
+    );
+
 
   if (panel) {
-    panel.style.display = "block";
+
+    panel.style.display =
+      "block";
+
   } else {
-    window.location.href = "checkout.html";
+
+    window.location.href =
+      "checkout.html";
   }
 }
 
+
 function goToCheckout() {
+
   if (cart.length === 0) {
-    alert("Your cart is empty.");
+
+    alert(
+      "Your cart is empty."
+    );
+
     return;
   }
 
+
   saveCart();
-  window.location.href = "checkout.html";
+
+
+  window.location.href =
+    "checkout.html";
 }
 
-function changeQuantity(productId, change) {
-  const item = cart.find(
-    product => String(product.id) === String(productId)
-  );
+
+function changeQuantity(
+  productId,
+  change
+) {
+
+  const item =
+    cart.find(
+      product =>
+        String(product.id) ===
+        String(productId)
+    );
+
 
   if (!item) return;
 
-  item.quantity += Number(change);
 
-  if (item.quantity <= 0) {
-    cart = cart.filter(
-      product => String(product.id) !== String(productId)
-    );
+  item.quantity +=
+    Number(change);
+
+
+  if (
+    item.quantity <= 0
+  ) {
+
+    cart =
+      cart.filter(
+        product =>
+          String(product.id) !==
+          String(productId)
+      );
   }
 
-  saveCart();
-}
-
-function removeFromCart(productId) {
-  cart = cart.filter(
-    item => String(item.id) !== String(productId)
-  );
 
   saveCart();
 }
+
+
+function removeFromCart(
+  productId
+) {
+
+  cart =
+    cart.filter(
+      item =>
+        String(item.id) !==
+        String(productId)
+    );
+
+
+  saveCart();
+}
+
 
 function clearCart() {
+
   cart = [];
+
   saveCart();
 }
 
+
+// ===============================
+// SEARCH
+// ===============================
+
 function searchProducts() {
-  const input = document.getElementById("searchInput");
+
+  const input =
+    document.getElementById(
+      "searchInput"
+    );
+
 
   if (!input) return;
 
-  const search = input.value.trim().toLowerCase();
+
+  const search =
+    input.value
+      .trim()
+      .toLowerCase();
+
 
   if (!search) {
-    displayProducts(allProducts);
+
+    displayProducts(
+      allProducts
+    );
+
     return;
   }
 
-  const filtered = allProducts.filter(product => {
 
-    const name = String(
-      product.name ||
-      product.title ||
-      ""
-    ).toLowerCase();
+  const filtered =
+    allProducts.filter(
+      product => {
 
-    const description = String(
-      product.description || ""
-    ).toLowerCase();
+        const name =
+          String(
+            product.name ||
+            product.title ||
+            ""
+          ).toLowerCase();
 
-    const category = String(
-      product.category || ""
-    ).toLowerCase();
 
-    return (
-      name.includes(search) ||
-      description.includes(search) ||
-      category.includes(search)
+        const description =
+          String(
+            product.description ||
+            ""
+          ).toLowerCase();
+
+
+        const category =
+          String(
+            product.category ||
+            ""
+          ).toLowerCase();
+
+
+        return (
+          name.includes(search) ||
+          description.includes(search) ||
+          category.includes(search)
+        );
+
+      }
     );
-  });
 
-  displayProducts(filtered);
+
+  displayProducts(
+    filtered
+  );
 }
 
-function filterCategory(category) {
-  const filtered = allProducts.filter(
-    product =>
-      String(product.category || "").toLowerCase() ===
-      String(category || "").toLowerCase()
-  );
 
-  const title = document.getElementById("productTitle");
+// ===============================
+// CATEGORY FILTER
+// ===============================
+
+function filterCategory(
+  category
+) {
+
+  const filtered =
+    allProducts.filter(
+      product =>
+        String(
+          product.category || ""
+        ).toLowerCase() ===
+        String(
+          category || ""
+        ).toLowerCase()
+    );
+
+
+  const title =
+    document.getElementById(
+      "productTitle"
+    );
+
 
   if (title) {
-    title.textContent = `🛍️ ${category}`;
+
+    title.textContent =
+      `🛍️ ${category}`;
   }
 
-  displayProducts(filtered);
+
+  displayProducts(
+    filtered
+  );
 }
+
 
 function showAllProducts() {
-  const title = document.getElementById("productTitle");
+
+  const title =
+    document.getElementById(
+      "productTitle"
+    );
+
 
   if (title) {
-    title.textContent = "🛍️ Latest Products";
+
+    title.textContent =
+      "🛍️ Latest Products";
   }
 
-  displayProducts(allProducts);
+
+  displayProducts(
+    allProducts
+  );
 }
 
+
+// ===============================
+// LOGIN CHECK
+// ===============================
+
 async function checkLogin() {
+
   try {
+
     const {
       data: { session }
-    } = await supabaseClient.auth.getSession();
+    } =
+      await supabaseClient.auth.getSession();
 
-    const accountBtn = document.getElementById("accountBtn");
-    const accountBox = document.getElementById("accountBox");
-    const emailElement = document.getElementById("customerEmail");
 
-    if (session && session.user) {
+    const accountBtn =
+      document.getElementById(
+        "accountBtn"
+      );
+
+
+    const accountBox =
+      document.getElementById(
+        "accountBox"
+      );
+
+
+    const emailElement =
+      document.getElementById(
+        "customerEmail"
+      );
+
+
+    if (
+      session &&
+      session.user
+    ) {
 
       if (accountBtn) {
-        accountBtn.style.display = "none";
+
+        accountBtn.style.display =
+          "none";
       }
+
 
       if (accountBox) {
-        accountBox.style.display = "flex";
+
+        accountBox.style.display =
+          "flex";
       }
 
+
       if (emailElement) {
+
         emailElement.textContent =
           session.user.email || "-";
       }
 
+
     } else {
 
       if (accountBtn) {
-        accountBtn.style.display = "block";
+
+        accountBtn.style.display =
+          "block";
       }
+
 
       if (accountBox) {
-        accountBox.style.display = "none";
+
+        accountBox.style.display =
+          "none";
       }
     }
 
+
   } catch (error) {
-    console.error("Login check error:", error);
+
+    console.error(
+      "Login check error:",
+      error
+    );
   }
 }
+
+
+// ===============================
+// LOGOUT
+// ===============================
 
 async function logout() {
+
   try {
+
     await supabaseClient.auth.signOut();
+
     window.location.reload();
+
+
   } catch (error) {
-    console.error("Logout error:", error);
+
+    console.error(
+      "Logout error:",
+      error
+    );
   }
 }
+
+
+// ===============================
+// MY ORDERS
+// ===============================
 
 async function showMyOrders() {
-  const ordersBox = document.getElementById("myOrders");
-  const ordersList = document.getElementById("myOrdersList");
 
-  if (!ordersBox || !ordersList) return;
+  const ordersBox =
+    document.getElementById(
+      "myOrders"
+    );
 
-  ordersBox.style.display = "block";
-  ordersList.innerHTML = "⏳ Loading orders...";
+
+  const ordersList =
+    document.getElementById(
+      "myOrdersList"
+    );
+
+
+  if (
+    !ordersBox ||
+    !ordersList
+  ) return;
+
+
+  ordersBox.style.display =
+    "block";
+
+
+  ordersList.innerHTML =
+    "⏳ Loading orders...";
+
 
   try {
+
     const {
       data: { session }
-    } = await supabaseClient.auth.getSession();
+    } =
+      await supabaseClient.auth.getSession();
 
-    if (!session || !session.user) {
-      ordersList.innerHTML = "Please login first.";
+
+    if (
+      !session ||
+      !session.user
+    ) {
+
+      ordersList.innerHTML =
+        "Please login first.";
+
       return;
     }
 
-    const { data, error } = await supabaseClient
-      .from("orders")
-      .select("*")
-      .eq("customer_email", session.user.email)
-      .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("orders")
+        .select("*")
+        .eq(
+          "customer_email",
+          session.user.email
+        )
+        .order(
+          "created_at",
+          {
+            ascending: false
+          }
+        );
 
-    if (!data || data.length === 0) {
-      ordersList.innerHTML = "No orders found.";
+
+    if (error) {
+      throw error;
+    }
+
+
+    if (
+      !data ||
+      data.length === 0
+    ) {
+
+      ordersList.innerHTML =
+        "No orders found.";
+
       return;
     }
 
-    ordersList.innerHTML = data.map(order => `
-      <div class="my-order">
 
-        <b>Order ID:</b>
-        ${escapeHTML(order.order_id || order.id || "-")}
+    ordersList.innerHTML =
+      data.map(
+        order => `
 
-        <br>
+          <div class="my-order">
 
-        <b>Total:</b>
-        ₹${Number(order.total || 0).toLocaleString("en-IN")}
+            <b>Order ID:</b>
+            ${escapeHTML(
+              order.order_id ||
+              order.id ||
+              "-"
+            )}
 
-        <br>
+            <br>
 
-        <b>Status:</b>
-        ${escapeHTML(order.status || "Pending")}
+            <b>Total:</b>
+            ₹${Number(
+              order.total || 0
+            ).toLocaleString("en-IN")}
 
-      </div>
-    `).join("");
+            <br>
+
+            <b>Status:</b>
+            ${escapeHTML(
+              order.status ||
+              "Pending"
+            )}
+
+          </div>
+
+        `
+      ).join("");
+
 
   } catch (error) {
-    console.error("Orders error:", error);
-    ordersList.innerHTML = "Unable to load orders.";
+
+    console.error(
+      "Orders error:",
+      error
+    );
+
+
+    ordersList.innerHTML =
+      "Unable to load orders.";
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  updateCartCount();
-  loadProducts();
-  checkLogin();
-});
+
+// ===============================
+// START
+// ===============================
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    updateCartCount();
+
+    loadProducts();
+
+    checkLogin();
+
+  }
+);
