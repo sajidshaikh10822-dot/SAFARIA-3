@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>SAFARIA - Online Shopping</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -279,12 +281,15 @@
     }
 
     @media (max-width: 900px) {
+
       .products {
         grid-template-columns: repeat(3, 1fr);
       }
+
     }
 
     @media (max-width: 650px) {
+
       .logo {
         font-size: 23px;
       }
@@ -305,9 +310,11 @@
       .hero h1 {
         font-size: 30px;
       }
+
     }
 
     @media (max-width: 400px) {
+
       .products {
         gap: 8px;
       }
@@ -327,7 +334,9 @@
       .price {
         font-size: 17px;
       }
+
     }
+
   </style>
 </head>
 
@@ -340,6 +349,7 @@
   </div>
 
   <div class="search">
+
     <input
       id="searchInput"
       type="text"
@@ -347,7 +357,10 @@
       oninput="searchProducts()"
     >
 
-    <button onclick="searchProducts()">🔍</button>
+    <button onclick="searchProducts()">
+      🔍
+    </button>
+
   </div>
 
   <a
@@ -380,7 +393,9 @@
 
 <nav>
 
-  <span onclick="showAllProducts()">All</span>
+  <span onclick="showAllProducts()">
+    All
+  </span>
 
   <span onclick="filterCategory('Electronics')">
     Electronics
@@ -411,7 +426,9 @@
 
 <section class="hero">
 
-  <h1>Welcome to SAFARIA</h1>
+  <h1>
+    Welcome to SAFARIA
+  </h1>
 
   <p>
     Everything you need, all in one place.
@@ -420,10 +437,7 @@
 </section>
 
 
-<div
-  id="accountBox"
-  class="account-box"
->
+<div id="accountBox" class="account-box">
 
   <div class="account-title">
     👤 My Account
@@ -461,7 +475,6 @@
 
   </div>
 
-
   <div class="account-actions">
 
     <button
@@ -483,12 +496,11 @@
 </div>
 
 
-<div
-  id="myOrders"
-  class="my-orders"
->
+<div id="myOrders" class="my-orders">
 
-  <h2>📦 My Orders</h2>
+  <h2>
+    📦 My Orders
+  </h2>
 
   <div id="myOrdersList">
     Loading orders...
@@ -591,9 +603,9 @@
 
 <script>
 
-/* =========================
+/* ==========================================
    SUPABASE
-========================= */
+========================================== */
 
 const SUPABASE_URL =
   "https://dcwdzbejpwvskajukxrh.supabase.co";
@@ -608,26 +620,26 @@ const supabaseClient =
   );
 
 
-/* =========================
+/* ==========================================
    ADMIN
-========================= */
+========================================== */
 
 const ADMIN_EMAIL =
   "sajidshaikh10822@gmail.com";
 
 
-/* =========================
+/* ==========================================
    GLOBAL VARIABLES
-========================= */
+========================================== */
 
 let allProducts = [];
 
 let cart = [];
 
 
-/* =========================
+/* ==========================================
    READ CART
-========================= */
+========================================== */
 
 function readCart() {
 
@@ -665,9 +677,66 @@ function readCart() {
 }
 
 
-/* =========================
+/* ==========================================
+   SAVE CART
+========================================== */
+
+function saveCart() {
+
+  localStorage.setItem(
+    "safaria_cart",
+    JSON.stringify(cart)
+  );
+
+  updateCartCount();
+
+}
+
+
+/* ==========================================
+   UPDATE CART COUNT
+========================================== */
+
+function updateCartCount() {
+
+  cart = readCart();
+
+  const count =
+    cart.reduce(
+      (total, item) => {
+
+        return (
+          total +
+          Math.max(
+            1,
+            Number(
+              item.quantity || 1
+            )
+          )
+        );
+
+      },
+      0
+    );
+
+  const cartCount =
+    document.getElementById(
+      "cartCount"
+    );
+
+  if (cartCount) {
+
+    cartCount.textContent =
+      count;
+
+  }
+
+}
+
+
+/* ==========================================
    LOAD PRODUCTS
-========================= */
+========================================== */
 
 async function loadProducts() {
 
@@ -679,13 +748,13 @@ async function loadProducts() {
   container.innerHTML =
     '<div class="loading">Loading products...</div>';
 
-
   try {
 
-    const {
-      data,
-      error
-    } =
+    console.log(
+      "Loading products from Supabase..."
+    );
+
+    const result =
       await supabaseClient
         .from("products")
         .select("*")
@@ -696,26 +765,38 @@ async function loadProducts() {
           }
         );
 
+    const data =
+      result.data;
+
+    const error =
+      result.error;
+
 
     if (error) {
 
       console.error(
-        "Products error:",
+        "PRODUCT ERROR:",
         error
       );
 
-      container.innerHTML =
-        `
+      container.innerHTML = `
         <div class="empty">
-          ❌ Products load nahi ho rahe.
-          <br><br>
-          Please try again.
+          ❌ Products load nahi ho rahe.<br><br>
+          <small>
+            ${escapeHTML(error.message || "Database error")}
+          </small>
         </div>
-        `;
+      `;
 
       return;
 
     }
+
+
+    console.log(
+      "PRODUCT DATA:",
+      data
+    );
 
 
     allProducts =
@@ -724,35 +805,51 @@ async function loadProducts() {
         : [];
 
 
+    if (
+      allProducts.length === 0
+    ) {
+
+      container.innerHTML = `
+        <div class="empty">
+          😔 Products table empty hai.
+        </div>
+      `;
+
+      return;
+
+    }
+
+
     displayProducts(
       allProducts
     );
-
 
     updateCartCount();
 
   } catch (error) {
 
     console.error(
-      "Load products error:",
+      "LOAD PRODUCTS ERROR:",
       error
     );
 
-    container.innerHTML =
-      `
+    container.innerHTML = `
       <div class="empty">
-        ❌ Products load nahi ho rahe.
+        ❌ Products load error.<br><br>
+        <small>
+          ${escapeHTML(error.message || "Unknown error")}
+        </small>
       </div>
-      `;
+    `;
 
   }
 
 }
 
 
-/* =========================
+/* ==========================================
    DISPLAY PRODUCTS
-========================= */
+========================================== */
 
 function displayProducts(
   products
@@ -763,26 +860,20 @@ function displayProducts(
       "products"
     );
 
-
   if (
     !Array.isArray(products) ||
     products.length === 0
   ) {
 
     container.innerHTML =
-      `
-      <div class="empty">
-        😔 No products found.
-      </div>
-      `;
+      '<div class="empty">😔 No products found.</div>';
 
     return;
 
   }
 
 
-  container.innerHTML =
-    "";
+  container.innerHTML = "";
 
 
   products.forEach(
@@ -802,14 +893,9 @@ function displayProducts(
         "https://via.placeholder.com/300x200?text=SAFARIA";
 
 
-      const name =
+      const productName =
         product.name ||
         "Product";
-
-
-      const description =
-        product.description ||
-        "";
 
 
       const price =
@@ -828,16 +914,18 @@ function displayProducts(
 
         <img
           src="${escapeHTML(image)}"
-          alt="${escapeHTML(name)}"
+          alt="${escapeHTML(productName)}"
           onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
         >
 
         <h3>
-          ${escapeHTML(name)}
+          ${escapeHTML(productName)}
         </h3>
 
         <div class="description">
-          ${escapeHTML(description)}
+          ${escapeHTML(
+            product.description || ""
+          )}
         </div>
 
         <div class="price">
@@ -863,7 +951,9 @@ function displayProducts(
           }
           onclick="addToCart(${Number(product.id)})"
         >
+
           🛒 Add to Cart
+
         </button>
 
       `;
@@ -879,9 +969,9 @@ function displayProducts(
 }
 
 
-/* =========================
+/* ==========================================
    ADD TO CART
-========================= */
+========================================== */
 
 function addToCart(id) {
 
@@ -908,9 +998,13 @@ function addToCart(id) {
   }
 
 
-  if (
-    Number(product.stock || 0) <= 0
-  ) {
+  const stock =
+    Number(
+      product.stock || 0
+    );
+
+
+  if (stock <= 0) {
 
     alert(
       "This product is out of stock."
@@ -937,15 +1031,9 @@ function addToCart(id) {
       );
 
 
-    const productStock =
-      Number(
-        product.stock || 0
-      );
-
-
     if (
       currentQuantity <
-      productStock
+      stock
     ) {
 
       existing.quantity =
@@ -997,89 +1085,19 @@ function addToCart(id) {
 }
 
 
-/* =========================
-   SAVE CART
-========================= */
-
-function saveCart() {
-
-  localStorage.setItem(
-    "safaria_cart",
-    JSON.stringify(cart)
-  );
-
-  updateCartCount();
-
-}
-
-
-/* =========================
-   UPDATE CART COUNT
-========================= */
-
-function updateCartCount() {
-
-  cart =
-    readCart();
-
-
-  const count =
-    cart.reduce(
-      (
-        total,
-        item
-      ) => {
-
-        return (
-          total +
-          Math.max(
-            1,
-            Number(
-              item.quantity || 1
-            )
-          )
-        );
-
-      },
-      0
-    );
-
-
-  const cartCount =
-    document.getElementById(
-      "cartCount"
-    );
-
-
-  if (cartCount) {
-
-    cartCount.textContent =
-      count;
-
-  }
-
-}
-
-
-/* =========================
+/* ==========================================
    OPEN CART
-========================= */
+========================================== */
 
 function openCart() {
 
-  const latestCart =
+  cart =
     readCart();
 
 
-  cart =
-    latestCart;
-
-
   if (
-    !Array.isArray(
-      latestCart
-    ) ||
-    latestCart.length === 0
+    !cart ||
+    cart.length === 0
   ) {
 
     alert(
@@ -1097,9 +1115,9 @@ function openCart() {
 }
 
 
-/* =========================
+/* ==========================================
    SEARCH
-========================= */
+========================================== */
 
 function searchProducts() {
 
@@ -1139,22 +1157,19 @@ function searchProducts() {
         const name =
           String(
             product.name || ""
-          )
-            .toLowerCase();
+          ).toLowerCase();
 
 
         const category =
           String(
             product.category || ""
-          )
-            .toLowerCase();
+          ).toLowerCase();
 
 
         const description =
           String(
             product.description || ""
-          )
-            .toLowerCase();
+          ).toLowerCase();
 
 
         return (
@@ -1180,9 +1195,9 @@ function searchProducts() {
 }
 
 
-/* =========================
+/* ==========================================
    CATEGORY FILTER
-========================= */
+========================================== */
 
 function filterCategory(
   category
@@ -1197,7 +1212,6 @@ function filterCategory(
         )
           .trim()
           .toLowerCase() ===
-
         String(
           category
         )
@@ -1208,8 +1222,7 @@ function filterCategory(
 
   document.getElementById(
     "searchInput"
-  ).value =
-    "";
+  ).value = "";
 
 
   document.getElementById(
@@ -1225,16 +1238,15 @@ function filterCategory(
 }
 
 
-/* =========================
-   SHOW ALL PRODUCTS
-========================= */
+/* ==========================================
+   SHOW ALL
+========================================== */
 
 function showAllProducts() {
 
   document.getElementById(
     "searchInput"
-  ).value =
-    "";
+  ).value = "";
 
 
   document.getElementById(
@@ -1250,9 +1262,9 @@ function showAllProducts() {
 }
 
 
-/* =========================
-   LOGIN / ACCOUNT
-========================= */
+/* ==========================================
+   CHECK LOGIN
+========================================== */
 
 async function checkLogin() {
 
@@ -1263,9 +1275,7 @@ async function checkLogin() {
         session
       }
     } =
-      await supabaseClient
-        .auth
-        .getSession();
+      await supabaseClient.auth.getSession();
 
 
     const accountBtn =
@@ -1313,7 +1323,6 @@ async function checkLogin() {
     adminBtn.hidden =
       true;
 
-
     adminBtn.style.display =
       "none";
 
@@ -1326,18 +1335,14 @@ async function checkLogin() {
       accountBtn.textContent =
         "👤 Login";
 
-
       accountBtn.href =
         "auth.html";
-
 
       accountBtn.onclick =
         null;
 
-
       accountBox.style.display =
         "none";
-
 
       return;
 
@@ -1369,7 +1374,7 @@ async function checkLogin() {
       };
 
 
-    const name =
+    let name =
       session.user.user_metadata?.full_name ||
       session.user.user_metadata?.name ||
       session.user.email ||
@@ -1395,53 +1400,4 @@ async function checkLogin() {
 
     if (
       email ===
-      ADMIN_EMAIL
-        .toLowerCase()
-    ) {
-
-      adminBtn.hidden =
-        false;
-
-
-      adminBtn.style.setProperty(
-        "display",
-        "inline-block",
-        "important"
-      );
-
-    }
-
-
-    const {
-      data: orders,
-      error
-    } =
-      await supabaseClient
-        .from("orders")
-        .select(
-          "customer_phone, shipping_address, customer_name"
-        )
-        .eq(
-          "customer_email",
-          session.user.email
-        )
-        .order(
-          "created_at",
-          {
-            ascending: false
-          }
-        )
-        .limit(1);
-
-
-    if (
-      !error &&
-      orders &&
-      orders.length > 0
-    ) {
-
-      const latestOrder =
-        orders[0];
-
-
-   
+ 
