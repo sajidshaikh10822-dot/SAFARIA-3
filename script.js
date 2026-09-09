@@ -1,11 +1,11 @@
 const SUPABASE_URL = "https://dcwdzbejpwvskajukxrh.supabase.co";
 
 const SUPABASE_KEY =
-  "sb_publishable_tD-2Ekpx7d-jNkeyiTPj-w_mikOo0Yx";
+  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
 
 const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
+  https://dcwdzbejpwvskajukxrh.supabase.co,
+  sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU
 );
 
 let allProducts = [];
