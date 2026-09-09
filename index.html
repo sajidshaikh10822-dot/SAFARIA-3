@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="en"><head>  <meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-  <title>SAFARIA - Online Shopping</title>
+«»
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
+  <title>SAFARIA - Online Shopping</title>  <!-- SUPABASE -->  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  <style>
 
     * {
       box-sizing: border-box;
@@ -17,10 +13,12 @@
       font-family: Arial, sans-serif;
     }
 
+
     body {
       background: #eaeded;
       color: #111;
     }
+
 
     header {
       background: #131921;
@@ -32,6 +30,7 @@
       flex-wrap: wrap;
     }
 
+
     .logo {
       color: #ff9900;
       font-size: 28px;
@@ -39,11 +38,13 @@
       cursor: pointer;
     }
 
+
     .search {
       flex: 1;
       min-width: 200px;
       display: flex;
     }
+
 
     .search input {
       width: 100%;
@@ -53,6 +54,7 @@
       font-size: 16px;
     }
 
+
     .search button {
       background: #febd69;
       border: none;
@@ -61,12 +63,14 @@
       font-size: 19px;
     }
 
+
     .header-btn {
       color: white;
       text-decoration: none;
       font-weight: bold;
       white-space: nowrap;
     }
+
 
     .login-btn {
       background: #ff9900;
@@ -75,9 +79,11 @@
       border-radius: 5px;
     }
 
+
     #adminBtn {
       display: none !important;
     }
+
 
     nav {
       background: #232f3e;
@@ -88,26 +94,36 @@
       overflow-x: auto;
     }
 
+
     nav span {
       white-space: nowrap;
       cursor: pointer;
     }
 
+
     .hero {
-      background: linear-gradient(135deg, #232f3e, #37475a);
+      background: linear-gradient(
+        135deg,
+        #232f3e,
+        #37475a
+      );
+
       color: white;
       padding: 45px 20px;
       text-align: center;
     }
+
 
     .hero h1 {
       font-size: 38px;
       margin-bottom: 10px;
     }
 
+
     .hero p {
       font-size: 18px;
     }
+
 
     .categories {
       display: flex;
@@ -116,6 +132,7 @@
       padding: 15px;
       background: white;
     }
+
 
     .category {
       min-width: 110px;
@@ -127,14 +144,17 @@
       font-weight: bold;
     }
 
+
     .section {
       padding: 20px 15px;
     }
+
 
     .section h2 {
       margin-bottom: 15px;
       font-size: 25px;
     }
+
 
     .products {
       display: grid;
@@ -142,12 +162,15 @@
       gap: 15px;
     }
 
+
     .product {
       background: white;
       padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow:
+        0 2px 6px rgba(0,0,0,0.08);
     }
+
 
     .product img {
       width: 100%;
@@ -157,11 +180,13 @@
       margin-bottom: 10px;
     }
 
+
     .product h3 {
       font-size: 17px;
       min-height: 40px;
       margin-bottom: 7px;
     }
+
 
     .description {
       color: #555;
@@ -170,6 +195,7 @@
       margin-bottom: 7px;
     }
 
+
     .price {
       color: #b12704;
       font-size: 21px;
@@ -177,11 +203,13 @@
       margin-bottom: 5px;
     }
 
+
     .stock {
       color: #067d62;
       font-size: 13px;
       margin-bottom: 10px;
     }
+
 
     .buy {
       width: 100%;
@@ -193,10 +221,12 @@
       font-weight: bold;
     }
 
+
     .buy:disabled {
       background: #ddd;
       cursor: not-allowed;
     }
+
 
     .loading,
     .empty {
@@ -206,6 +236,7 @@
       border-radius: 8px;
       grid-column: 1 / -1;
     }
+
 
     .error-box {
       background: #fff3f3;
@@ -218,6 +249,7 @@
       line-height: 1.7;
     }
 
+
     .account-box {
       background: white;
       margin: 15px;
@@ -226,24 +258,29 @@
       display: none;
       flex-direction: column;
       gap: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow:
+        0 2px 6px rgba(0,0,0,0.08);
     }
+
 
     .account-title {
       font-size: 22px;
       font-weight: bold;
     }
 
+
     .account-info {
       line-height: 1.9;
       color: #333;
     }
+
 
     .account-actions {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
     }
+
 
     .logout,
     .orders-btn {
@@ -254,13 +291,16 @@
       font-weight: bold;
     }
 
+
     .logout {
       background: #e7e7e7;
     }
 
+
     .orders-btn {
       background: #ff9900;
     }
+
 
     .my-orders {
       display: none;
@@ -268,8 +308,10 @@
       margin: 15px;
       padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow:
+        0 2px 6px rgba(0,0,0,0.08);
     }
+
 
     .my-order {
       border: 1px solid #ddd;
@@ -279,9 +321,11 @@
       line-height: 1.7;
     }
 
+
     .order-status {
       font-weight: bold;
     }
+
 
     footer {
       background: #131921;
@@ -291,6 +335,7 @@
       margin-top: 30px;
     }
 
+
     @media (max-width: 900px) {
 
       .products {
@@ -299,24 +344,29 @@
 
     }
 
+
     @media (max-width: 650px) {
 
       .logo {
         font-size: 23px;
       }
 
+
       .search {
         order: 5;
         flex-basis: 100%;
       }
 
+
       .products {
         grid-template-columns: repeat(2, 1fr);
       }
 
+
       .product img {
         height: 150px;
       }
+
 
       .hero h1 {
         font-size: 30px;
@@ -324,23 +374,28 @@
 
     }
 
+
     @media (max-width: 400px) {
 
       .products {
         gap: 8px;
       }
 
+
       .product {
         padding: 9px;
       }
+
 
       .product img {
         height: 120px;
       }
 
+
       .product h3 {
         font-size: 14px;
       }
+
 
       .price {
         font-size: 17px;
@@ -348,1095 +403,303 @@
 
     }
 
-  </style>
-
-</head>
-
-<body>
-
-
-<header>
-
-  <div
-    class="logo"
-    onclick="location.reload()"
-  >
-    SAFARIA
-  </div>
-
-
-  <div class="search">
-
-    <input
-      id="searchInput"
-      type="text"
-      placeholder="Search products..."
-      oninput="searchProducts()"
-    >
-
-    <button onclick="searchProducts()">
-      🔍
-    </button>
-
-  </div>
-
-
-  <a
-    href="auth.html"
-    class="header-btn login-btn"
-    id="accountBtn"
-  >
-    👤 Login
-  </a>
-
-
-  <a
-    href="javascript:void(0)"
-    class="header-btn"
-    onclick="openCart()"
-  >
-    🛒 Cart (<span id="cartCount">0</span>)
-  </a>
-
-
-  <a
-    href="admin.html"
-    class="header-btn"
-    id="adminBtn"
-  >
-    🔐 Admin
-  </a>
-
-</header>
-
-
-<nav>
-
-  <span onclick="showAllProducts()">
-    All
-  </span>
-
-  <span onclick="filterCategory('Electronics')">
-    Electronics
-  </span>
-
-  <span onclick="filterCategory('Fashion')">
-    Fashion
-  </span>
-
-  <span onclick="filterCategory('Mobiles')">
-    Mobiles
-  </span>
-
-  <span onclick="filterCategory('Home')">
-    Home
-  </span>
-
-  <span onclick="filterCategory('Beauty')">
-    Beauty
-  </span>
-
-  <span onclick="filterCategory('Grocery')">
-    Grocery
-  </span>
-
-</nav>
-
-
-<section class="hero">
-
-  <h1>
-    Welcome to SAFARIA
-  </h1>
-
-  <p>
-    Everything you need, all in one place.
-  </p>
-
-</section>
-
-
-<div
-  id="accountBox"
-  class="account-box"
+  </style></head><body>  <!-- =========================
+       HEADER
+  ========================== -->  <header><div
+  class="logo"
+  onclick="location.reload()"
 >
-
-  <div class="account-title">
-    👤 My Account
-  </div>
+  SAFARIA
+</div>
 
 
-  <div class="account-info">
+<div class="search">
 
-    <div>
-      <b>Name:</b>
-      <span id="customerName">
-        Customer
-      </span>
-    </div>
-
-
-    <div>
-      <b>Email:</b>
-      <span id="customerEmail">
-        -
-      </span>
-    </div>
+  <input
+    id="searchInput"
+    type="text"
+    placeholder="Search products..."
+    oninput="searchProducts()"
+  >
 
 
-    <div>
-      <b>Phone:</b>
-      <span id="customerPhone">
-        -
-      </span>
-    </div>
-
-
-    <div>
-      <b>Address:</b>
-      <span id="customerAddress">
-        -
-      </span>
-    </div>
-
-  </div>
-
-
-  <div class="account-actions">
-
-    <button
-      class="orders-btn"
-      onclick="showMyOrders()"
-    >
-      📦 My Orders
-    </button>
-
-
-    <button
-      class="logout"
-      onclick="logout()"
-    >
-      Logout
-    </button>
-
-  </div>
+  <button
+    type="button"
+    onclick="searchProducts()"
+  >
+    🔍
+  </button>
 
 </div>
 
 
-<div
-  id="myOrders"
-  class="my-orders"
+<a
+  href="auth.html"
+  class="header-btn login-btn"
+  id="accountBtn"
 >
+  👤 Login
+</a>
 
-  <h2>
+
+<a
+  href="javascript:void(0)"
+  class="header-btn"
+  onclick="openCart()"
+>
+  🛒 Cart
+  (<span id="cartCount">0</span>)
+</a>
+
+
+<a
+  href="admin.html"
+  class="header-btn"
+  id="adminBtn"
+>
+  🔐 Admin
+</a>
+
+  </header>  <!-- =========================
+       NAVIGATION
+  ========================== -->  <nav><span onclick="showAllProducts()">
+  All
+</span>
+
+
+<span onclick="filterCategory('Electronics')">
+  Electronics
+</span>
+
+
+<span onclick="filterCategory('Fashion')">
+  Fashion
+</span>
+
+
+<span onclick="filterCategory('Mobiles')">
+  Mobiles
+</span>
+
+
+<span onclick="filterCategory('Home')">
+  Home
+</span>
+
+
+<span onclick="filterCategory('Beauty')">
+  Beauty
+</span>
+
+
+<span onclick="filterCategory('Grocery')">
+  Grocery
+</span>
+
+  </nav>  <!-- =========================
+       HERO
+  ========================== -->  <section class="hero"><h1>
+  Welcome to SAFARIA
+</h1>
+
+
+<p>
+  Everything you need, all in one place.
+</p>
+
+  </section>  <!-- =========================
+       ACCOUNT
+  ========================== -->  <div
+    id="accountBox"
+    class="account-box"
+  ><div class="account-title">
+  👤 My Account
+</div>
+
+
+<div class="account-info">
+
+
+  <div>
+
+    <b>Name:</b>
+
+    <span id="customerName">
+      Customer
+    </span>
+
+  </div>
+
+
+  <div>
+
+    <b>Email:</b>
+
+    <span id="customerEmail">
+      -
+    </span>
+
+  </div>
+
+
+  <div>
+
+    <b>Phone:</b>
+
+    <span id="customerPhone">
+      -
+    </span>
+
+  </div>
+
+
+  <div>
+
+    <b>Address:</b>
+
+    <span id="customerAddress">
+      -
+    </span>
+
+  </div>
+
+
+</div>
+
+
+<div class="account-actions">
+
+
+  <button
+    class="orders-btn"
+    onclick="showMyOrders()"
+  >
     📦 My Orders
-  </h2>
+  </button>
 
-  <div id="myOrdersList">
-    Loading orders...
-  </div>
+
+  <button
+    class="logout"
+    onclick="logout()"
+  >
+    Logout
+  </button>
+
 
 </div>
 
-
-<div class="categories">
-
-  <div
-    class="category"
-    onclick="filterCategory('Electronics')"
-  >
-    📱
-    <br>
-    Electronics
-  </div>
+  </div>  <!-- =========================
+       MY ORDERS
+  ========================== -->  <div
+    id="myOrders"
+    class="my-orders"
+  ><h2>
+  📦 My Orders
+</h2>
 
 
-  <div
-    class="category"
-    onclick="filterCategory('Fashion')"
-  >
-    👕
-    <br>
-    Fashion
-  </div>
-
-
-  <div
-    class="category"
-    onclick="filterCategory('Mobiles')"
-  >
-    📱
-    <br>
-    Mobiles
-  </div>
-
-
-  <div
-    class="category"
-    onclick="filterCategory('Home')"
-  >
-    🏠
-    <br>
-    Home
-  </div>
-
-
-  <div
-    class="category"
-    onclick="filterCategory('Beauty')"
-  >
-    💄
-    <br>
-    Beauty
-  </div>
-
-
-  <div
-    class="category"
-    onclick="filterCategory('Grocery')"
-  >
-    🛒
-    <br>
-    Grocery
-  </div>
-
+<div id="myOrdersList">
+  Loading orders...
 </div>
 
-
-<section class="section">
-
-  <h2 id="productTitle">
-    🛍️ Latest Products
-  </h2>
-
-
-  <div
-    id="products"
-    class="products"
-  >
-
-    <div class="loading">
-      Loading products...
-    </div>
-
-  </div>
-
-</section>
-
-
-<footer>
-
-  <h2>
-    SAFARIA
-  </h2>
-
-  <p>
-    India's Shopping Store
-  </p>
-
+  </div>  <!-- =========================
+       CATEGORIES
+  ========================== -->  <div class="categories"><div
+  class="category"
+  onclick="filterCategory('Electronics')"
+>
+  📱
   <br>
-
-  <p>
-    © 2026 SAFARIA. All rights reserved.
-  </p>
-
-</footer>
-
-
-<script>
-
-
-/* =================================
-   SUPABASE
-================================= */
-
-const SUPABASE_URL =
-  "https://dcwdzbejpwvskajukxrh.supabase.co";
-
-
-const SUPABASE_KEY =
-  "sb_publishable_1IsM8N7-OEcBJyIH5HnsFw_cl6F5oPU";
-
-
-const supabaseClient =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
-
-/* =================================
-   ADMIN EMAIL
-================================= */
-
-const ADMIN_EMAIL =
-  "sajidshaikh10822@gmail.com";
-
-
-/* =================================
-   VARIABLES
-================================= */
-
-let allProducts = [];
-
-let cart = [];
-
-
-/* =================================
-   ESCAPE HTML
-================================= */
-
-function escapeHTML(value) {
-
-  if (value === null || value === undefined) {
-    return "";
-  }
-
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
-
-/* =================================
-   READ CART
-================================= */
-
-function readCart() {
-
-  try {
-
-    const saved =
-      localStorage.getItem(
-        "safaria_cart"
-      );
-
-    if (!saved) {
-      return [];
-    }
-
-    const parsed =
-      JSON.parse(saved);
-
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed;
-
-  } catch (error) {
-
-    console.error(
-      "Cart read error:",
-      error
-    );
-
-    return [];
-
-  }
-
-}
-
-
-/* =================================
-   SAVE CART
-================================= */
-
-function saveCart() {
-
-  localStorage.setItem(
-    "safaria_cart",
-    JSON.stringify(cart)
-  );
-
-  updateCartCount();
-
-}
-
-
-/* =================================
-   CART COUNT
-================================= */
-
-function updateCartCount() {
-
-  cart = readCart();
-
-  const count =
-    cart.reduce(
-      (total, item) => {
-
-        return total +
-          Math.max(
-            1,
-            Number(
-              item.quantity || 1
-            )
-          );
-
-      },
-      0
-    );
-
-
-  const cartCount =
-    document.getElementById(
-      "cartCount"
-    );
-
-
-  if (cartCount) {
-
-    cartCount.textContent =
-      count;
-
-  }
-
-}
-
-
-/* =================================
-   LOAD PRODUCTS
-================================= */
-
-async function loadProducts() {
-
-  const container =
-    document.getElementById(
-      "products"
-    );
-
-
-  container.innerHTML =
-    '<div class="loading">⏳ Loading products...</div>';
-
-
-  try {
-
-    const result =
-      await supabaseClient
-        .from("products")
-        .select("*")
-        .order(
-          "id",
-          {
-            ascending: false
-          }
-        );
-
-
-    const data =
-      result.data;
-
-    const error =
-      result.error;
-
-
-    console.log(
-      "SUPABASE PRODUCTS:",
-      data
-    );
-
-
-    if (error) {
-
-      console.error(
-        "Products error:",
-        error
-      );
-
-
-      container.innerHTML = `
-        <div class="error-box">
-          ❌ Products load nahi ho rahe.<br><br>
-          <b>Supabase Error:</b><br>
-          ${escapeHTML(error.message || "Unknown error")}
-        </div>
-      `;
-
-      return;
-
-    }
-
-
-    allProducts =
-      Array.isArray(data)
-        ? data
-        : [];
-
-
-    if (allProducts.length === 0) {
-
-      container.innerHTML = `
-        <div class="empty">
-          📦 Products table mein abhi koi product nahi hai.<br><br>
-          Admin Panel se product add karo.
-        </div>
-      `;
-
-      updateCartCount();
-
-      return;
-
-    }
-
-
-    displayProducts(
-      allProducts
-    );
-
-
-    updateCartCount();
-
-  } catch (error) {
-
-    console.error(
-      "Unexpected product error:",
-      error
-    );
-
-
-    container.innerHTML = `
-      <div class="error-box">
-        ❌ Product loading error.<br><br>
-        ${escapeHTML(error.message || error)}
-      </div>
-    `;
-
-  }
-
-}
-
-
-/* =================================
-   DISPLAY PRODUCTS
-================================= */
-
-function displayProducts(products) {
-
-  const container =
-    document.getElementById(
-      "products"
-    );
-
-
-  if (
-    !Array.isArray(products) ||
-    products.length === 0
-  ) {
-
-    container.innerHTML =
-      '<div class="empty">😔 No products found.</div>';
-
-    return;
-
-  }
-
-
-  container.innerHTML =
-    "";
-
-
-  products.forEach(
-    product => {
-
-      const card =
-        document.createElement(
-          "div"
-        );
-
-
-      card.className =
-        "product";
-
-
-      const image =
-        product.image ||
-        "https://via.placeholder.com/300x200?text=SAFARIA";
-
-
-      const name =
-        product.name ||
-        "Product";
-
-
-      const description =
-        product.description ||
-        "";
-
-
-      const price =
-        Number(
-          product.price || 0
-        );
-
-
-      const stock =
-        Number(
-          product.stock || 0
-        );
-
-
-      card.innerHTML = `
-
-        <img
-          src="${escapeHTML(image)}"
-          alt="${escapeHTML(name)}"
-          onerror="this.src='https://via.placeholder.com/300x200?text=SAFARIA'"
-        >
-
-        <h3>
-          ${escapeHTML(name)}
-        </h3>
-
-        <div class="description">
-          ${escapeHTML(description)}
-        </div>
-
-        <div class="price">
-          ₹${price.toLocaleString("en-IN")}
-        </div>
-
-        <div class="stock">
-          ${
-            stock > 0
-              ? "✓ In Stock"
-              : "❌ Out of Stock"
-          }
-        </div>
-
-        <button
-          class="buy"
-          ${stock <= 0 ? "disabled" : ""}
-          onclick="addToCart(${Number(product.id)})"
-        >
-          🛒 Add to Cart
-        </button>
-
-      `;
-
-
-      container.appendChild(
-        card
-      );
-
-    }
-  );
-
-}
-
-
-/* =================================
-   ADD TO CART
-================================= */
-
-function addToCart(id) {
-
-  cart =
-    readCart();
-
-
-  const product =
-    allProducts.find(
-      p =>
-        Number(p.id) ===
-        Number(id)
-    );
-
-
-  if (!product) {
-
-    alert(
-      "❌ Product not found."
-    );
-
-    return;
-
-  }
-
-
-  const stock =
-    Number(
-      product.stock || 0
-    );
-
-
-  if (stock <= 0) {
-
-    alert(
-      "❌ This product is out of stock."
-    );
-
-    return;
-
-  }
-
-
-  const existing =
-    cart.find(
-      item =>
-        Number(item.id) ===
-        Number(id)
-    );
-
-
-  if (existing) {
-
-    const currentQty =
-      Number(
-        existing.quantity || 1
-      );
-
-
-    if (currentQty >= stock) {
-
-      alert(
-        "Maximum stock reached."
-      );
-
-      return;
-
-    }
-
-
-    existing.quantity =
-      currentQty + 1;
-
-  } else {
-
-    cart.push({
-
-      id:
-        product.id,
-
-      name:
-        product.name,
-
-      price:
-        Number(
-          product.price || 0
-        ),
-
-      image:
-        product.image || "",
-
-      quantity:
-        1
-
-    });
-
-  }
-
-
-  saveCart();
-
-
-  alert(
-    "✅ Product added to cart!"
-  );
-
-}
-
-
-/* =================================
-   OPEN CART
-================================= */
-
-function openCart() {
-
-  cart =
-    readCart();
-
-
-  if (
-    cart.length === 0
-  ) {
-
-    alert(
-      "🛒 Your cart is empty."
-    );
-
-    return;
-
-  }
-
-
-  window.location.href =
-    "checkout.html";
-
-}
-
-
-/* =================================
-   SEARCH
-================================= */
-
-function searchProducts() {
-
-  const input =
-    document.getElementById(
-      "searchInput"
-    );
-
-
-  const value =
-    input.value
-      .trim()
-      .toLowerCase();
-
-
-  if (!value) {
-
-    document.getElementById(
-      "productTitle"
-    ).textContent =
-      "🛍️ Latest Products";
-
-
-    displayProducts(
-      allProducts
-    );
-
-    return;
-
-  }
-
-
-  const filtered =
-    allProducts.filter(
-      product => {
-
-        const name =
-          String(
-            product.name || ""
-          ).toLowerCase();
-
-
-        const category =
-          String(
-            product.category || ""
-          ).toLowerCase();
-
-
-        const description =
-          String(
-            product.description || ""
-          ).toLowerCase();
-
-
-        return (
-          name.includes(value) ||
-          category.includes(value) ||
-          description.includes(value)
-        );
-
-      }
-    );
-
-
-  document.getElementById(
-    "productTitle"
-  ).textContent =
-    `🔍 Search Results (${filtered.length})`;
-
-
-  displayProducts(
-    filtered
-  );
-
-}
-
-
-/* =================================
-   FILTER CATEGORY
-================================= */
-
-function filterCategory(
-  category
-) {
-
-  const filtered =
-    allProducts.filter(
-      product =>
-        String(
-          product.category || ""
-        )
-          .trim()
-          .toLowerCase() ===
-        String(
-          category
-        )
-          .trim()
-          .toLowerCase()
-    );
-
-
-  document.getElementById(
-    "productTitle"
-  ).textContent =
-    `🛍️ ${category}`;
-
-
-  displayProducts(
-    filtered
-  );
-
-}
-
-
-/* =================================
-   SHOW ALL
-================================= */
-
-function showAllProducts() {
-
-  document.getElementById(
-    "searchInput"
-  ).value = "";
-
-
-  document.getElementById(
-    "productTitle"
-  ).textContent =
-    "🛍️ Latest Products";
-
-
-  displayProducts(
-    allProducts
-  );
-
-}
-
-
-/* =================================
-   CHECK LOGIN
-================================= */
-
-async function checkLogin() {
-
-  try {
-
-    const {
-      data: {
-        session
-      }
-    } =
-      await supabaseClient
-        .auth
-        .getSession();
-
-
-    const accountBtn =
-      document.getElementById(
-        "accountBtn"
-      );
-
-
-    const accountBox =
-      document.getElementById(
-        "accountBox"
-      );
-
-
-    const adminBtn =
-      document.getElementById(
-        "adminBtn"
-      );
-
-
-    const customerName =
-      document.getElementById(
-        "customerName"
-      );
-
-
-    const customerEmail =
-      document.getElementById(
-        "customerEmail"
-      );
-
-
-    const customerPhone =
-      document.getElementById(
-        "customerPhone"
-      );
-
-
-    const customerAddress =
-      document.getElementById(
-        "customerAddress"
-      );
-
-
-    adminBtn.style.display =
-      "none";
-
-
-    if (
-      !session ||
-      !session.user
-    ) {
-
-      accountBtn.textContent =
-        "👤 Login";
-
-
-      accountBtn.href =
-        "auth.html";
-
-
-      accountBtn.onclick =
-        null;
-
-
-      accountBox.style.display =
-        "none";
-
-
-      return;
-
-    }
-
-
-    const email =
-      String(
-        session.user.email || ""
-      )
-        .trim()
-        .toLowerCase();
-
-
-    accountBtn.textContent =
-      "👤 My Account";
-
-
-    accountBtn.href =
-      "javascript:void(0)";
-
-
-    accountBtn.onclick =
-      function() {
-
-        accountBox.style.display =
-          "flex";
-
-      };
-
-
-    const name =
-      session.user.user_metadata?.full_name ||
-      session.user.user_metadata?.name ||
-      session.user.email ||
-      "Customer";
-
-
-    customerName.textContent =
-      name;
-
-
-    customerEmail. hu
+  Electronics
+</div>
+
+
+<div
+  class="category"
+  onclick="filterCategory('Fashion')"
+>
+  👕
+  <br>
+  Fashion
+</div>
+
+
+<div
+  class="category"
+  onclick="filterCategory('Mobiles')"
+>
+  📱
+  <br>
+  Mobiles
+</div>
+
+
+<div
+  class="category"
+  onclick="filterCategory('Home')"
+>
+  🏠
+  <br>
+  Home
+</div>
+
+
+<div
+  class="category"
+  onclick="filterCategory('Beauty')"
+>
+  💄
+  <br>
+  Beauty
+</div>
+
+
+<div
+  class="category"
+  onclick="filterCategory('Grocery')"
+>
+  🛒
+  <br>
+  Grocery
+</div>
+
+  </div>  <!-- =========================
+       PRODUCTS
+  ========================== -->  <section class="section"><h2 id="productTitle">
+  🛍️ Latest Products
+</h2>
+
+
+<div
+  id="products"
+  class="products"
+>
+
+  <div class="loading">
+    ⏳ Loading products...
+  </div>
+
+</div>
+
+  </section>  <!-- =========================
+       FOOTER
+  ========================== -->  <footer><h2>
+  SAFARIA
+</h2>
+
+
+<p>
+  India's Shopping Store
+</p>
+
+
+<br>
+
+
+<p>
+  © 2026 SAFARIA. All rights reserved.
+</p>
+
+  </footer>  <!-- =========================
+       MAIN JAVASCRIPT
+  ========================== -->  <script src="script.js"></script></body></html>
